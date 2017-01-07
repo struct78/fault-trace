@@ -171,7 +171,7 @@ void setupGrid() {
 
 void setupMIDI() {
 	// Create the MIDI Bus
-	bus = new MidiBus(this, -1, "FLT_GLTCH");
+	bus = new MidiBus(this, -1, "FaultTrace");
 }
 
 long quantize(long delay) {
