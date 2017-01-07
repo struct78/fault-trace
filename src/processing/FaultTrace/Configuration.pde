@@ -5,7 +5,7 @@ public static final class Configuration {
 		public static final long StartOffset = 10000;
 
 		// Time acceleration
-		public static final long Acceleration = 1500;
+		public static final long Acceleration = 1000;
 
 		// BPM for time quantization
 		public static final int BeatsPerMinute = 75;
@@ -38,12 +38,11 @@ public static final class Configuration {
 
 		public static final class Note {
 			// Minimum note duration in milliseconds
-			public static final int Min = 25;
+			public static final int Min = 5;
 
 			// Maximum note duration in milliseconds
-			public static final int Max = 100;
+			public static final int Max = 150;
 		}
-
 	}
 
 	public static final class UI {
