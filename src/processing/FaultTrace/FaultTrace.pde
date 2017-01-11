@@ -22,7 +22,7 @@ import wblut.processing.*;
 
 // TODO
 
-// AC's
+// Add more shape types
 // HUD and music need to start at same time
 // Measured and actual time need to match
 //
@@ -75,6 +75,8 @@ HEC_ConvexHull creatorGlobe;
 HEC_ConvexHull creatorWireframe;
 WB_Point[] wireframePoints;
 Globe globe;
+Ani globeAnimation;
+float globeScale = 1.0;
 
 Calendar startDate;
 Calendar endDate;
@@ -127,7 +129,6 @@ void setup3D() {
 }
 
 void setupTimezone() {
-
 	timeZone = TimeZone.getTimeZone( Configuration.Data.TimeZone );
 	TimeZone.setDefault( timeZone );
 	dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS";
@@ -149,6 +150,15 @@ void setupTimezone() {
 
 void setupAnimation() {
 	Ani.init(this);
+  globeAnimation = new Ani(this, Configuration.Animation.Zoom.Time, "globeScale", globeScale, Ani.QUAD_IN_OUT, "onEnd:setGlobeScale");
+}
+
+void setGlobeScale() {
+	float endValue = globeAnimation.getEnd();
+	globeScale = random(0.8, 1.5);
+	globeAnimation.setBegin( endValue );
+	globeAnimation.setEnd( globeScale );
+	globeAnimation.start();
 }
 
 void setupUI() {
@@ -244,11 +254,10 @@ void setupSong() {
 			color colour = getColourFromMonth( d2 );
 
 			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
-
 			point.mulSelf( initialScale ) ;
+			points.add( new GlobePoint( point, quantized_delay+millis(), animationTime, scale ) );
+			states.add( new StateManager( d2, colour, quantize(diff/speed) ) );
 
-			points.add( new GlobePoint( point, quantized_delay, animationTime, scale ) );
-			states.add( new StateManager( d2, colour, quantized_delay ) );
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
 			x++;
@@ -260,23 +269,23 @@ void setupSong() {
 }
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
-		// Create the note
-		Note note = new Note( bus );
+	// Create the note
+	Note note = new Note( bus );
 
-		// Each instrument/section represents 1/8th of the globe
-		note.channel = channel;
+	// Each instrument/section represents 1/8th of the globe
+	note.channel = channel;
 
-		// How hard the note is hit
-		note.velocity = velocity;
+	// How hard the note is hit
+	note.velocity = velocity;
 
-		// Pitch of the note
-		note.pitch = pitch;
+	// Pitch of the note
+	note.pitch = pitch;
 
-		// How long the note is played for, on some instruments this makes no difference
-		note.duration = duration;
+	// How long the note is played for, on some instruments this makes no difference
+	note.duration = duration;
 
-		// Add the note to task schedule
-		timer.schedule( new ThreadTask(note), delay );
+	// Add the note to task schedule
+	timer.schedule( new ThreadTask(note), delay );
 }
 
 void setupData() {
@@ -368,7 +377,12 @@ void drawMesh( color colour, WB_Point[] points ) {
 	creatorGlobe.setPoints(points);
 
 	globeMesh = new HE_Mesh(creatorGlobe);
-	globeMesh = new HE_Mesh(new HEC_Dual(globeMesh).setFixNonPlanarFaces(true));
+
+	if ( Configuration.Shape.Type == ShapeType.Dual ) {
+		globeMesh = new HE_Mesh(new HEC_Dual(globeMesh));
+	}
+
+  globeMesh.scale( globeScale );
 
 	stroke(colour+5, 70);
 	fill(colour);
@@ -387,31 +401,19 @@ void drawMesh( color colour, WB_Point[] points ) {
 			render.drawFaces( globeMesh );
 			break;
 		case Points:
-			for ( int x = 0 ; x < points.length ; x++ ) {
-				render.drawPoint( (WB_Coord)points[x], 2 );
-			}
+			render.drawPoints( globeMesh.getPoints(), 2 );
 			break;
 		case EdgesPoints:
 			noFill();
 			render.drawEdges( globeMesh );
-			for ( int x = 0 ; x < points.length ; x++ ) {
-				render.drawPoint( (WB_Coord)points[x], 2 );
-			}
+			render.drawPoints( globeMesh.getPoints(), 2 );
 			break;
 		case EdgesFacesPoints:
 			stroke(colour+5, 70);
 			render.drawEdges( globeMesh );
-
-			for ( int x = 0 ; x < points.length ; x++ ) {
-				WB_Point coord = (WB_Point)points[x].get();
-				coord.mulSelf(1.2);
-
-				render.drawPoint( coord, 2 );
-			}
-
+			render.drawPoints( globeMesh.getPoints(), 3 );
 			noStroke();
 			render.drawFaces( globeMesh );
-
 			break;
 		default:
 			break;
@@ -423,6 +425,7 @@ void drawGlobe() {
 
 	Calendar currentDate = (Calendar)stateThread.getDate();
 	color colour = stateThread.getColour();
+
 	if ( currentDate != null && points.length > 4 ) {
 		drawLights( colour );
 		drawRotation();
@@ -454,14 +457,14 @@ void drawHUD() {
 	}
 }
 
-int getChannelFromCoordinates(double latitude, double longitude) {
-	latitude = latitude+90;
-	longitude = longitude+180;
+int getChannelFromCoordinates( double latitude, double longitude ) {
+	latitude = latitude + 90;
+	longitude = longitude + 180;
 
-	for ( Rectangle rectangle : grid) {
-		Point2D.Double point = new Point2D.Double(longitude, latitude);
-		if (rectangle.contains(point)) {
-			return grid.indexOf(rectangle);
+	for ( Rectangle rectangle : grid ) {
+		Point2D.Double point = new Point2D.Double( longitude, latitude );
+		if ( rectangle.contains( point ) ) {
+			return grid.indexOf( rectangle );
 		}
 	}
 
@@ -474,22 +477,12 @@ color getColourFromMonth( Calendar date ) {
 
 	int daysinmonth = date.getActualMaximum( Calendar.DAY_OF_MONTH );
 
-	return lerpColor(
-		color( colours.get( date.get( Calendar.MONTH ) ) ),
-		color( colours.get( nextMonth.get(Calendar.MONTH) ) ),
-		(float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth
+	return lerpColor( color( colours.get( date.get( Calendar.MONTH ) ) ), color( colours.get( nextMonth.get(Calendar.MONTH) ) ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth
 	);
 }
 
 int mapDepth( float depth ) {
-	return invert( int( map( depth,
-			0,
-			Configuration.Data.Depth.Max,
-			Configuration.MIDI.Pitch.Min,
-			Configuration.MIDI.Pitch.Max )
-		),
-		Configuration.MIDI.Pitch.Min,
-		Configuration.MIDI.Pitch.Max );
+	return invert( int( map( depth, 0, Configuration.Data.Depth.Max, Configuration.MIDI.Pitch.Min, Configuration.MIDI.Pitch.Max ) ), Configuration.MIDI.Pitch.Min, Configuration.MIDI.Pitch.Max );
 }
 
 int mapDepth( float depth, int min, int max ) {
