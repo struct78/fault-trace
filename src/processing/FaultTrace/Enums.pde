@@ -2,6 +2,10 @@ public enum UIType {
 	Edges, Faces, EdgesFaces, Points, EdgesPoints, EdgesFacesPoints
 }
 
+public enum ShapeType {
+	Normal, Dual
+}
+
 public enum QuantizationType {
 	FourWholeNotes(0.25f),
 	ThreeWholeNotes(0.3333f),
