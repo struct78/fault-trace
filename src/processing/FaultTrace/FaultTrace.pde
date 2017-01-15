@@ -21,31 +21,10 @@ import wblut.math.*;
 import wblut.processing.*;
 
 // TODO
-
+// Look to see why Thread.sleep() is taking up so much CPU time (~7seconds)
+// Look at setting an on/off flag on the note and set 2 different threads to play and stop the notes
 // Add more shape types
-// HUD and music need to start at same time
-// Measured and actual time need to match
-//
-
-// 1) Setup UI
-//    - Rotating circle/clock
-//    - Single letter for month
-//    - Background colour same as globe
-// 2) Add cities
-//    - Rotate around globe
-//    - Line to point
-// 3) Animate points out rather than making them disappear
-// 4) Quantize time to quarter notes
-// 5) Make an ArrayList with the following
-//    - Note (start, duration)
-//    - Date
-//    - Colour
-//    - Points
-//    - Timestamp
-// 6) Add VR support
-
-
-//
+// Add VR support
 
 long start_ms;
 long end_ms;
@@ -73,6 +52,8 @@ WB_Render3D render;
 WB_DebugRender3D drender;
 HEC_ConvexHull creatorGlobe;
 HEC_ConvexHull creatorWireframe;
+HES_CatmullClark subdividerLattice;
+HEM_Lattice lattice;
 WB_Point[] wireframePoints;
 Globe globe;
 Ani globeAnimation;
@@ -126,13 +107,14 @@ void setupGlobe() {
 void setup3D() {
 	creatorGlobe = new HEC_ConvexHull();
 	creatorWireframe = new HEC_ConvexHull();
+	subdividerLattice = new HES_CatmullClark();
+	lattice = new HEM_Lattice().setWidth( 20 ).setDepth( 5 );
 }
 
 void setupTimezone() {
 	timeZone = TimeZone.getTimeZone( Configuration.Data.TimeZone );
-	TimeZone.setDefault( timeZone );
+	//TimeZone.setDefault( timeZone );
 	dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS";
-
 
 	startDate = Calendar.getInstance();
 	endDate = Calendar.getInstance();
@@ -155,7 +137,7 @@ void setupAnimation() {
 
 void setGlobeScale() {
 	float endValue = globeAnimation.getEnd();
-	globeScale = random(0.8, 1.5);
+	globeScale = random(1.0, 1.8);
 	globeAnimation.setBegin( endValue );
 	globeAnimation.setEnd( globeScale );
 	globeAnimation.start();
@@ -255,8 +237,8 @@ void setupSong() {
 
 			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
 			point.mulSelf( initialScale ) ;
-			points.add( new GlobePoint( point, quantized_delay+millis(), animationTime, scale ) );
-			states.add( new StateManager( d2, colour, quantize(diff/speed) ) );
+			points.add( new GlobePoint( point, quantized_delay + millis(), animationTime, scale ) );
+			states.add( new StateManager( d2, colour, quantize(diff/speed) + millis() ) );
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
@@ -328,7 +310,7 @@ void setupDebug() {
 String getDatePart( SimpleDateFormat dateFormat ) {
 	long start = startDate.getTimeInMillis();
 	long end = endDate.getTimeInMillis();
-	long diff = start+((long)millis()*Configuration.MIDI.Acceleration)+Configuration.MIDI.StartOffset;
+	long diff = start+((long)millis()*Configuration.MIDI.Acceleration);
 
 	if ( diff > end ) {
 		return dateFormat.format( end );
@@ -379,10 +361,16 @@ void drawMesh( color colour, WB_Point[] points ) {
 	globeMesh = new HE_Mesh(creatorGlobe);
 
 	if ( Configuration.Shape.Type == ShapeType.Dual ) {
-		globeMesh = new HE_Mesh(new HEC_Dual(globeMesh));
+		globeMesh = new HE_Mesh( new HEC_Dual( globeMesh ) );
 	}
 
-  globeMesh.scale( globeScale );
+
+	if ( Configuration.Shape.Type == ShapeType.Lattice ) {
+		globeMesh.modify( new HEM_PunchHoles().setWidth( 50 ) );
+		globeMesh.modify( new HEM_Shell().setThickness( 50 ) );
+	}
+
+	//globeMesh.scale( globeScale );
 
 	stroke(colour+5, 70);
 	fill(colour);
@@ -411,7 +399,7 @@ void drawMesh( color colour, WB_Point[] points ) {
 		case EdgesFacesPoints:
 			stroke(colour+5, 70);
 			render.drawEdges( globeMesh );
-			render.drawPoints( globeMesh.getPoints(), 3 );
+			render.drawPoints( globeMesh.getPoints(), 4 );
 			noStroke();
 			render.drawFaces( globeMesh );
 			break;
@@ -426,6 +414,7 @@ void drawGlobe() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 	color colour = stateThread.getColour();
 
+
 	if ( currentDate != null && points.length > 4 ) {
 		drawLights( colour );
 		drawRotation();
@@ -439,6 +428,11 @@ void drawHUD() {
 	SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
 	SimpleDateFormat hourFormat = new SimpleDateFormat("HH");
 	SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
+
+	monthFormat.setTimeZone( timeZone );
+	dayFormat.setTimeZone( timeZone );
+	hourFormat.setTimeZone( timeZone );
+	minuteFormat.setTimeZone( timeZone );
 
 	if ( currentDate != null ) {
 
