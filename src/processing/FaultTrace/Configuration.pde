@@ -2,10 +2,10 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 10000;
+		public static final long StartOffset = 5000;
 
 		// Time acceleration
-		public static final long Acceleration = 5000;
+		public static final long Acceleration = 2000;
 
 		// BPM for time quantization
 		public static final int BeatsPerMinute = 120;
@@ -46,7 +46,7 @@ public static final class Configuration {
 	}
 
 	public static final class Shape {
-		public static final ShapeType Type = ShapeType.Dual;
+		public static final ShapeType Type = ShapeType.Normal;
 	}
 
 	public static final class UI {
@@ -65,16 +65,16 @@ public static final class Configuration {
 			public static final String Font = "HelveticaNeue-Bold-42.vlw";
 		}
 
-		public static final UIType Type = UIType.EdgesFacesPoints;
+		public static final UIType Type = UIType.Faces;
 	}
 
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 5.0;
+			public static final float Min = 1.0;
 
 			// Maximum tween time
-			public static final float Max = 20.0;
+			public static final float Max = 5.0;
 		}
 
 		public static final class Scale {
@@ -82,7 +82,7 @@ public static final class Configuration {
 			public static final float Min = 0.1;
 
 			// Maximum tween scale factor
-			public static final float Max = 0.8;
+			public static final float Max = 0.95;
 		}
 
 		// Rotation speed
@@ -90,11 +90,8 @@ public static final class Configuration {
 
 
 		public static final class Zoom {
-			// Zoom speed
-			public static final float Scale = 0.002;
-
 			// Zoom time
-			public static final float Time = 5.0;
+			public static final float Time = 10.0;
 		}
 	}
 
@@ -103,7 +100,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of faces to render
-		public static final int MaxFaces = 365;
+		public static final int MaxFaces = 2000;
 	}
 
 	public static final class Data {
@@ -113,12 +110,12 @@ public static final class Configuration {
 			public static final int Max = 500;
 		}
 
-		public static final String TimeZone = "UTC";
+		public static final String TimeZone = "Australia/Melbourne";
 	}
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2015-04-01T00:00:00.000Z";
+		public static final String StartDate = "2015-01-01T00:00:00.000Z";
 
 		// End date
 		public static final String EndDate = "2015-12-31T23:59:59.999Z";
