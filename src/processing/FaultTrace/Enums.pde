@@ -3,7 +3,7 @@ public enum UIType {
 }
 
 public enum ShapeType {
-	Normal, Dual
+	Normal, Dual, Lattice
 }
 
 public enum QuantizationType {
