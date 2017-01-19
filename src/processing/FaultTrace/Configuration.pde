@@ -2,21 +2,21 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 5000;
+		public static final long StartOffset = 3000;
 
 		// Time acceleration
-		public static final long Acceleration = 2000;
+		public static final long Acceleration = 5000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 120;
+		public static final int BeatsPerMinute = 140;
 
 		// BPM for time quantization
-		public static final int BeatsPerMeasure = 4;
+		public static final int BeatsPerMeasure = 3;
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
 
-		public static final float Quantization = QuantizationType.OneSixteenthNote.get();
+		public static final float Quantization = QuantizationType.OneEigthNote.get();
 
 
 		public static final class Pitch {
@@ -29,7 +29,7 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 70;
+			public static final int Min = 107;
 
 			// Maximum velocity (0 - 127)
 			public static final int Max = 127;
@@ -43,10 +43,6 @@ public static final class Configuration {
 			// Maximum note duration in milliseconds
 			public static final int Max = 150;
 		}
-	}
-
-	public static final class Shape {
-		public static final ShapeType Type = ShapeType.Normal;
 	}
 
 	public static final class UI {
@@ -64,8 +60,6 @@ public static final class Configuration {
 			// The HUD font
 			public static final String Font = "HelveticaNeue-Bold-42.vlw";
 		}
-
-		public static final UIType Type = UIType.Faces;
 	}
 
 	public static final class Animation {
@@ -86,7 +80,7 @@ public static final class Configuration {
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.005;
+		public static final float Speed = 0.01;
 
 
 		public static final class Zoom {
@@ -101,6 +95,25 @@ public static final class Configuration {
 
 		// Maximum amount of faces to render
 		public static final int MaxFaces = 2000;
+
+		// Show bounding wireframe
+		public static final boolean ShowWireframe = false;
+
+		// Available types:
+		// - Normal
+		// - Dual
+		// - Lattice
+		// - Twisted
+		public static final MeshType Type = MeshType.Dual;
+
+		// Available types:
+		// - Edges
+		// - Faces
+		// - EdgesFaces
+		// - Points
+		// - EdgesPoints
+		// - EdgesFacesPoints
+		public static final RenderType Renderer = RenderType.Faces;
 	}
 
 	public static final class Data {
@@ -115,10 +128,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2015-01-01T00:00:00.000Z";
+		public static final String StartDate = "2017-01-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2015-12-31T23:59:59.999Z";
+		public static final String EndDate = "2017-01-14T23:59:59.999Z";
 	}
 
 	public static final class IO {
@@ -126,6 +139,6 @@ public static final class Configuration {
 		public static final boolean SaveFrames = false;
 
 		// CSV File
-		public static final String CSV = "quakes-2015.csv";
+		public static final String CSV = "quakes-2017.csv";
 	}
 }
