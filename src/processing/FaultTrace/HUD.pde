@@ -42,17 +42,17 @@ public class HUD {
 	}
 
 	public void display() {
-
+		int multiplier = 2;
 		int hudWidth = this.margin;
 		int hudHeight = 0;
 
 		// TODO allow for vertical stacking
 
 		for ( HUDElement element : this.elements ) {
-			hudWidth += element.width + this.margin;
+			hudWidth += this.margin + element.width + this.margin;
 
 			if ( element.height > hudHeight ) {
-				hudHeight = this.margin + element.height + this.margin;
+				hudHeight = this.margin * multiplier + element.height;
 			}
 		}
 
@@ -64,7 +64,7 @@ public class HUD {
 				this.x = this.width - hudWidth;
 				break;
 			case "left":
-				this.x = this.margin;
+				this.x = this.margin * multiplier;
 				break;
 			default:
 				this.x = this.margin;
@@ -94,7 +94,6 @@ public class HUD {
 			fill( this.fill );
 			rect( currentX, this.y, element.width, element.height );
 			fill( this.textFill );
-
 			// Text
 			textFont( this.font, Configuration.UI.HUD.FontSize );
 			textAlign( LEFT, BASELINE );
