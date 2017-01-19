@@ -21,16 +21,23 @@ import wblut.math.*;
 import wblut.processing.*;
 
 // TODO
-// Look to see why Thread.sleep() is taking up so much CPU time (~7seconds)
+// Place HUD over object
+// Add twist mesh
+// Track is running longer than the HUD - this is due to quantize() pushing values outside the bounds
+// Implement cycle of instruments (channel = channel+mod(4))
 // Look at setting an on/off flag on the note and set 2 different threads to play and stop the notes
 // Add more shape types
 // Add VR support
 
-long start_ms;
-long end_ms;
-long start;
+
+long setupTime;
 long delay;
 long quantized_delay;
+long start_ms;
+long end_ms;
+long diff_quantized_ms;
+long diff_accelerated_ms;
+
 float theta = 0;
 
 Timer timer;
@@ -52,8 +59,10 @@ WB_Render3D render;
 WB_DebugRender3D drender;
 HEC_ConvexHull creatorGlobe;
 HEC_ConvexHull creatorWireframe;
-HES_CatmullClark subdividerLattice;
+HEM_Twist twist;
 HEM_Lattice lattice;
+HEC_Geodesic geodesic;
+HEM_ChamferEdges chamfer;
 WB_Point[] wireframePoints;
 Globe globe;
 Ani globeAnimation;
@@ -67,12 +76,13 @@ String dateFormat;
 SimpleDateFormat format;
 
 public void settings() {
-	fullScreen(P3D);
+	fullScreen(P3D, 2);
 	smooth(8);
 }
 
 void setup() {
 	setupTimezone();
+	setupTiming();
 	setup3D();
 	setupUI();
 	setupFonts();
@@ -85,18 +95,17 @@ void setup() {
 	setupGlobe();
 	setupUIThread();
 	setupRenderer();
-	setupDebug();
 	setupShutdownHook();
 	setupFrameRate();
-
-	start = millis();
+	setupTime = millis();
+	setupDebug();
 }
 
 void draw() {
 	noCursor();
 	drawBackground();
-	drawHUD();
 	drawGlobe();
+	drawHUD();
 	saveFrames();
 }
 
@@ -104,16 +113,29 @@ void setupGlobe() {
 	globe = new Globe( this.points );
 }
 
+void setupTiming() {
+	start_ms = startDate.getTimeInMillis();
+	end_ms = endDate.getTimeInMillis();
+	diff_accelerated_ms = Configuration.MIDI.StartOffset + (((end_ms-start_ms)/Configuration.MIDI.Acceleration));
+	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize(((end_ms-start_ms)/Configuration.MIDI.Acceleration));
+}
+
 void setup3D() {
 	creatorGlobe = new HEC_ConvexHull();
 	creatorWireframe = new HEC_ConvexHull();
-	subdividerLattice = new HES_CatmullClark();
 	lattice = new HEM_Lattice().setWidth( 20 ).setDepth( 5 );
+	geodesic = new HEC_Geodesic();
+	geodesic.setRadius( Configuration.Mesh.GlobeSize );
+	geodesic.setB( 2 );
+	geodesic.setC( 3 );
+	geodesic.setType(HEC_Geodesic.ICOSAHEDRON);
+
+	WB_Line line = new WB_Line( 0, 0, 0, 0, exp(1.0) / 2, exp(1.0) / 2 );
+	twist = new HEM_Twist().setTwistAxis( line ).setAngleFactor( TWO_PI );
 }
 
 void setupTimezone() {
 	timeZone = TimeZone.getTimeZone( Configuration.Data.TimeZone );
-	//TimeZone.setDefault( timeZone );
 	dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
 	startDate = Calendar.getInstance();
@@ -137,7 +159,7 @@ void setupAnimation() {
 
 void setGlobeScale() {
 	float endValue = globeAnimation.getEnd();
-	globeScale = random(1.0, 1.8);
+	globeScale = random(1.0, 1.75);
 	globeAnimation.setBegin( endValue );
 	globeAnimation.setEnd( globeScale );
 	globeAnimation.start();
@@ -163,17 +185,16 @@ void setupGrid() {
 
 void setupMIDI() {
 	// Create the MIDI Bus
-	bus = new MidiBus(this, -1, "FaultTrace");
+	bus = new MidiBus( this, -1, "FaultTrace" );
 }
 
-long quantize(long delay) {
-	float beat = (60 * 1000) / (float)Configuration.MIDI.BeatsPerMinute;
+long quantize( long delay ) {
+	float beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
 	float quantization = Configuration.MIDI.Quantization;
-	float snap = beat * ( Configuration.MIDI.BeatsPerMeasure /  quantization);
+	float snap = beat * ( Configuration.MIDI.BeatsPerMeasure /  quantization );
 
-	return (long)(Math.round(delay/snap) * snap);
+	return (long)( Math.round( delay/snap ) * snap );
 }
-
 
 void setupSong() {
 	// Set the delay between notes
@@ -193,7 +214,6 @@ void setupSong() {
 	d1 = (Calendar)startDate.clone();
 
 	int x = 0;
-	long speed = Configuration.MIDI.Acceleration;
 
 	for (TableRow row : rows ) {
 		// Extract the data
@@ -217,14 +237,15 @@ void setupSong() {
 			continue;
 		}
 
-		if (d2.after( startDate ) && d2.before( endDate )) {
-
+		if ( d2.after( startDate ) && d2.before( endDate ) ) {
 			// Diff in milliseconds
 			long diff = d2.getTimeInMillis() - d1.getTimeInMillis();
 
 			// Increase the delay
-			delay += (diff/speed);
+			delay += (diff/Configuration.MIDI.Acceleration);
 			quantized_delay = quantize(delay);
+
+			println( delay + ":" + quantized_delay );
 
 			int channel = getChannelFromCoordinates( latitude, longitude );
 			int velocity = mapMagnitude( magnitude );
@@ -238,7 +259,7 @@ void setupSong() {
 			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
 			point.mulSelf( initialScale ) ;
 			points.add( new GlobePoint( point, quantized_delay + millis(), animationTime, scale ) );
-			states.add( new StateManager( d2, colour, quantize(diff/speed) + millis() ) );
+			states.add( new StateManager( d2, colour, quantize(diff/Configuration.MIDI.Acceleration) + millis() ) );
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
@@ -272,7 +293,7 @@ void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
 
 void setupData() {
 	// Load the data
-	Table table = loadTable( Configuration.IO.CSV, "header");
+	Table table = loadTable( Configuration.IO.CSV, "header" );
 	rows = table.rows();
 }
 
@@ -282,7 +303,7 @@ void setupTimer() {
 
 void setupUIThread() {
 	stateThread = new StateManagerThread( states );
-	timer.schedule( new ThreadTask( stateThread ), 0 );
+	timer.schedule( new ThreadTask( stateThread ), Configuration.MIDI.StartOffset );
 }
 
 void setupRenderer() {
@@ -290,27 +311,16 @@ void setupRenderer() {
 }
 
 void setupDebug() {
-	long start_ms = startDate.getTimeInMillis();
-	long end_ms = endDate.getTimeInMillis();
-
-	println(start_ms);
-	println(end_ms);
-	long actual =  (((end_ms-start_ms)/Configuration.MIDI.Acceleration));
-	long quantized = quantize(((end_ms-start_ms)/Configuration.MIDI.Acceleration));
-
-	println("Estimated song length: " + delay/1000/60 + " minutes // " + delay/1000/60/60 + " hours // " + delay/1000/60/60/24 + " days");
-	println("Total " + delay + "ms");
-	//println("Should be " + (((aend-astart)/Configuration.MIDI.Acceleration)+Configuration.MIDI.StartOffset) + "ms");
-	println("Should be " + (actual+Configuration.MIDI.StartOffset) + "ms");
-	println("Quantized should be " + (quantized+Configuration.MIDI.StartOffset) + "ms");
-	println("Difference " + ((actual+Configuration.MIDI.StartOffset)-delay) + "ms");
-	println("Setup lasted " + millis() + "ms");
+	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
+	println("Total " + diff_accelerated_ms + "ms");
+	println("Quantized " + diff_quantized_ms + "ms");
+	println("Setup lasted " + setupTime + "ms");
 }
 
 String getDatePart( SimpleDateFormat dateFormat ) {
 	long start = startDate.getTimeInMillis();
 	long end = endDate.getTimeInMillis();
-	long diff = start+((long)millis()*Configuration.MIDI.Acceleration);
+	long diff = start+(((long)millis()-setupTime)*Configuration.MIDI.Acceleration);
 
 	if ( diff > end ) {
 		return dateFormat.format( end );
@@ -352,30 +362,37 @@ void drawRotation() {
 
 	translate( width / 2, height / 2, 0 );
 	rotateY( frameCount * Configuration.Animation.Speed );
-	rotateX( -sin(theta) / TWO_PI );
+	rotateX( -frameCount * Configuration.Animation.Speed );
 }
 
 void drawMesh( color colour, WB_Point[] points ) {
-	creatorGlobe.setPoints(points);
+	creatorGlobe.setPoints( points );
+	globeMesh = new HE_Mesh( creatorGlobe );
 
-	globeMesh = new HE_Mesh(creatorGlobe);
-
-	if ( Configuration.Shape.Type == ShapeType.Dual ) {
+	if ( Configuration.Mesh.Type == MeshType.Dual ) {
 		globeMesh = new HE_Mesh( new HEC_Dual( globeMesh ) );
 	}
 
-
-	if ( Configuration.Shape.Type == ShapeType.Lattice ) {
-		globeMesh.modify( new HEM_PunchHoles().setWidth( 50 ) );
-		globeMesh.modify( new HEM_Shell().setThickness( 50 ) );
+	if ( Configuration.Mesh.Type == MeshType.Lattice ) {
+		globeMesh.modify( lattice );
 	}
 
-	//globeMesh.scale( globeScale );
+	if ( Configuration.Mesh.Type == MeshType.Twisted ) {
+		globeMesh.modify( twist );
+	}
+
+	scale( globeScale );
+
+	if ( Configuration.Mesh.ShowWireframe ) {
+		wireframeMesh = new HE_Mesh( geodesic );
+		stroke( 240 );
+		render.drawEdges( wireframeMesh );
+	}
 
 	stroke(colour+5, 70);
 	fill(colour);
 
-	switch ( Configuration.UI.Type ) {
+	switch ( Configuration.Mesh.Renderer ) {
 		case Edges:
 			noFill();
 			render.drawEdges( globeMesh );
@@ -414,15 +431,17 @@ void drawGlobe() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 	color colour = stateThread.getColour();
 
-
 	if ( currentDate != null && points.length > 4 ) {
+		pushMatrix();
 		drawLights( colour );
 		drawRotation();
 		drawMesh( colour, points );
+		popMatrix();
 	}
 }
 
 void drawHUD() {
+	noLights();
 	Calendar currentDate = (Calendar)stateThread.getDate();
 	SimpleDateFormat monthFormat = new SimpleDateFormat("MMM");
 	SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
