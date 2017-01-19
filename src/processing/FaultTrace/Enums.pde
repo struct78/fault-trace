@@ -1,9 +1,9 @@
-public enum UIType {
+public enum RenderType {
 	Edges, Faces, EdgesFaces, Points, EdgesPoints, EdgesFacesPoints
 }
 
-public enum ShapeType {
-	Normal, Dual, Lattice
+public enum MeshType {
+	Normal, Dual, Lattice, Twisted
 }
 
 public enum QuantizationType {
