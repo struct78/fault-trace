@@ -9,7 +9,7 @@ public class Note extends Thread {
 		this.bus = bus;
 	}
 
-	public void run() {
+	public synchronized void run() {
 		try {
 			bus.sendNoteOn( this.channel, this.pitch, this.velocity );
 

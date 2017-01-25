@@ -64,6 +64,7 @@ HEM_Lattice lattice;
 HEC_Geodesic geodesic;
 HEM_ChamferEdges chamfer;
 WB_Point[] wireframePoints;
+WB_Point[] meshPoints;
 Globe globe;
 Ani globeAnimation;
 float globeScale = 1.0;
@@ -71,13 +72,16 @@ float globeScale = 1.0;
 Calendar startDate;
 Calendar endDate;
 Calendar calendar;
+Calendar currentDate;
 TimeZone timeZone;
 String dateFormat;
 SimpleDateFormat format;
+color colour;
 
 public void settings() {
-	fullScreen(P3D, 2);
+	fullScreen(P3D);
 	smooth(8);
+	pixelDensity(2);
 }
 
 void setup() {
@@ -104,8 +108,8 @@ void setup() {
 void draw() {
 	noCursor();
 	drawBackground();
-	drawGlobe();
 	drawHUD();
+	drawGlobe();
 	saveFrames();
 }
 
@@ -159,7 +163,7 @@ void setupAnimation() {
 
 void setGlobeScale() {
 	float endValue = globeAnimation.getEnd();
-	globeScale = random(1.0, 1.75);
+	globeScale = random( 0.8, 1.2 );
 	globeAnimation.setBegin( endValue );
 	globeAnimation.setEnd( globeScale );
 	globeAnimation.start();
@@ -168,7 +172,7 @@ void setGlobeScale() {
 void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
-	colours.addAll(Arrays.asList(0xffe31826, 0xff881832, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d));
+	colours.addAll( Arrays.asList( 0xffe31826, 0xff881832, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
 }
 
 void setupFonts() {
@@ -360,7 +364,7 @@ void drawRotation() {
 	// Move
 	theta += Configuration.Animation.Speed;
 
-	translate( width / 2, height / 2, 0 );
+	translate( width / 2, height / 2 - 100, 0 );
 	rotateY( frameCount * Configuration.Animation.Speed );
 	rotateX( -frameCount * Configuration.Animation.Speed );
 }
@@ -426,22 +430,19 @@ void drawMesh( color colour, WB_Point[] points ) {
 }
 
 void drawGlobe() {
-	WB_Point[] points = globe.getPoints( Configuration.Mesh.MaxFaces );
+	meshPoints = globe.getPoints( Configuration.Mesh.MaxFaces );
 
-	Calendar currentDate = (Calendar)stateThread.getDate();
-	color colour = stateThread.getColour();
+	currentDate = (Calendar)stateThread.getDate();
+	colour = stateThread.getColour();
 
-	if ( currentDate != null && points.length > 4 ) {
-		pushMatrix();
+	if ( currentDate != null && meshPoints.length > 4 ) {
 		drawLights( colour );
 		drawRotation();
-		drawMesh( colour, points );
-		popMatrix();
+		drawMesh( colour, meshPoints );
 	}
 }
 
 void drawHUD() {
-	noLights();
 	Calendar currentDate = (Calendar)stateThread.getDate();
 	SimpleDateFormat monthFormat = new SimpleDateFormat("MMM");
 	SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
@@ -458,7 +459,7 @@ void drawHUD() {
 		// TO DO
 		// Array list of objects that have a width, height, text object
 		// Figure out how to do graph
-		HUD hud = new HUD( width, height, "left", "bottom", this.font);
+		HUD hud = new HUD( width, height, "centre", "bottom", this.font);
 		hud.setMargin( 10 );
 		hud.setFill( stateThread.getColour() );
 		hud.setTextFill( 210 );

@@ -1,4 +1,4 @@
-public class ThreadTask extends TimerTask { 
+public class ThreadTask extends TimerTask {
  Thread thread;
  ThreadTask(Thread thread) {
 	 this.thread = thread;

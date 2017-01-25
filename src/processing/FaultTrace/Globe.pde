@@ -1,12 +1,14 @@
 public class Globe {
 	ArrayList<GlobePoint> points;
+	ArrayList<WB_Point> buffer;
 
 	public Globe( ArrayList<GlobePoint> points ) {
 		this.points = points;
+		this.buffer = new ArrayList<WB_Point>();
 	}
 
 	public WB_Point[] getPoints( int max ) {
-		ArrayList<WB_Point> buffer = new ArrayList<WB_Point>();
+		this.buffer.clear();
 		GlobePoint point;
 		int newSize = 0;
 		int size = this.points.size();
@@ -15,12 +17,12 @@ public class Globe {
 			point = this.points.get(x);
 			if ( point.canDisplay() ) {
 				point.animate();
-				buffer.add( point.getPoint() );
+				this.buffer.add( point.getPoint() );
 				newSize++;
 			}
 		}
 
-		if (newSize > max) {
+		if ( newSize > max ) {
 			for ( int x = 0 ; x < newSize-max ; x++ ) {
 				if ( x < size ) {
 					this.points.remove( x );
@@ -28,6 +30,6 @@ public class Globe {
 			}
 		}
 
-		return buffer.toArray(new WB_Point[newSize]);
+		return this.buffer.toArray( new WB_Point[ newSize ] );
 	}
 }
