@@ -11,7 +11,7 @@ public static final class Configuration {
 		public static final int BeatsPerMinute = 140;
 
 		// BPM for time quantization
-		public static final int BeatsPerMeasure = 3;
+		public static final int BeatsPerMeasure = 4;
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
@@ -85,16 +85,16 @@ public static final class Configuration {
 
 		public static final class Zoom {
 			// Zoom time
-			public static final float Time = 10.0;
+			public static final float Time = 5.0;
 		}
 	}
 
 	public static final class Mesh {
 		// Size of the globe
-		public static final int GlobeSize = 400;
+		public static final int GlobeSize = 420;
 
 		// Maximum amount of faces to render
-		public static final int MaxFaces = 2000;
+		public static final int MaxFaces = 1000;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -104,7 +104,7 @@ public static final class Configuration {
 		// - Dual
 		// - Lattice
 		// - Twisted
-		public static final MeshType Type = MeshType.Dual;
+		public static final MeshType Type = MeshType.Normal;
 
 		// Available types:
 		// - Edges
