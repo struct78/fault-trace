@@ -8,10 +8,10 @@ public static final class Configuration {
 		public static final long Acceleration = 5000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 140;
+		public static final int BeatsPerMinute = 120;
 
 		// BPM for time quantization
-		public static final int BeatsPerMeasure = 4;
+		public static final int BeatsPerMeasure = 3;
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
@@ -41,7 +41,7 @@ public static final class Configuration {
 			public static final int Min = 50;
 
 			// Maximum note duration in milliseconds
-			public static final int Max = 150;
+			public static final int Max = 1500;
 		}
 	}
 
@@ -68,7 +68,7 @@ public static final class Configuration {
 			public static final float Min = 1.0;
 
 			// Maximum tween time
-			public static final float Max = 5.0;
+			public static final float Max = 10.0;
 		}
 
 		public static final class Scale {
@@ -76,7 +76,7 @@ public static final class Configuration {
 			public static final float Min = 0.1;
 
 			// Maximum tween scale factor
-			public static final float Max = 0.95;
+			public static final float Max = 0.7;
 		}
 
 		// Rotation speed
@@ -104,7 +104,7 @@ public static final class Configuration {
 		// - Dual
 		// - Lattice
 		// - Twisted
-		public static final MeshType Type = MeshType.Normal;
+		public static final MeshType Type = MeshType.Dual;
 
 		// Available types:
 		// - Edges
@@ -113,7 +113,7 @@ public static final class Configuration {
 		// - Points
 		// - EdgesPoints
 		// - EdgesFacesPoints
-		public static final RenderType Renderer = RenderType.Faces;
+		public static final RenderType Renderer = RenderType.EdgesFaces;
 	}
 
 	public static final class Data {
