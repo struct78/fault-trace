@@ -76,12 +76,18 @@ Calendar currentDate;
 TimeZone timeZone;
 String dateFormat;
 SimpleDateFormat format;
+SimpleDateFormat monthFormat;
+SimpleDateFormat dayFormat;
+SimpleDateFormat hourFormat;
+SimpleDateFormat minuteFormat;
 color colour;
+HUD hud;
+Point2D.Double rectanglePoint;
 
 public void settings() {
-	fullScreen(P3D);
+	fullScreen(P3D, 2);
 	smooth(8);
-	pixelDensity(2);
+	//pixelDensity(2);
 }
 
 void setup() {
@@ -146,6 +152,17 @@ void setupTimezone() {
 	endDate = Calendar.getInstance();
 
 	format = new SimpleDateFormat( dateFormat );
+	format.setTimeZone( timeZone );
+
+	monthFormat = new SimpleDateFormat("MMM");
+	dayFormat = new SimpleDateFormat("dd");
+	hourFormat = new SimpleDateFormat("HH");
+	minuteFormat = new SimpleDateFormat("mm");
+
+	monthFormat.setTimeZone( timeZone );
+	dayFormat.setTimeZone( timeZone );
+	hourFormat.setTimeZone( timeZone );
+	minuteFormat.setTimeZone( timeZone );
 
 	try {
 		startDate.setTime( format.parse( Configuration.Timing.StartDate ) ) ;
@@ -249,8 +266,6 @@ void setupSong() {
 			delay += (diff/Configuration.MIDI.Acceleration);
 			quantized_delay = quantize(delay);
 
-			println( delay + ":" + quantized_delay );
-
 			int channel = getChannelFromCoordinates( latitude, longitude );
 			int velocity = mapMagnitude( magnitude );
 			int pitch = mapDepth( depth );
@@ -267,6 +282,16 @@ void setupSong() {
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
+			// Drone
+			if ( magnitude >= 4 ) {
+				setNote( 8, velocity, 0, (int)quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerMeasure, quantized_delay );
+			}
+
+			// Sub Bass
+			if ( magnitude >= 7 ) {
+				setNote( 9, velocity, 0, (int)quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerMeasure, quantized_delay );
+			}
+
 			x++;
 		}
 
@@ -277,7 +302,7 @@ void setupSong() {
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
 	// Create the note
-	Note note = new Note( bus );
+	note = new Note( bus );
 
 	// Each instrument/section represents 1/8th of the globe
 	note.channel = channel;
@@ -444,22 +469,13 @@ void drawGlobe() {
 
 void drawHUD() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
-	SimpleDateFormat monthFormat = new SimpleDateFormat("MMM");
-	SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
-	SimpleDateFormat hourFormat = new SimpleDateFormat("HH");
-	SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
-
-	monthFormat.setTimeZone( timeZone );
-	dayFormat.setTimeZone( timeZone );
-	hourFormat.setTimeZone( timeZone );
-	minuteFormat.setTimeZone( timeZone );
 
 	if ( currentDate != null ) {
 
 		// TO DO
 		// Array list of objects that have a width, height, text object
 		// Figure out how to do graph
-		HUD hud = new HUD( width, height, "centre", "bottom", this.font);
+		hud = new HUD( width, height, "centre", "bottom", this.font);
 		hud.setMargin( 10 );
 		hud.setFill( stateThread.getColour() );
 		hud.setTextFill( 210 );
@@ -476,8 +492,8 @@ int getChannelFromCoordinates( double latitude, double longitude ) {
 	longitude = longitude + 180;
 
 	for ( Rectangle rectangle : grid ) {
-		Point2D.Double point = new Point2D.Double( longitude, latitude );
-		if ( rectangle.contains( point ) ) {
+		rectanglePoint = new Point2D.Double( longitude, latitude );
+		if ( rectangle.contains( rectanglePoint ) ) {
 			return grid.indexOf( rectangle );
 		}
 	}
@@ -500,11 +516,11 @@ int mapDepth( float depth ) {
 }
 
 int mapDepth( float depth, int min, int max ) {
-	return invert( int( mapexp( depth, 0, 750, min, max ) ), min, max );
+	return invert( int( mapexp( depth, 0, Configuration.Data.Depth.Max, min, max ) ), min, max );
 }
 
 float mapDepth(float depth, float min, float max) {
-	return invert( mapexp( depth, 0, 750, min, max ), min, max);
+	return invert( mapexp( depth, 0, Configuration.Data.Depth.Max, min, max ), min, max);
 }
 
 int mapMagnitude( float magnitude ) {
