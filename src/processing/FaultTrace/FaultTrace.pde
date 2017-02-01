@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Timer;
@@ -51,6 +52,7 @@ ArrayList<Rectangle> grid = new ArrayList();
 ArrayList<Integer> colours = new ArrayList();
 ArrayList<StateManager> states = new ArrayList();
 ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
+ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
 
 PFont font;
 HE_Mesh globeMesh;
@@ -66,6 +68,7 @@ HEM_ChamferEdges chamfer;
 WB_Point[] wireframePoints;
 WB_Point[] meshPoints;
 Globe globe;
+Graph graph;
 Ani globeAnimation;
 float globeScale = 1.0;
 
@@ -83,6 +86,8 @@ SimpleDateFormat minuteFormat;
 color colour;
 HUD hud;
 Point2D.Double rectanglePoint;
+int uiGridWidth;
+int uiMargin;
 
 public void settings() {
 	fullScreen(P3D, 2);
@@ -115,6 +120,7 @@ void draw() {
 	noCursor();
 	drawBackground();
 	drawHUD();
+	drawGraph();
 	drawGlobe();
 	saveFrames();
 }
@@ -180,7 +186,7 @@ void setupAnimation() {
 
 void setGlobeScale() {
 	float endValue = globeAnimation.getEnd();
-	globeScale = random( 0.8, 1.2 );
+	globeScale = random( 1.0, 1.5 );
 	globeAnimation.setBegin( endValue );
 	globeAnimation.setEnd( globeScale );
 	globeAnimation.start();
@@ -190,6 +196,8 @@ void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
 	colours.addAll( Arrays.asList( 0xffe31826, 0xff881832, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
+	uiGridWidth = Configuration.UI.GridWidth;
+	uiMargin = Configuration.UI.Margin;
 }
 
 void setupFonts() {
@@ -278,6 +286,7 @@ void setupSong() {
 			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
 			point.mulSelf( initialScale ) ;
 			points.add( new GlobePoint( point, quantized_delay + millis(), animationTime, scale ) );
+			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
 			states.add( new StateManager( d2, colour, quantize(diff/Configuration.MIDI.Acceleration) + millis() ) );
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
@@ -389,9 +398,9 @@ void drawRotation() {
 	// Move
 	theta += Configuration.Animation.Speed;
 
-	translate( width / 2, height / 2 - 100, 0 );
+	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( frameCount * Configuration.Animation.Speed );
-	rotateX( -frameCount * Configuration.Animation.Speed );
+	rotateX( frameCount * Configuration.Animation.Speed / PI );
 }
 
 void drawMesh( color colour, WB_Point[] points ) {
@@ -410,7 +419,7 @@ void drawMesh( color colour, WB_Point[] points ) {
 		globeMesh.modify( twist );
 	}
 
-	scale( globeScale );
+	//scale( globeScale );
 
 	if ( Configuration.Mesh.ShowWireframe ) {
 		wireframeMesh = new HE_Mesh( geodesic );
@@ -428,7 +437,7 @@ void drawMesh( color colour, WB_Point[] points ) {
 			break;
 		case Faces:
 			noStroke();
-			render.drawFaces( globeMesh );
+			render.drawMesh( globeMesh );
 			break;
 		case EdgesFaces:
 			render.drawEdges( globeMesh );
@@ -443,7 +452,7 @@ void drawMesh( color colour, WB_Point[] points ) {
 			render.drawPoints( globeMesh.getPoints(), 2 );
 			break;
 		case EdgesFacesPoints:
-			stroke(colour+5, 70);
+			stroke(colour+2, 70);
 			render.drawEdges( globeMesh );
 			render.drawPoints( globeMesh.getPoints(), 4 );
 			noStroke();
@@ -467,6 +476,19 @@ void drawGlobe() {
 	}
 }
 
+void drawGraph() {
+	Calendar currentDate = (Calendar)stateThread.getDate();
+
+	if ( currentDate != null ) {
+		graph = new Graph( graphPoints, width, height, (uiGridWidth*4) + (uiMargin*3), uiGridWidth, "right", "bottom" );
+		graph.setMargin( uiMargin );
+		graph.setFill( stateThread.getColour() );
+		graph.setLineStroke( 210 );
+		graph.getPoints( (uiGridWidth*4) + (uiMargin*3) );
+		graph.display();
+	}
+}
+
 void drawHUD() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 
@@ -475,14 +497,14 @@ void drawHUD() {
 		// TO DO
 		// Array list of objects that have a width, height, text object
 		// Figure out how to do graph
-		hud = new HUD( width, height, "centre", "bottom", this.font);
-		hud.setMargin( 10 );
+		hud = new HUD( width, height, "left", "bottom", this.font);
+		hud.setMargin( uiMargin );
 		hud.setFill( stateThread.getColour() );
 		hud.setTextFill( 210 );
-		hud.addElement( new HUDElement( 100, 100, getDatePart( monthFormat ).substring(0,3), "bottom", "left" ) );
-		hud.addElement( new HUDElement( 100, 100, getDatePart( dayFormat ), "bottom", "left" ) );
-		hud.addElement( new HUDElement( 100, 100, getDatePart( hourFormat ), "bottom", "left" ) );
-		hud.addElement( new HUDElement( 100, 100, getDatePart( minuteFormat ), "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( monthFormat ).substring(0,3), "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( dayFormat ), "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( hourFormat ), "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( minuteFormat ), "bottom", "left" ) );
 		hud.display();
 	}
 }
@@ -509,6 +531,12 @@ color getColourFromMonth( Calendar date ) {
 
 	return lerpColor( color( colours.get( date.get( Calendar.MONTH ) ) ), color( colours.get( nextMonth.get(Calendar.MONTH) ) ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth
 	);
+}
+
+void saveFrames() {
+	if ( Configuration.IO.SaveFrames ) {
+		saveFrame("frameGrabs/frame-########.tga");
+	}
 }
 
 int mapDepth( float depth ) {
@@ -552,90 +580,3 @@ int invert( int n, int min, int max ) {
 float invert( float n, float min, float max ) {
 	return ( max - n ) + min;
 }
-
-void saveFrames() {
-	if ( Configuration.IO.SaveFrames ) {
-		saveFrame("frameGrabs/frame-########.tga");
-	}
-}
-
-/*
-
-
-				// Major/Great earthquakes
-				// Tubas
-				if (magnitude >= 7) {
-					note = new Note(bus);
-					note.channel = 8;
-					note.velocity = mapMagnitude(magnitude);
-					note.pitch = mapDepth(depth);
-					note.duration = 1000;
-
-					task = new ThreadTask(note);
-					timer.schedule(task, delay);
-				}
-
-				// Major/Great earthquakes
-				// Kettle Drum
-				// Drone
-				// Tuba
-				// French Horn
-				// Trombone
-				if (magnitude >= 8) {
-					note = new Note(bus);
-					note.channel = 9;
-					note.velocity = 127;
-					note.pitch = 36;
-					note.duration = 200;
-
-
-					task = new ThreadTask(note);
-					timer.schedule(task, delay);
-
-					note = new Note(bus);
-					note.channel = 9;
-					note.velocity = 127;
-					note.pitch = 56;
-					note.duration = 200;
-
-					task = new ThreadTask(note);
-					timer.schedule(task, delay);
-				}
-
-
-				// Small earthquakes
-				if (magnitude <= 1) {
-					note = new Note(bus);
-					note.channel = 10;
-					note.velocity = 255;
-					note.pitch = mapDepth(depth, 40, 80);
-					//note.duration = mapMagnitudeToLength(5000, magnitude);
-
-					task = new ThreadTask(note);
-					timer.schedule(task, delay);
-				}
-
-				// Low RMS (root-mean-square)
-				if (rms < 0.01f) {
-					note = new Note(bus);
-					note.channel = 11;
-					note.velocity = mapMagnitude(magnitude);
-					note.pitch = mapDepth(depth);
-					note.duration = 2000;
-
-					task = new ThreadTask(note);
-					timer.schedule(task, delay-500);
-
-				}
-
-				// Big RMS (root-mean-square)
-				if (rms > HALF_PI) {
-					note = new Note(bus);
-					note.channel = 12;
-					note.velocity = mapMagnitude(magnitude);
-					note.pitch = mapDepth(depth);
-					note.duration = 1000;
-
-					task = new ThreadTask(note);
-					timer.schedule(task, delay-500);
-				}*/
