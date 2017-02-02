@@ -23,11 +23,7 @@ import wblut.processing.*;
 
 // TODO
 // Place HUD over object
-// Add twist mesh
-// Track is running longer than the HUD - this is due to quantize() pushing values outside the bounds
 // Implement cycle of instruments (channel = channel+mod(4))
-// Look at setting an on/off flag on the note and set 2 different threads to play and stop the notes
-// Add more shape types
 // Add VR support
 
 
@@ -65,6 +61,7 @@ HEM_Twist twist;
 HEM_Lattice lattice;
 HEC_Geodesic geodesic;
 HEM_ChamferEdges chamfer;
+HES_TriDec globeSimplifier;
 WB_Point[] wireframePoints;
 WB_Point[] meshPoints;
 Globe globe;
@@ -145,7 +142,7 @@ void setup3D() {
 	geodesic.setB( 2 );
 	geodesic.setC( 3 );
 	geodesic.setType(HEC_Geodesic.ICOSAHEDRON);
-
+	//globeSimplifier = new HES_TriDec().setGoal( 1.0 );
 	WB_Line line = new WB_Line( 0, 0, 0, 0, exp(1.0) / 2, exp(1.0) / 2 );
 	twist = new HEM_Twist().setTwistAxis( line ).setAngleFactor( TWO_PI );
 }
@@ -283,11 +280,12 @@ void setupSong() {
 			float initialScale = mapDepth( depth, Configuration.Animation.Scale.Min, 1.0 );
 			color colour = getColourFromMonth( d2 );
 
-			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
+			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize, depth );
 			point.mulSelf( initialScale ) ;
 			points.add( new GlobePoint( point, quantized_delay + millis(), animationTime, scale ) );
 			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
-			states.add( new StateManager( d2, colour, quantize(diff/Configuration.MIDI.Acceleration) + millis() ) );
+
+			states.add( new StateManager( d2, colour, (long)(diff/Configuration.MIDI.Acceleration) ) );
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
@@ -399,8 +397,7 @@ void drawRotation() {
 	theta += Configuration.Animation.Speed;
 
 	translate( width / 2, ( height / 2 ), 0 );
-	rotateY( frameCount * Configuration.Animation.Speed );
-	rotateX( frameCount * Configuration.Animation.Speed / PI );
+	rotateY( theta );
 }
 
 void drawMesh( color colour, WB_Point[] points ) {
@@ -419,7 +416,7 @@ void drawMesh( color colour, WB_Point[] points ) {
 		globeMesh.modify( twist );
 	}
 
-	//scale( globeScale );
+	//globeMesh.simplify( globeSimplifier );
 
 	if ( Configuration.Mesh.ShowWireframe ) {
 		wireframeMesh = new HE_Mesh( geodesic );
