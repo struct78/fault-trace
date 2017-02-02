@@ -5,7 +5,7 @@ public class ThreadTask extends TimerTask {
  }
 
  public void run() {
-	 thread.setDaemon(true);
+	 thread.setDaemon(false);
 	 thread.start();
  }
 }
