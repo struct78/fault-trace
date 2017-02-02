@@ -8,7 +8,7 @@ public static final class Configuration {
 		public static final long Acceleration = 7200;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 120;
+		public static final int BeatsPerMinute = 125;
 
 		// BPM for time quantization
 		public static final int BeatsPerMeasure = 3;
@@ -69,10 +69,10 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 0.1;
+			public static final float Min = 1.0;
 
 			// Maximum tween time
-			public static final float Max = 2.0;
+			public static final float Max = 10.0;
 		}
 
 		public static final class Scale {
@@ -80,11 +80,11 @@ public static final class Configuration {
 			public static final float Min = 1.0;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.025;
+			public static final float Max = 1.05;
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.005;
+		public static final float Speed = 0.01;
 
 
 		public static final class Zoom {
@@ -95,7 +95,7 @@ public static final class Configuration {
 
 	public static final class Mesh {
 		// Size of the globe
-		public static final int GlobeSize = 500;
+		public static final int GlobeSize = 400;
 
 		// Maximum amount of faces to render
 		public static final int MaxFaces = 10000;
@@ -122,9 +122,9 @@ public static final class Configuration {
 
 	public static final class Data {
 		public static final class Depth {
-			public static final int Min = 10;
+			public static final int Min = 0;
 
-			public static final int Max = 500;
+			public static final int Max = 1000;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
