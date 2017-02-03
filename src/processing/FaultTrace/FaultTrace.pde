@@ -87,7 +87,7 @@ int uiGridWidth;
 int uiMargin;
 
 public void settings() {
-	fullScreen(P3D, 2);
+	size(1920, 1080, P3D);
 	smooth(8);
 	//pixelDensity(2);
 }
