@@ -9,6 +9,9 @@ Fault Trace is built with Processing, Python, and Ableton Live.
 ## Song Information
 
 Title: January
+
 Time Signature: 3/4
+
 Time Acceleration: 7200
+
 Tempo: 125 BPM
