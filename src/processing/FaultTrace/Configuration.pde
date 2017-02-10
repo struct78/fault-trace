@@ -10,13 +10,17 @@ public static final class Configuration {
 		// BPM for time quantization
 		public static final int BeatsPerMinute = 150;
 
-		// BPM for time quantization
-		public static final float BeatsPerBar = 3;
+		// Beats per bar X/4
+		public static final float BeatsPerBar = 4;
+
+		// 4/X
+		public static final float BeatDivision = 4;
+
+		// Decimal representaiton of BeatDivision
+		public static final float NoteType = QuantizationType.OneEigthNote.get();
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
-
-		public static final float BeatUnit = QuantizationType.OneQuarterNote.get();
 
 
 		public static final class Pitch {

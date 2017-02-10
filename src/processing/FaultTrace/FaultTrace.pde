@@ -215,10 +215,11 @@ void setupMIDI() {
 }
 
 long quantize( long delay ) {
-	float beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
-	float snap = beat * ( Configuration.MIDI.BeatsPerBar /  Configuration.MIDI.BeatUnit );
+	float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
+	float milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
+	float milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType );
 
-	return (long)( Math.round( delay/snap ) * snap );
+	return (long)(Math.round( delay / milliseconds_per_note ) * milliseconds_per_note);
 }
 
 void setupSong() {
@@ -347,7 +348,7 @@ void setupRenderer() {
 
 void setupDebug() {
 	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
-	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatUnit);
+	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.NoteType);
 	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
 	println("Total " + diff_accelerated_ms + "ms");
 	println("Quantized " + diff_quantized_ms + "ms");
