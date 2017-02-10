@@ -347,7 +347,7 @@ void setupRenderer() {
 }
 
 void setupDebug() {
-	println("Beat delay: " + quantize( 100 ));
+	println("Beat delay: " + quantize( 127 ));
 	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
 	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatDivision);
 	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
