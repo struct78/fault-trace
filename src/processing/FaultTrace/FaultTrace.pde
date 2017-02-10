@@ -216,8 +216,7 @@ void setupMIDI() {
 
 long quantize( long delay ) {
 	float beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
-	float quantization = Configuration.MIDI.Quantization;
-	float snap = beat * ( Configuration.MIDI.BeatsPerMeasure /  quantization );
+	float snap = beat * ( Configuration.MIDI.BeatsPerBar /  Configuration.MIDI.BeatUnit );
 
 	return (long)( Math.round( delay/snap ) * snap );
 }
@@ -291,12 +290,12 @@ void setupSong() {
 
 			// Drone
 			if ( magnitude >= 4 ) {
-				setNote( 8, velocity, 0, (int)quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerMeasure, quantized_delay );
+				setNote( 8, velocity, 0, (int)(quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerBar), quantized_delay );
 			}
 
 			// Sub Bass
 			if ( magnitude >= 7 ) {
-				setNote( 9, velocity, 0, (int)quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerMeasure, quantized_delay );
+				setNote( 9, velocity, 0, (int)(quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerBar), quantized_delay );
 			}
 
 			x++;
@@ -347,6 +346,8 @@ void setupRenderer() {
 }
 
 void setupDebug() {
+	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
+	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatUnit);
 	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
 	println("Total " + diff_accelerated_ms + "ms");
 	println("Quantized " + diff_quantized_ms + "ms");
