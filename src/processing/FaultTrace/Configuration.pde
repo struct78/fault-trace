@@ -11,12 +11,15 @@ public static final class Configuration {
 		public static final int BeatsPerMinute = 125;
 
 		// BPM for time quantization
-		public static final int BeatsPerMeasure = 3;
+		public static final int BeatsPerBar = 3;
+
+		//
+		public static final int BeatDivision = 4;
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
 
-		public static final float Quantization = QuantizationType.OneEigthNote.get();
+		public static final float NoteDivision = QuantizationType.OneSixteenthNote.get();
 
 
 		public static final class Pitch {
@@ -143,6 +146,6 @@ public static final class Configuration {
 		public static final boolean SaveFrames = false;
 
 		// CSV File
-		public static final String CSV = "quakes-2017.csv";
+		public static final String CSV = "quakes.csv";
 	}
 }
