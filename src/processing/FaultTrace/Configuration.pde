@@ -5,19 +5,19 @@ public static final class Configuration {
 		public static final long StartOffset = 3000;
 
 		// Time acceleration
-		public static final long Acceleration = 5000;
+		public static final long Acceleration = 5250;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 150;
+		public static final int BeatsPerMinute = 135;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 4;
+		public static final float BeatsPerBar = 21;
 
 		// 4/X
-		public static final float BeatDivision = 4;
+		public static final float BeatDivision = 8;
 
 		// Decimal representaiton of BeatDivision
-		public static final float NoteType = QuantizationType.OneEigthNote.get();
+		public static final float NoteType = QuantizationType.OneSixteenthNote.get();
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
@@ -81,14 +81,14 @@ public static final class Configuration {
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 1.0;
+			public static final float Min = 1.00;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.05;
+			public static final float Max = 1.00;
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.01;
+		public static final float Speed = 0.0055;
 
 
 		public static final class Zoom {
@@ -102,10 +102,13 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of faces to render
-		public static final int MaxFaces = 10000;
+		public static final int MaxFaces = 2500;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
+
+		// Opacity of globe ( 0 - 255 )
+		public static final int FillOpacity = 200;
 
 		// Available types:
 		// - Normal
@@ -121,7 +124,8 @@ public static final class Configuration {
 		// - Points
 		// - EdgesPoints
 		// - EdgesFacesPoints
-		public static final RenderType Renderer = RenderType.EdgesPoints;
+		// - Lines
+		public static final RenderType Renderer = RenderType.EdgesFacesPoints;
 	}
 
 	public static final class Data {
