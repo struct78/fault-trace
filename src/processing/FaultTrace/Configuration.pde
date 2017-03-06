@@ -5,19 +5,19 @@ public static final class Configuration {
 		public static final long StartOffset = 3000;
 
 		// Time acceleration
-		public static final long Acceleration = 5250;
+		public static final long Acceleration = 750;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 135;
+		public static final int BeatsPerMinute = 100;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 21;
+		public static final float BeatsPerBar = 4;
 
 		// 4/X
-		public static final float BeatDivision = 8;
+		public static final float BeatDivision = 2;
 
 		// Decimal representaiton of BeatDivision
-		public static final float NoteType = QuantizationType.OneSixteenthNote.get();
+		public static final float NoteType = QuantizationType.OneHalfNote.get();
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
