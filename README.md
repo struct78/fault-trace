@@ -11,6 +11,9 @@ This song was inspired by the French TV series Engrenages.
 ## SONG INFORMATION
 
 Track: February
+
 Time Signature: 21/8
+
 Time Acceleration: 5250x
+
 Tempo: 135 BPM
