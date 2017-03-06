@@ -60,5 +60,4 @@ with open('../processing/poseidon/data/quakes.csv', 'wb') as result:
 			wtr = csv.writer( result )
 			next(rdr)
 			for row in rdr:
-				print row[0]
 				wtr.writerow( (row[0], row[1], row[2], row[3], row[4], row[8], row[9]) )
