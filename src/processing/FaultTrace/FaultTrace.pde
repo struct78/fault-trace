@@ -21,12 +21,6 @@ import wblut.hemesh.*;
 import wblut.math.*;
 import wblut.processing.*;
 
-// TODO
-// Place HUD over object
-// Implement cycle of instruments (channel = channel+mod(4))
-// Add VR support
-
-
 long setupTime;
 long delay;
 long quantized_delay;
@@ -88,8 +82,8 @@ int uiMargin;
 
 public void settings() {
 	size(1920, 1080, P3D);
-	smooth(8);
-	//pixelDensity(2);
+	smooth(4);
+	pixelDensity(2);
 }
 
 void setup() {
@@ -192,7 +186,7 @@ void setGlobeScale() {
 void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
-	colours.addAll( Arrays.asList( 0xffe31826, 0xff881832, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
+	colours.addAll( Arrays.asList( 0xffe31826, 0xff803264, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
 	uiGridWidth = Configuration.UI.GridWidth;
 	uiMargin = Configuration.UI.Margin;
 }
@@ -276,27 +270,25 @@ void setupSong() {
 			int pitch = mapDepth( depth );
 			int duration = mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
-			float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
-			float initialScale = mapDepth( depth, Configuration.Animation.Scale.Min, 1.0 );
+			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max ); //mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			color colour = getColourFromMonth( d2 );
 
-			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize, depth );
-			point.mulSelf( initialScale ) ;
+			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
 			points.add( new GlobePoint( point, quantized_delay + millis(), animationTime, scale ) );
 			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
-
 			states.add( new StateManager( d2, colour, (long)(diff/Configuration.MIDI.Acceleration) ) );
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
-			// Drone
-			if ( magnitude >= 4 ) {
-				setNote( 8, velocity, 0, (int)(quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerBar), quantized_delay );
+			// Mallet rolls
+			if ( depth >= 400 ) {
+				setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
 			}
 
-			// Sub Bass
-			if ( magnitude >= 7 ) {
-				setNote( 9, velocity, 0, (int)(quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerBar), quantized_delay );
+
+			// Reverse talking
+			if ( magnitude >= 8 ) {
+				setNote( 9, velocity, 60, (int)(quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerBar), quantized_delay );
 			}
 
 			x++;
@@ -348,11 +340,10 @@ void setupRenderer() {
 
 void setupDebug() {
 	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
-	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.NoteType);
+	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatDivision);
 	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
 	println("Total " + diff_accelerated_ms + "ms");
 	println("Quantized " + diff_quantized_ms + "ms");
-	println("Setup lasted " + setupTime + "ms");
 }
 
 String getDatePart( SimpleDateFormat dateFormat ) {
@@ -388,10 +379,11 @@ void drawBackground() {
 }
 
 void drawLights( color colour ) {
-	ambient(colour);
-	directionalLight( red( colour ), green( colour ), blue( colour ), 1, 1, -1 );
-	pointLight( red( colour ), green( colour ), blue( colour ), width * 0.8, height * 0.8, 0 );
-	shininess(100.0);
+	ambient( colour );
+	directionalLight( red( colour ), green( colour ), blue( colour ), 0, 0, -1 );
+	pointLight( red( colours.get(0) ), green( colours.get(0) ), blue( colours.get(0) ), 0, 0, 0 );
+	pointLight( red( colours.get(7) ), green( colours.get(7) ), blue( colours.get(7) ), width, height, 400 );
+	shininess( 0.03 );
 }
 
 void drawRotation() {
@@ -400,6 +392,7 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
+	rotateX( cos(theta) );
 }
 
 void drawMesh( color colour, WB_Point[] points ) {
@@ -418,16 +411,9 @@ void drawMesh( color colour, WB_Point[] points ) {
 		globeMesh.modify( twist );
 	}
 
-	//globeMesh.simplify( globeSimplifier );
-
-	if ( Configuration.Mesh.ShowWireframe ) {
-		wireframeMesh = new HE_Mesh( geodesic );
-		stroke( 240 );
-		render.drawEdges( wireframeMesh );
-	}
-
-	stroke(colour+5, 70);
-	fill(colour);
+	fill( colour );
+	strokeWeight( 0.5 );
+	stroke( colour+3 );
 
 	switch ( Configuration.Mesh.Renderer ) {
 		case Edges:
@@ -442,6 +428,11 @@ void drawMesh( color colour, WB_Point[] points ) {
 			render.drawEdges( globeMesh );
 			render.drawFaces( globeMesh );
 			break;
+		case FacesPoints:
+			render.drawPoints( globeMesh.getPoints(), 2 );
+			noStroke();
+			render.drawFaces( globeMesh );
+			break;
 		case Points:
 			render.drawPoints( globeMesh.getPoints(), 2 );
 			break;
@@ -451,15 +442,17 @@ void drawMesh( color colour, WB_Point[] points ) {
 			render.drawPoints( globeMesh.getPoints(), 2 );
 			break;
 		case EdgesFacesPoints:
-			stroke(colour+2, 70);
 			render.drawEdges( globeMesh );
-			render.drawPoints( globeMesh.getPoints(), 4 );
+			render.drawPoints( globeMesh.getPoints(), 1 );
 			noStroke();
 			render.drawFaces( globeMesh );
 			break;
 		default:
 			break;
 	}
+
+
+	hint(DISABLE_DEPTH_SORT);
 }
 
 void drawGlobe() {
@@ -473,12 +466,17 @@ void drawGlobe() {
 		drawRotation();
 		drawMesh( colour, meshPoints );
 	}
+	else {
+		setupTime = millis();
+	}
 }
 
 void drawGraph() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 
 	if ( currentDate != null ) {
+
+		strokeWeight( 0.66 );
 		graph = new Graph( graphPoints, width, height, (uiGridWidth*4) + (uiMargin*3), uiGridWidth, "right", "bottom" );
 		graph.setMargin( uiMargin );
 		graph.setFill( stateThread.getColour() );
@@ -528,8 +526,7 @@ color getColourFromMonth( Calendar date ) {
 
 	int daysinmonth = date.getActualMaximum( Calendar.DAY_OF_MONTH );
 
-	return lerpColor( color( colours.get( date.get( Calendar.MONTH ) ) ), color( colours.get( nextMonth.get(Calendar.MONTH) ) ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth
-	);
+	return lerpColor( color( colours.get( date.get( Calendar.MONTH ) ) ), color( colours.get( nextMonth.get(Calendar.MONTH) ) ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth );
 }
 
 void saveFrames() {
