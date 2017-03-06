@@ -10,8 +10,8 @@ public class Globe {
 		this.points = points;
 		this.creator = new HEC_Geodesic();
 		this.creator.setRadius( Configuration.Mesh.GlobeSize );
-		this.creator.setB( 1 );
-		this.creator.setC( 1 );
+		this.creator.setB( 4 );
+		this.creator.setC( 4 );
 		this.creator.setType( HEC_Geodesic.ICOSAHEDRON );
 		this.icosahedron = new HE_Mesh( creator );
 		this.icosahedronPoints = icosahedron.getPoints();
@@ -64,9 +64,9 @@ public class GlobePoint {
 		this.delay = delay;
 		this.point = point;
 		this.animationTime = animationTime;
-		this.scale = scale;
+		this.scale = 0.8f;
 
-		this.animation = new Ani( this, this.animationTime, "scale", 1.0f, Ani.ELASTIC_OUT );
+		this.animation = new Ani( this, this.animationTime, "scale", scale, Ani.ELASTIC_OUT );
 		this.animation.pause();
 	}
 
@@ -82,6 +82,5 @@ public class GlobePoint {
 
 	public WB_Point getPoint() {
 		return this.point.scale( this.scale );
-		//return this.point;
 	}
 }
