@@ -1,0 +1,19 @@
+Clone or download https://github.com/struct78/fault-trace/april
+
+Install dependencies:
+  i) Setup a Virtual MIDI port called "FaultTrace" https://www.skratchdot.com/2016/01/creating-virtual-midi-ports-on-osx/
+  ii) Install Ani library for Processing http://www.looksgood.de/libraries/Ani/
+  iii) Install themidibus library for Processing http://www.smallbutdigital.com/themidibus.php
+  iv) Install HE_Mesh library for Processing (Build-of-the-day HE_Mesh (2017/03/06)) https://github.com/wblut/HE_Mesh
+
+Most of the settings you want to tweak are in Configuration.pde, including BPM, Beats Per Bar, Beat Division, Pitch range, Velocity range, Note duration and a bunch of other things. 
+
+The Ableton project in the source code may reference files/effects that aren't there, so you'll probably need to bail them and start from scratch.
+
+There are 8 channels by default, but you can add extra channels for certain conditions. For example I have 2 conditions for earthquake depths > 400m which sends a MIDI note to channel 9, and another one for magnitude > 8 which sends a MIDI note to channel 10. (The channels in the sketch are 0-based, so 0 is 1, 1 is 2, 8 is 9, etc.)
+
+https://github.com/struct78/fault-trace/blob/march/src/processing/FaultTrace/FaultTrace.pde#L283
+
+Once you run the project, you should start seeing the MIDI notes going through to Ableton, and you'll be on your way.
+
+Note that the CSV data won't be available until the end of April, so your song will not sound like it does using February data, so you may want to do some tweaking at the beginning of May.
