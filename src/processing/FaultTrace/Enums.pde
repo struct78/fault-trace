@@ -3,7 +3,7 @@ public enum RenderType {
 }
 
 public enum MeshType {
-	Normal, Dual, Lattice, Twisted
+	Normal, Dual, Lattice, Twisted, Voronoi, Extrude
 }
 
 public enum QuantizationType {
