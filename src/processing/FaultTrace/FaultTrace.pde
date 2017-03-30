@@ -40,6 +40,7 @@ MidiBus bus;
 Iterable<TableRow> rows;
 ArrayList<Rectangle> grid = new ArrayList();
 ArrayList<Integer> colours = new ArrayList();
+ArrayList<Integer> lightColours = new ArrayList();
 ArrayList<StateManager> states = new ArrayList();
 ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
 ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
@@ -48,15 +49,15 @@ PFont font;
 HE_Mesh globeMesh;
 HE_Mesh wireframeMesh;
 WB_Render3D render;
-WB_DebugRender3D drender;
+WB_DebugRender3D debugRender;
 HEC_ConvexHull creatorGlobe;
-HEC_ConvexHull creatorWireframe;
 HEM_Twist twist;
 HEM_Lattice lattice;
+HEMC_VoronoiCells voronoi;
+HE_MeshCollection meshCollection;
+HEM_Extrude extrude;
 HEC_Geodesic geodesic;
-HEM_ChamferEdges chamfer;
-HES_TriDec globeSimplifier;
-WB_Point[] wireframePoints;
+
 WB_Point[] meshPoints;
 Globe globe;
 Graph graph;
@@ -97,8 +98,8 @@ void setup() {
 	setupTimer();
 	setupMIDI();
 	setupData();
-	setupSong();
 	setupGlobe();
+	setupSong();
 	setupUIThread();
 	setupRenderer();
 	setupShutdownHook();
@@ -128,17 +129,29 @@ void setupTiming() {
 }
 
 void setup3D() {
+	// Normal mesh
 	creatorGlobe = new HEC_ConvexHull();
-	creatorWireframe = new HEC_ConvexHull();
-	lattice = new HEM_Lattice().setWidth( 20 ).setDepth( 5 );
-	geodesic = new HEC_Geodesic();
-	geodesic.setRadius( Configuration.Mesh.GlobeSize );
-	geodesic.setB( 2 );
-	geodesic.setC( 3 );
-	geodesic.setType(HEC_Geodesic.ICOSAHEDRON);
-	//globeSimplifier = new HES_TriDec().setGoal( 1.0 );
+
+	// Lattice
+	lattice = new HEM_Lattice().setWidth( 20 ).setDepth( 10 );
+
+	// Twist
 	WB_Line line = new WB_Line( 0, 0, 0, 0, exp(1.0) / 2, exp(1.0) / 2 );
-	twist = new HEM_Twist().setTwistAxis( line ).setAngleFactor( TWO_PI );
+	twist = new HEM_Twist().setTwistAxis( line ).setAngleFactor( 1.0 );
+
+	// Voronoi
+	voronoi = new HEMC_VoronoiCells();
+
+	// Spikes
+	 extrude = new HEM_Extrude().setChamfer( 1 ).setDistance( 10 );
+	// Extrude
+	//extrude = new HEM_Extrude().setHardEdgeChamfer( 1 ).setDistance( 30 );
+
+	geodesic = new HEC_Geodesic();
+	geodesic.setRadius( Configuration.Mesh.GlobeSize * 0.8 );
+	geodesic.setB( 6 );
+	geodesic.setC( 6 );
+	geodesic.setType(HEC_Geodesic.ICOSAHEDRON);
 }
 
 void setupTimezone() {
@@ -186,7 +199,8 @@ void setGlobeScale() {
 void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
-	colours.addAll( Arrays.asList( 0xffe31826, 0xff803264, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
+	colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffBF422B, 0xffFF614F, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
+	lightColours.addAll( Arrays.asList( 0xfcbde0a, 0xffc280de ) );
 	uiGridWidth = Configuration.UI.GridWidth;
 	uiMargin = Configuration.UI.Margin;
 }
@@ -209,9 +223,10 @@ void setupMIDI() {
 }
 
 long quantize( long delay ) {
+	int type = ( int ) ( ( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType.length );
 	float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
 	float milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
-	float milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType );
+	float milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType[ type ]);
 
 	return (long)(Math.round( delay / milliseconds_per_note ) * milliseconds_per_note);
 }
@@ -273,22 +288,33 @@ void setupSong() {
 			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max ); //mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			color colour = getColourFromMonth( d2 );
 
-			WB_Point point = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
-			points.add( new GlobePoint( point, quantized_delay + millis(), animationTime, scale ) );
+			WB_Point wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
+
+			GlobePoint newPoint = new GlobePoint( wbPoint );
+			GlobePoint existingPoint = globe.getExistingPoint( newPoint );
+
+			if ( existingPoint != null ) {
+				existingPoint.addDelay( quantized_delay + millis() );
+				existingPoint.addAnimationTime( animationTime );
+				existingPoint.addScale( scale );
+				existingPoint.addAnimation( scale, animationTime );
+			}
+			else {
+				newPoint.addDelay( quantized_delay + millis() );
+				newPoint.addAnimationTime( animationTime );
+				newPoint.addScale( scale );
+				newPoint.addAnimation( scale, animationTime );
+				points.add( newPoint );
+			}
+
 			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
 			states.add( new StateManager( d2, colour, (long)(diff/Configuration.MIDI.Acceleration) ) );
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
-			// Mallet rolls
-			if ( depth >= 400 ) {
+			// Low atmosphere
+			if ( depth >= 200 ) {
 				setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
-			}
-
-
-			// Reverse talking
-			if ( magnitude >= 8 ) {
-				setNote( 9, velocity, 60, (int)(quantize( diff / Configuration.MIDI.Acceleration ) * Configuration.MIDI.BeatsPerBar), quantized_delay );
 			}
 
 			x++;
@@ -381,8 +407,8 @@ void drawBackground() {
 void drawLights( color colour ) {
 	ambient( colour );
 	directionalLight( red( colour ), green( colour ), blue( colour ), 0, 0, -1 );
-	pointLight( red( colours.get(0) ), green( colours.get(0) ), blue( colours.get(0) ), 0, 0, 0 );
-	pointLight( red( colours.get(7) ), green( colours.get(7) ), blue( colours.get(7) ), width, height, 400 );
+	pointLight( red( lightColours.get(0) ), green( lightColours.get(0) ), blue( lightColours.get(0) ), 0, 0, width/4 );
+	pointLight( red( lightColours.get(1) ), green( lightColours.get(1) ), blue( lightColours.get(1) ), width, height, 0 );
 	shininess( 0.03 );
 }
 
@@ -392,58 +418,110 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
-	rotateX( cos(theta) );
+	//rotateX( sin(theta) );
 }
 
 void drawMesh( color colour, WB_Point[] points ) {
 	creatorGlobe.setPoints( points );
 	globeMesh = new HE_Mesh( creatorGlobe );
 
-	if ( Configuration.Mesh.Type == MeshType.Dual ) {
-		globeMesh = new HE_Mesh( new HEC_Dual( globeMesh ) );
-	}
-
-	if ( Configuration.Mesh.Type == MeshType.Lattice ) {
-		globeMesh.modify( lattice );
-	}
-
-	if ( Configuration.Mesh.Type == MeshType.Twisted ) {
-		globeMesh.modify( twist );
+	if ( Configuration.Mesh.ShowWireframe ) {
+		wireframeMesh = new HE_Mesh( geodesic );
+		stroke( 238 );
+		render.drawEdges( wireframeMesh );
 	}
 
 	fill( colour );
 	strokeWeight( 0.5 );
 	stroke( colour+3 );
 
+	switch( Configuration.Mesh.Type ) {
+		case Dual:
+			globeMesh = new HE_Mesh( new HEC_Dual( globeMesh ) );
+			break;
+		case Voronoi:
+			voronoi.setPoints( points );
+			voronoi.setN( points.length / 10 );
+			voronoi.setContainer( globe.getGeodesic() );
+			voronoi.setOffset( 2 );
+			voronoi.setSurface( false );
+			voronoi.setCreateSkin( false );
+			meshCollection = voronoi.create();
+			break;
+		case Lattice:
+			globeMesh.modify( lattice );
+			break;
+		case Twisted:
+			globeMesh.modify( twist );
+			break;
+		case Extrude:
+			globeMesh.modify( extrude );
+			//extrude.extruded.modify( new HEM_Extrude().setDistance( 5 ) );
+		default:
+			break;
+	}
+
+
+
 	switch ( Configuration.Mesh.Renderer ) {
 		case Edges:
 			noFill();
-			render.drawEdges( globeMesh );
+
+			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
+				render.drawEdges( meshCollection );
+			} else {
+				render.drawEdges( globeMesh );
+			}
+
 			break;
 		case Faces:
 			noStroke();
-			render.drawMesh( globeMesh );
+
+			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
+				render.drawFaces( meshCollection );
+			} else {
+				render.drawFaces( globeMesh );
+			}
+
 			break;
 		case EdgesFaces:
-			render.drawEdges( globeMesh );
-			render.drawFaces( globeMesh );
+			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
+				render.drawEdges( meshCollection );
+				render.drawFaces( meshCollection );
+			} else {
+				render.drawEdges( globeMesh );
+				render.drawFaces( globeMesh );
+			}
 			break;
 		case FacesPoints:
-			render.drawPoints( globeMesh.getPoints(), 2 );
-			noStroke();
-			render.drawFaces( globeMesh );
+
+			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
+				//render.drawPoint( meshCollection.getPoints(), (double)2 );
+				noStroke();
+				render.drawFaces( meshCollection );
+			} else {
+				render.drawPoint( globeMesh.getPoints(), (double)2 );
+				noStroke();
+				render.drawFaces( globeMesh );
+			}
+
 			break;
 		case Points:
-			render.drawPoints( globeMesh.getPoints(), 2 );
+			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
+				//render.drawPoint( meshCollection.getPoints(), (double)2 );
+			} else {
+				render.drawPoint( globeMesh.getPoints(), (double)2 );
+			}
+
 			break;
 		case EdgesPoints:
 			noFill();
 			render.drawEdges( globeMesh );
-			render.drawPoints( globeMesh.getPoints(), 2 );
+			render.drawPoint( globeMesh.getPoints(), (double)2 );
 			break;
 		case EdgesFacesPoints:
 			render.drawEdges( globeMesh );
-			render.drawPoints( globeMesh.getPoints(), 1 );
+			render.drawPoint( globeMesh.getPoints(), (double)1 );
 			noStroke();
 			render.drawFaces( globeMesh );
 			break;
@@ -456,7 +534,7 @@ void drawMesh( color colour, WB_Point[] points ) {
 }
 
 void drawGlobe() {
-	meshPoints = globe.getPoints( Configuration.Mesh.MaxFaces );
+	meshPoints = globe.getPoints( Configuration.Mesh.MaxPoints );
 
 	currentDate = (Calendar)stateThread.getDate();
 	colour = stateThread.getColour();
@@ -475,7 +553,6 @@ void drawGraph() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 
 	if ( currentDate != null ) {
-
 		strokeWeight( 0.66 );
 		graph = new Graph( graphPoints, width, height, (uiGridWidth*4) + (uiMargin*3), uiGridWidth, "right", "bottom" );
 		graph.setMargin( uiMargin );
@@ -490,7 +567,6 @@ void drawHUD() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 
 	if ( currentDate != null ) {
-
 		// TO DO
 		// Array list of objects that have a width, height, text object
 		// Figure out how to do graph
@@ -498,10 +574,10 @@ void drawHUD() {
 		hud.setMargin( uiMargin );
 		hud.setFill( stateThread.getColour() );
 		hud.setTextFill( 210 );
-		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( monthFormat ).substring(0,3), "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, str(frameRate) /* getDatePart( monthFormat ).substring(0,3)*/, "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, str(meshPoints.length)/*getDatePart( dayFormat )*/, "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( dayFormat ), "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( hourFormat ), "bottom", "left" ) );
-		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( minuteFormat ), "bottom", "left" ) );
 		hud.display();
 	}
 }
@@ -575,4 +651,21 @@ int invert( int n, int min, int max ) {
 
 float invert( float n, float min, float max ) {
 	return ( max - n ) + min;
+}
+
+
+void keyPressed() {
+	color newColor = color(random(255), random(255), random(255));
+
+	if ( keyCode == LEFT ) {
+		lightColours.set(0, newColor);
+
+		println("Left Light: " + hex(newColor));
+	}
+
+	if ( keyCode == RIGHT ) {
+		lightColours.set(1, newColor);
+
+		println("Right Light: " + hex(newColor));
+	}
 }
