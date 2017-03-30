@@ -567,15 +567,12 @@ void drawHUD() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 
 	if ( currentDate != null ) {
-		// TO DO
-		// Array list of objects that have a width, height, text object
-		// Figure out how to do graph
 		hud = new HUD( width, height, "left", "bottom", this.font);
 		hud.setMargin( uiMargin );
 		hud.setFill( stateThread.getColour() );
 		hud.setTextFill( 210 );
-		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, str(frameRate) /* getDatePart( monthFormat ).substring(0,3)*/, "bottom", "left" ) );
-		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, str(meshPoints.length)/*getDatePart( dayFormat )*/, "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( monthFormat ).substring(0,3), "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( dayFormat ), "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( dayFormat ), "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( hourFormat ), "bottom", "left" ) );
 		hud.display();
