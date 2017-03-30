@@ -5,7 +5,7 @@ public static final class Configuration {
 		public static final long StartOffset = 3000;
 
 		// Time acceleration
-		public static final long Acceleration = 750;
+		public static final long Acceleration = 4000;
 
 		// BPM for time quantization
 		public static final int BeatsPerMinute = 100;
@@ -14,10 +14,14 @@ public static final class Configuration {
 		public static final float BeatsPerBar = 4;
 
 		// 4/X
-		public static final float BeatDivision = 2;
+		public static final float BeatDivision = 4;
 
 		// Decimal representaiton of BeatDivision
-		public static final float NoteType = QuantizationType.OneHalfNote.get();
+		public static final float[] NoteType = new float[] {
+			QuantizationType.OneHalfNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+		 	QuantizationType.OneEigthNote.get()
+		};
 
 		// Number of MIDI channels to use
 		public static final int Channels = 13;
@@ -33,10 +37,10 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 60;
+			public static final int Min = 20;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 127;
+			public static final int Max = 90;
 		}
 
 
@@ -76,15 +80,15 @@ public static final class Configuration {
 			public static final float Min = 1.0;
 
 			// Maximum tween time
-			public static final float Max = 10.0;
+			public static final float Max = 3.0;
 		}
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 1.00;
+			public static final float Min = 1.0;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.00;
+			public static final float Max = 1.0;
 		}
 
 		// Rotation speed
@@ -97,15 +101,20 @@ public static final class Configuration {
 		}
 	}
 
+	public static final class Optimisations {
+		// In an effort to keep animation speed consistent, increase this number to group neighbouring points into a single point
+		public static final float PointDistanceTolerance = 1.5;
+	}
+
 	public static final class Mesh {
 		// Size of the globe
 		public static final int GlobeSize = 400;
 
-		// Maximum amount of faces to render
-		public static final int MaxFaces = 2500;
+		// Maximum amount of points to render
+		public static final int MaxPoints = 100;
 
 		// Show bounding wireframe
-		public static final boolean ShowWireframe = false;
+		public static final boolean ShowWireframe = true;
 
 		// Opacity of globe ( 0 - 255 )
 		public static final int FillOpacity = 200;
@@ -115,6 +124,8 @@ public static final class Configuration {
 		// - Dual
 		// - Lattice
 		// - Twisted
+		// - Voronoi
+		// - Extrude
 		public static final MeshType Type = MeshType.Normal;
 
 		// Available types:
@@ -125,7 +136,9 @@ public static final class Configuration {
 		// - EdgesPoints
 		// - EdgesFacesPoints
 		// - Lines
-		public static final RenderType Renderer = RenderType.EdgesFacesPoints;
+		public static final RenderType Renderer = RenderType.Faces;
+
+		public static final boolean UseIcosahedronBase = false;
 	}
 
 	public static final class Data {
@@ -140,10 +153,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-02-01T00:00:00.000Z";
+		public static final String StartDate = "2017-03-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-02-28T23:59:59.999Z";
+		public static final String EndDate = "2017-03-31T23:59:59.999Z";
 	}
 
 	public static final class IO {
