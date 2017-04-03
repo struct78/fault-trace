@@ -92,7 +92,7 @@ public static final class Configuration {
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.0055;
+		public static final float Speed = 0.01;
 
 
 		public static final class Zoom {
@@ -103,7 +103,7 @@ public static final class Configuration {
 
 	public static final class Optimisations {
 		// In an effort to keep animation speed consistent, increase this number to group neighbouring points into a single point
-		public static final float PointDistanceTolerance = 1.5;
+		public static final float PointDistanceTolerance = 0.025;
 	}
 
 	public static final class Mesh {

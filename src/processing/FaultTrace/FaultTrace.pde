@@ -29,7 +29,7 @@ long end_ms;
 long diff_quantized_ms;
 long diff_accelerated_ms;
 
-float theta = 0;
+float theta = 180;
 
 Timer timer;
 ThreadTask task;
@@ -148,9 +148,9 @@ void setup3D() {
 	//extrude = new HEM_Extrude().setHardEdgeChamfer( 1 ).setDistance( 30 );
 
 	geodesic = new HEC_Geodesic();
-	geodesic.setRadius( Configuration.Mesh.GlobeSize * 0.8 );
-	geodesic.setB( 6 );
-	geodesic.setC( 6 );
+	geodesic.setRadius( Configuration.Mesh.GlobeSize * 0.9 );
+	geodesic.setB( 2 );
+	geodesic.setC( 3 );
 	geodesic.setType(HEC_Geodesic.ICOSAHEDRON);
 }
 
@@ -199,8 +199,8 @@ void setGlobeScale() {
 void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
-	colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffBF422B, 0xffFF614F, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
-	lightColours.addAll( Arrays.asList( 0xfcbde0a, 0xffc280de ) );
+	colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffFD7400, 0xffBF422B, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
+	lightColours.addAll( Arrays.asList( 0xFFFFE11A, 0xFF1F8A70 ) );
 	uiGridWidth = Configuration.UI.GridWidth;
 	uiMargin = Configuration.UI.Margin;
 }
@@ -210,9 +210,9 @@ void setupFonts() {
 }
 
 void setupGrid() {
-	for (int x = 0 ; x < 360; x += 90) {
-		for (int y = 0 ; y < 180 ; y += 90) {
-			grid.add(new Rectangle(x, y, 90, 90));
+	for ( int x = 0 ; x < 360; x += 90 ) {
+		for ( int y = 0 ; y < 180 ; y += 90 ) {
+			grid.add( new Rectangle( x, y, 90, 90 ) );
 		}
 	}
 }
@@ -312,9 +312,19 @@ void setupSong() {
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
-			// Low atmosphere
-			if ( depth >= 200 ) {
+			// Violin
+			if ( depth >= 500 ) {
 				setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+			}
+
+			// Cello
+			if ( depth >= 750 ) {
+				setNote( 9, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+			}
+
+			// Double Bass
+			if ( depth >= 1000 ) {
+				setNote( 10, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
 			}
 
 			x++;
@@ -425,13 +435,16 @@ void drawMesh( color colour, WB_Point[] points ) {
 	creatorGlobe.setPoints( points );
 	globeMesh = new HE_Mesh( creatorGlobe );
 
+
+
 	if ( Configuration.Mesh.ShowWireframe ) {
+		fill( colour );
+		noStroke();
 		wireframeMesh = new HE_Mesh( geodesic );
-		stroke( 238 );
-		render.drawEdges( wireframeMesh );
+		render.drawFaces( wireframeMesh );
 	}
 
-	fill( colour );
+	fill( 238 );
 	strokeWeight( 0.5 );
 	stroke( colour+3 );
 
@@ -573,8 +586,8 @@ void drawHUD() {
 		hud.setTextFill( 210 );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( monthFormat ).substring(0,3), "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( dayFormat ), "bottom", "left" ) );
-		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( dayFormat ), "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( hourFormat ), "bottom", "left" ) );
+		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( minuteFormat ), "bottom", "left" ) );
 		hud.display();
 	}
 }
