@@ -15,3 +15,5 @@ Time Signature: 3/4
 Time Acceleration: 7200
 
 Tempo: 125 BPM
+
+Earthquakes: 8750
