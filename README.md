@@ -20,4 +20,4 @@ Tempo: 125 BPM
 
 Earthquakes: 8750
 
-[![Fault Trace](https://img.youtube.com/vi/SO6j19QDf78/0.jpg)](https://www.youtube.com/watch?v=SO6j19QDf78)
+[![Fault Trace](https://img.youtube.com/vi/SO6j19QDf78/maxresdefault.jpg)](https://www.youtube.com/watch?v=SO6j19QDf78)
