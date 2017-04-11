@@ -6,14 +6,16 @@ Each month a new song will be released based on earthquake data for that month. 
 
 Fault Trace is an open source project built with Processing, Python, and Ableton Live.
 
-This song was inspired by the French TV series Engrenages.
+This song was inspired by artists such as Brian Eno, Rae Howell, and Fabrizio Patterlini.
 
 ## SONG INFORMATION
 
-Track: February
+Track: March
 
-Time Signature: 21/8
+Time Signature: 4/4
 
-Time Acceleration: 5250x
+Time Compression: 4000x
 
-Tempo: 135 BPM
+Tempo: 100 BPM
+
+Earthquakes 7602
