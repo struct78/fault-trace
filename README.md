@@ -17,3 +17,5 @@ Time Signature: 21/8
 Time Acceleration: 5250x
 
 Tempo: 135 BPM
+
+Earthquakes: 6996
