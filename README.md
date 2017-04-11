@@ -6,6 +6,8 @@ Each song will be unique in style, time signature, tempo, and time acceleration.
 
 Fault Trace is built with Processing, Python, and Ableton Live.
 
+This song was inspired by artists such as Autechre, Squarepusher, and Aphex Twin.
+
 ## Song Information
 
 Title: January
