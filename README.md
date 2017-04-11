@@ -19,3 +19,5 @@ Time Acceleration: 5250x
 Tempo: 135 BPM
 
 Earthquakes: 6996
+
+[![Fault Trace](https://img.youtube.com/vi/1qIgpPjjGKM/maxresdefault.jpg)](https://www.youtube.com/watch?v=1qIgpPjjGKM)
