@@ -124,8 +124,8 @@ void setupGlobe() {
 void setupTiming() {
 	start_ms = startDate.getTimeInMillis();
 	end_ms = endDate.getTimeInMillis();
-	diff_accelerated_ms = Configuration.MIDI.StartOffset + (((end_ms-start_ms)/Configuration.MIDI.Acceleration));
-	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize(((end_ms-start_ms)/Configuration.MIDI.Acceleration));
+	diff_accelerated_ms = Configuration.MIDI.StartOffset + ( ( ( end_ms-start_ms )/Configuration.MIDI.Acceleration ) );
+	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize( ( ( end_ms-start_ms ) / Configuration.MIDI.Acceleration ) );
 }
 
 void setup3D() {
@@ -148,10 +148,10 @@ void setup3D() {
 	//extrude = new HEM_Extrude().setHardEdgeChamfer( 1 ).setDistance( 30 );
 
 	geodesic = new HEC_Geodesic();
-	geodesic.setRadius( Configuration.Mesh.GlobeSize * 0.9 );
+	geodesic.setRadius( Configuration.Mesh.GlobeSize * 0.815 );
 	geodesic.setB( 2 );
 	geodesic.setC( 3 );
-	geodesic.setType(HEC_Geodesic.ICOSAHEDRON);
+	geodesic.setType( HEC_Geodesic.ICOSAHEDRON );
 }
 
 void setupTimezone() {
@@ -417,7 +417,7 @@ void drawBackground() {
 void drawLights( color colour ) {
 	ambient( colour );
 	directionalLight( red( colour ), green( colour ), blue( colour ), 0, 0, -1 );
-	pointLight( red( lightColours.get(0) ), green( lightColours.get(0) ), blue( lightColours.get(0) ), 0, 0, width/4 );
+	pointLight( red( lightColours.get(0) ), green( lightColours.get(0) ), blue( lightColours.get(0) ), 0, 0, 250 );
 	pointLight( red( lightColours.get(1) ), green( lightColours.get(1) ), blue( lightColours.get(1) ), width, height, 0 );
 	shininess( 0.03 );
 }
