@@ -19,3 +19,7 @@ Time Compression: 4000x
 Tempo: 100 BPM
 
 Earthquakes 7602
+
+## Video
+
+[![Fault Trace](https://img.youtube.com/vi/WJ-J4suUoEQ/hqdefault.jpg)](https://www.youtube.com/watch?v=WJ-J4suUoEQ)
