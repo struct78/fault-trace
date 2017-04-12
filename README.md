@@ -22,4 +22,4 @@ Earthquakes 7602
 
 ## Video
 
-[![Fault Trace](https://img.youtube.com/vi/WJ-J4suUoEQ/hqdefault.jpg)](https://www.youtube.com/watch?v=WJ-J4suUoEQ)
+[![Fault Trace](https://img.youtube.com/vi/WJ-J4suUoEQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=WJ-J4suUoEQ)
