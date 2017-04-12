@@ -1,4 +1,7 @@
-﻿#!/bin/bash
+ ﻿#!/bin/bash
+ # Usage
+ # > ./edit-render.sh ../../renders/march/render.mov 00:00:07 00:11:30 688 2.0 4K
+ 
 if [ "$#" -ne 6 ]; then
 	echo "Requires 3 arguments:"
 	echo "1) Movie file"

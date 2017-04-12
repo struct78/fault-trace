@@ -1,6 +1,7 @@
-ffmpeg -i render-02-02-2017-edit-ffmpeg.mp4 -b:a 192k -vn january.mp3
-
 #!/bin/bash
+# Usage
+# > ffmpeg -i render-02-02-2017-edit-ffmpeg.mp4 -b:a 192k -vn january.mp3
+
 if [ "$#" -ne 3 ]; then
 	echo "Requires 2 arguments:"
 	echo "1) Movie file"
