@@ -9,20 +9,47 @@ public class Globe {
 	public Globe( ArrayList<GlobePoint> points ) {
 		this.points = points;
 		this.creator = new HEC_Geodesic();
-		this.creator.setRadius( Configuration.Mesh.GlobeSize );
-		this.creator.setB( 4 );
-		this.creator.setC( 4 );
+		this.creator.setRadius( Configuration.Mesh.GlobeSize);
+		this.creator.setB( 3 );
+		this.creator.setC( 3 );
 		this.creator.setType( HEC_Geodesic.ICOSAHEDRON );
 		this.icosahedron = new HE_Mesh( creator );
 		this.icosahedronPoints = icosahedron.getPoints();
 		this.fillBuffer();
 	}
 
+	public GlobePoint getExistingPoint( GlobePoint newPoint ) {
+		int size = this.points.size();
+		GlobePoint point;
+
+		for ( int x = 0 ; x < size ; x++ ) {
+			point = this.points.get(x);
+			WB_Vector vec = point.point.subToVector3D( newPoint.point );
+
+			if (
+				abs((float)vec.xd()) <= Configuration.Optimisations.PointDistanceTolerance &&
+				abs((float)vec.yd()) <= Configuration.Optimisations.PointDistanceTolerance &&
+				abs((float)vec.zd()) <= Configuration.Optimisations.PointDistanceTolerance
+			) {
+				return point;
+			}
+		}
+
+		return null;
+	}
+
+	public HE_Mesh getGeodesic() {
+		return this.icosahedron;
+	}
+
 	private void fillBuffer() {
 		this.bufferBase = new ArrayList<WB_Point>();
 		this.buffer = new ArrayList<WB_Point>();
-		for ( WB_Coord coord : this.icosahedronPoints ) {
-			this.bufferBase.add( new WB_Point( coord ) );
+
+		if ( Configuration.Mesh.UseIcosahedronBase ) {
+			for ( WB_Coord coord : this.icosahedronPoints ) {
+				this.bufferBase.add( new WB_Point( coord ) );
+			}
 		}
 	}
 
@@ -45,7 +72,15 @@ public class Globe {
 		if ( newSize > max ) {
 			for ( int x = 0 ; x < newSize-max ; x++ ) {
 				if ( x < size ) {
-					this.points.remove( x );
+					point = this.points.get(x);
+
+					if ( !point.isFinishing && !point.isFinished ) {
+						point.remove();
+					}
+
+					if ( point.isFinished ) {
+						this.points.remove( x );
+					}
 				}
 			}
 		}
@@ -54,29 +89,84 @@ public class Globe {
 }
 
 public class GlobePoint {
+	ArrayList<Long> delays;
+	ArrayList<Float> animationTimes;
+	ArrayList<Float> scales;
+	ArrayList<Ani> animations;
+
 	long delay;
 	float animationTime;
 	float scale;
+	boolean isFinished;
+	boolean isFinishing;
+	int index;
 	WB_Point point;
 	Ani animation;
 
-	public GlobePoint( WB_Point point, long delay, float animationTime, float scale ) {
-		this.delay = delay;
+	public GlobePoint( WB_Point point ) {
+		this.delays = new ArrayList<Long>();
+		this.animationTimes = new ArrayList<Float>();
+		this.scales = new ArrayList<Float>();
+		this.animations = new ArrayList<Ani>();
 		this.point = point;
-		this.animationTime = animationTime;
-		this.scale = 0.8f;
+		this.scale = 0.0;
+		this.index = 0;
+		this.isFinished = false;
+		this.isFinishing = false;
+	}
 
-		this.animation = new Ani( this, this.animationTime, "scale", scale, Ani.ELASTIC_OUT );
-		this.animation.pause();
+	public void addDelay( long delay ) {
+		this.delays.add( delay );
+	}
+
+	public void addScale( float scale ) {
+		this.scales.add( scale );
+	}
+
+	public void addAnimationTime( float animationTime ) {
+		this.animationTimes.add( animationTime );
+	}
+
+	public void addAnimation( float scale, float animationTime ) {
+	 	Ani animation = new Ani( this, animationTime, "scale", scale, Ani.EXPO_OUT );
+		animation.pause();
+
+		this.animations.add( animation );
+
+		animation = null;
+	}
+
+	public void remove() {
+		this.isFinishing = true;
+		this.isFinished = false;
+		Ani animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
+		animation.start();
+	}
+
+	public void onEnd() {
+		this.isFinished = true;
+		this.isFinishing = false;
 	}
 
 	public boolean canDisplay() {
-	 return ( millis() > this.delay );
+		for ( int x = 0 ; x < this.delays.size() ; x++ ) {
+			long delay = this.delays.get( x );
+			float animationTime = this.animationTimes.get( x );
+			if ( millis() >= delay ) {
+				this.index = x;
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public void animate() {
-		if ( !this.animation.isPlaying() && !this.animation.isEnded() ) {
-			this.animation.resume();
+		Ani animation = this.animations.get( this.index );
+		if ( animation != null ) {
+			if ( !animation.isPlaying() && !animation.isEnded() ) {
+				animation.resume();
+			}
 		}
 	}
 
