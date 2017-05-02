@@ -1,7 +1,7 @@
 public class Globe {
 	ArrayList<GlobePoint> points;
-	ArrayList<WB_Point> buffer;
-	ArrayList<WB_Point> bufferBase;
+	ArrayList<WB_Point4D> buffer;
+	ArrayList<WB_Point4D> bufferBase;
 	HEC_Geodesic creator;
 	HE_Mesh icosahedron;
 	List<WB_Coord> icosahedronPoints;
@@ -19,6 +19,10 @@ public class Globe {
 	}
 
 	public GlobePoint getExistingPoint( GlobePoint newPoint ) {
+		if ( !Configuration.Optimisations.GroupPoints ) {
+			return null;
+		}
+
 		int size = this.points.size();
 		GlobePoint point;
 
@@ -43,17 +47,17 @@ public class Globe {
 	}
 
 	private void fillBuffer() {
-		this.bufferBase = new ArrayList<WB_Point>();
-		this.buffer = new ArrayList<WB_Point>();
+		this.bufferBase = new ArrayList<WB_Point4D>();
+		this.buffer = new ArrayList<WB_Point4D>();
 
 		if ( Configuration.Mesh.UseIcosahedronBase ) {
 			for ( WB_Coord coord : this.icosahedronPoints ) {
-				this.bufferBase.add( new WB_Point( coord ) );
+				this.bufferBase.add( new WB_Point4D( coord ) );
 			}
 		}
 	}
 
-	public WB_Point[] getPoints( int max ) {
+	public WB_Point4D[] getPoints( int max ) {
 		this.buffer.clear();
 		this.buffer.addAll( this.bufferBase );
 		GlobePoint point;
@@ -84,7 +88,7 @@ public class Globe {
 				}
 			}
 		}
-		return this.buffer.toArray( new WB_Point[ newSize ] );
+		return this.buffer.toArray( new WB_Point4D[ newSize ] );
 	}
 }
 
@@ -93,10 +97,12 @@ public class GlobePoint {
 	ArrayList<Float> animationTimes;
 	ArrayList<Float> scales;
 	ArrayList<Ani> animations;
+	ArrayList<Float> distances;
 
 	long delay;
 	float animationTime;
 	float scale;
+	float distance;
 	boolean isFinished;
 	boolean isFinishing;
 	int index;
@@ -108,8 +114,10 @@ public class GlobePoint {
 		this.animationTimes = new ArrayList<Float>();
 		this.scales = new ArrayList<Float>();
 		this.animations = new ArrayList<Ani>();
+		this.distances = new ArrayList<Float>();
 		this.point = point;
 		this.scale = 0.0;
+		this.distance = 0.0;
 		this.index = 0;
 		this.isFinished = false;
 		this.isFinishing = false;
@@ -127,8 +135,17 @@ public class GlobePoint {
 		this.animationTimes.add( animationTime );
 	}
 
-	public void addAnimation( float scale, float animationTime ) {
-	 	Ani animation = new Ani( this, animationTime, "scale", scale, Ani.EXPO_OUT );
+	public void addDistance( float distance ) {
+		this.distances.add( distance );
+	}
+
+	public void addAnimation( float scale, float distance, float animationTime ) {
+	 	Ani animation = new Ani( this, animationTime, "scale", scale, Ani.BACK_OUT );
+		animation.pause();
+
+		this.animations.add( animation );
+
+		animation = new Ani( this, animationTime, "distance", distance, Ani.BACK_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -139,7 +156,10 @@ public class GlobePoint {
 	public void remove() {
 		this.isFinishing = true;
 		this.isFinished = false;
-		Ani animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
+		Ani animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.BACK_IN, "onEnd:onEnd" );
+		animation.start();
+
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.BACK_IN, "onEnd:onEnd" );
 		animation.start();
 	}
 
@@ -149,7 +169,7 @@ public class GlobePoint {
 	}
 
 	public boolean canDisplay() {
-		for ( int x = 0 ; x < this.delays.size() ; x++ ) {
+		for ( int x = this.delays.size()-1 ; x >= 0 ; x-- ) {
 			long delay = this.delays.get( x );
 			float animationTime = this.animationTimes.get( x );
 			if ( millis() >= delay ) {
@@ -162,15 +182,21 @@ public class GlobePoint {
 	}
 
 	public void animate() {
-		Ani animation = this.animations.get( this.index );
-		if ( animation != null ) {
-			if ( !animation.isPlaying() && !animation.isEnded() ) {
-				animation.resume();
+		for ( int x = 0 ; x < 2 ; x++ ) {
+			Ani animation = this.animations.get( this.index + x );
+
+			if ( animation != null ) {
+				if ( !animation.isPlaying() && !animation.isEnded() ) {
+					animation.resume();
+				}
 			}
 		}
 	}
 
-	public WB_Point getPoint() {
-		return this.point.scale( this.scale );
+	public WB_Point4D getPoint() {
+		WB_Point4D point4D = new WB_Point4D( this.point.scale( this.scale ) );
+		point4D.setW( this.distance );
+
+		return point4D;
 	}
 }
