@@ -2,13 +2,13 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 3000;
+		public static final long StartOffset = 5000;
 
 		// Time acceleration
-		public static final long Acceleration = 4000;
+		public static final long Acceleration = 7000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 100;
+		public static final int BeatsPerMinute = 128;
 
 		// Beats per bar X/4
 		public static final float BeatsPerBar = 4;
@@ -18,9 +18,14 @@ public static final class Configuration {
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneSixteenthNote.get(),
+			QuantizationType.OneSixteenthNote.get(),
 			QuantizationType.OneHalfNote.get(),
 			QuantizationType.OneQuarterNote.get(),
-		 	QuantizationType.OneEigthNote.get()
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneHalfNoteTriplet.get(),
 		};
 
 		// Number of MIDI channels to use
@@ -77,10 +82,10 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 1.0;
+			public static final float Min = 0.46875;
 
 			// Maximum tween time
-			public static final float Max = 3.0;
+			public static final float Max = 1.875;
 		}
 
 		public static final class Scale {
@@ -88,7 +93,7 @@ public static final class Configuration {
 			public static final float Min = 1.0;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.0;
+			public static final float Max = 0.1;
 		}
 
 		// Rotation speed
@@ -103,7 +108,10 @@ public static final class Configuration {
 
 	public static final class Optimisations {
 		// In an effort to keep animation speed consistent, increase this number to group neighbouring points into a single point
-		public static final float PointDistanceTolerance = 0.025;
+		public static final float PointDistanceTolerance = 0.001;
+
+		// Re-use existing points
+		public static final boolean GroupPoints = false;
 	}
 
 	public static final class Mesh {
@@ -111,7 +119,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 100;
+		public static final int MaxPoints = 10000;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = true;
@@ -136,7 +144,7 @@ public static final class Configuration {
 		// - EdgesPoints
 		// - EdgesFacesPoints
 		// - Lines
-		public static final RenderType Renderer = RenderType.Faces;
+		public static final RenderType Renderer = RenderType.Lines;
 
 		public static final boolean UseIcosahedronBase = false;
 	}
@@ -148,15 +156,21 @@ public static final class Configuration {
 			public static final int Max = 1000;
 		}
 
+		public static final class Distance {
+			public static final float Min = 1.0;
+
+			public static final float Max = 1.33;
+		}
+
 		public static final String TimeZone = "Australia/Melbourne";
 	}
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-03-01T00:00:00.000Z";
+		public static final String StartDate = "2017-04-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-03-31T23:59:59.999Z";
+		public static final String EndDate = "2017-04-30T23:59:59.999Z";
 	}
 
 	public static final class IO {
