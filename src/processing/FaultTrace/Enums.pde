@@ -7,17 +7,21 @@ public enum MeshType {
 }
 
 public enum QuantizationType {
-	FourWholeNotes(0.25f),
-	ThreeWholeNotes(0.3333f),
-	TwoWholeNotes(0.5f),
 	OneWholeNote(1.0f),
 	OneHalfNote(2.0f),
+	OneHalfNoteTriplet(3.0f),
 	OneQuarterNote(4.0f),
+	OneQuarterNoteTriplet(6.0f),
 	OneEigthNote(8.0f),
+	OneEigthNoteTriplet(12.0f),
 	OneSixteenthNote(16.0f),
+	OneSixteenthNoteTriplet(24.0f),
 	OneThirtySecondNote(32.0f),
+	OneThirtySecondNoteTriplet(48.0f),
 	OneSixtyFourthNote(64.0f),
-	OneHundredTwentyEighthNote(128.0f);
+	OneSixtyFourthNoteTriplet(96.0f),
+	OneHundredTwentyEighthNote(128.0f),
+	OneHundredTwentyEighthNoteTriplet(192.0f);
 
 	private float value;
 
