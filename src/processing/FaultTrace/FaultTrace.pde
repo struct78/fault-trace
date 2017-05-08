@@ -149,12 +149,9 @@ void setup3D() {
 
 	geodesic = new HEC_Geodesic();
 	geodesic.setRadius( Configuration.Mesh.GlobeSize );
-	geodesic.setB( 4 );
-	geodesic.setC( 4 );
+	geodesic.setB( 2 );
+	geodesic.setC( 2 );
 	geodesic.setType( HEC_Geodesic.ICOSAHEDRON );
-
-	hint(ENABLE_DEPTH_TEST);
-	hint(ENABLE_DEPTH_SORT);
 }
 
 void setupTimezone() {
@@ -203,7 +200,7 @@ void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
 	colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffFD7400, 0xffFF385F, 0xffFF385F, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
-	lightColours.addAll( Arrays.asList( 0xFF1B72BD, 0xFF79BD8F ) );
+	lightColours.addAll( Arrays.asList( 0xFF1899CC, 0xFF79BD8F ) );
 	uiGridWidth = Configuration.UI.GridWidth;
 	uiMargin = Configuration.UI.Margin;
 }
@@ -434,27 +431,25 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
-	//rotateX( sin(theta) );
+	rotateX( theta / PI );
 }
 
 void drawMesh( color colour, WB_Point4D[] points ) {
-
+	hint(ENABLE_DEPTH_TEST);
 	if ( Configuration.Mesh.Renderer != RenderType.Lines ) {
 		creatorGlobe.setPoints( points );
 		globeMesh = new HE_Mesh( creatorGlobe );
 	}
 
-
-
 	if ( Configuration.Mesh.ShowWireframe ) {
 		noFill();
-		stroke( 0xff1E89B2, 50 );
+		stroke( 150, 150, 160, 50 );
 		wireframeMesh = new HE_Mesh( geodesic );
 		render.drawFaces( wireframeMesh );
 
 		noStroke();
 		fill( 225, 225, 230, 110 );
-		sphere( Configuration.Mesh.GlobeSize - 2 );
+		//sphere( Configuration.Mesh.GlobeSize - 2 );
 	}
 
 	strokeWeight( 0.5 );
@@ -510,70 +505,81 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 
 			break;
 		case EdgesFaces:
-			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
-				render.drawEdges( meshCollection );
-				render.drawFaces( meshCollection );
-			} else {
-				render.drawEdges( globeMesh );
-				render.drawFaces( globeMesh );
-			}
 			break;
 		case FacesPoints:
-
-			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
-				//render.drawPoint( meshCollection.getPoints(), (double)2 );
-				noStroke();
-				render.drawFaces( meshCollection );
-			} else {
-				render.drawPoint( globeMesh.getPoints(), (double)2 );
-				noStroke();
-				render.drawFaces( globeMesh );
-			}
-
+			renderFacesPoints( globeMesh, meshCollection );
 			break;
 		case Points:
-			if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
-				//render.drawPoint( meshCollection.getPoints(), (double)2 );
-			} else {
-				render.drawPoint( globeMesh.getPoints(), (double)2 );
-			}
-
+			renderPoints( globeMesh );
 			break;
 		case EdgesPoints:
-			noFill();
-			render.drawEdges( globeMesh );
-			render.drawPoint( globeMesh.getPoints(), (double)2 );
+			renderEdgesPoints( globeMesh );
 			break;
 		case EdgesFacesPoints:
-			render.drawEdges( globeMesh );
-			render.drawPoint( globeMesh.getPoints(), (double)1 );
-			noStroke();
-			render.drawFaces( globeMesh );
+			renderEdgesFacesPoints( globeMesh );
 			break;
 		case Lines:
-			for ( WB_Point4D point : points ) {
-				float distance = point.wf();
-				WB_Point4D endpoint = point.mul( distance );
-				float radius = Configuration.Mesh.GlobeSize / 2 * 0.99;
-
-				if ( abs(endpoint.xf()) < radius && abs(endpoint.yf()) < radius && abs(endpoint.zf()) < radius )
-				{
-					stroke( lightColours.get( 0 ) );
-					strokeWeight( 3 );
-				}
-				else {
-					//stroke( colour );
-					stroke( lightColours.get( 1 ) );
-					strokeWeight( 1.5 );
-				}
-
-				line( point.xf(), point.yf(), point.zf(), endpoint.xf(), endpoint.yf(), endpoint.zf() );
-			}
+			renderLines( points );
 		default:
 			break;
 	}
+}
 
-	hint(DISABLE_DEPTH_SORT);
+void renderEdgesFaces( HE_Mesh globeMesh, HE_MeshCollection meshCollection ) {
+	if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
+		render.drawEdges( meshCollection );
+		render.drawFaces( meshCollection );
+	} else {
+		render.drawEdges( globeMesh );
+		render.drawFaces( globeMesh );
+	}
+}
+
+void renderFacesPoints( HE_Mesh globeMesh, HE_MeshCollection meshCollection ) {
+	if ( Configuration.Mesh.Type == MeshType.Voronoi ) {
+		noStroke();
+		render.drawFaces( meshCollection );
+	} else {
+		render.drawPoint( globeMesh.getPoints(), (double)2 );
+		noStroke();
+		render.drawFaces( globeMesh );
+	}
+}
+
+void renderPoints( HE_Mesh globMesh ) {
+	render.drawPoint( globeMesh.getPoints(), (double)2 );
+}
+void renderEdgesPoints( HE_Mesh globeMesh ) {
+	noFill();
+	render.drawEdges( globeMesh );
+	render.drawPoint( globeMesh.getPoints(), (double)2 );
+}
+
+void renderEdgesFacesPoints( HE_Mesh globeMesh ) {
+	render.drawEdges( globeMesh );
+	render.drawPoint( globeMesh.getPoints(), (double)1 );
+	noStroke();
+	render.drawFaces( globeMesh );
+}
+
+void renderLines( WB_Point4D[] points ) {
+	for ( WB_Point4D point : points ) {
+		float distance = point.wf();
+		WB_Point4D endpoint = point.mul( distance );
+		float radius = Configuration.Mesh.GlobeSize;
+
+		strokeWeight( HALF_PI );
+
+		if ( pow( endpoint.xf(), 2 ) + pow( endpoint.yf(), 2 ) + pow( endpoint.zf(), 2 ) < pow( radius, 2 ) )
+		{
+			stroke( lightColours.get( 0 ) );
+		}
+		else {
+			stroke( colour );
+		}
+
+		line( point.xf(), point.yf(), point.zf(), endpoint.xf(), endpoint.yf(), endpoint.zf() );
+	}
 }
 
 void drawGlobe() {
@@ -609,9 +615,6 @@ void drawGraph() {
 void drawHUD() {
 	Calendar currentDate = (Calendar)stateThread.getDate();
 
-	hint(DISABLE_DEPTH_TEST);
-	hint(DISABLE_DEPTH_SORT);
-
 	if ( currentDate != null ) {
 		hud = new HUD( width, height, "left", "bottom", this.font);
 		hud.setMargin( uiMargin );
@@ -623,9 +626,6 @@ void drawHUD() {
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( minuteFormat ), "bottom", "left" ) );
 		hud.display();
 	}
-
-	hint(ENABLE_DEPTH_TEST);
-	hint(ENABLE_DEPTH_SORT);
 }
 
 int getChannelFromCoordinates( double latitude, double longitude ) {

@@ -6,7 +6,7 @@ Install dependencies:
   iii) Install themidibus library for Processing http://www.smallbutdigital.com/themidibus.php
   iv) Install HE_Mesh library for Processing (Build-of-the-day HE_Mesh (2017/03/06)) https://github.com/wblut/HE_Mesh
 
-Most of the settings you want to tweak are in Configuration.pde, including BPM, Beats Per Bar, Beat Division, Pitch range, Velocity range, Note duration and a bunch of other things. 
+Most of the settings you want to tweak are in Configuration.pde, including BPM, Beats Per Bar, Beat Division, Pitch range, Velocity range, Note duration and a bunch of other things.
 
 The Ableton project in the source code may reference files/effects that aren't there, so you'll probably need to bail them and start from scratch.
 
@@ -16,4 +16,22 @@ https://github.com/struct78/fault-trace/blob/march/src/processing/FaultTrace/Fau
 
 Once you run the project, you should start seeing the MIDI notes going through to Ableton, and you'll be on your way.
 
-Note that the CSV data won't be available until the end of April, so your song will not sound like it does using February data, so you may want to do some tweaking at the beginning of May.
+Note that the CSV data won't be completely available until the end of May, so your song will not sound like it does using April data, so you may want to do some tweaking at the beginning of June.
+
+You can, however, get a snapshot of the data by running the get-data-by-year.py python script under src/python.
+
+Simply run:
+python get-data-by-year.py
+
+This will create quakes-2017.csv in the src/processing/data folder. You will then need to manually copy out the timestamped dates into quakes.csv.
+
+If you do this, you will need to update the timestamps in Configuration.pde. You will just need to update the month for both timestamps.
+
+// Update these timestamps to the correct month
+public static final class Timing {
+	// Start date offset
+	public static final String StartDate = "2017-04-01T00:00:00.000Z";
+
+	// End date
+	public static final String EndDate = "2017-04-30T23:59:59.999Z";
+}
