@@ -6,20 +6,20 @@ Each month a new song will be released based on earthquake data for that month. 
 
 Fault Trace is an open source project built with Processing, Python, and Ableton Live.
 
-This song was inspired by artists such as Brian Eno, Rae Howell, and Fabrizio Patterlini.
+This song was inspired by artists such as Amon Tobin and Dust Brothers.
 
 ## SONG INFORMATION
 
-Track: March
+Track: April
 
 Time Signature: 4/4
 
-Time Compression: 4000x
+Time Compression: 7000x
 
-Tempo: 100 BPM
+Tempo: 128 BPM
 
-Earthquakes 7602
+Earthquakes: 9273
 
 ## Video
 
-[![Fault Trace](https://img.youtube.com/vi/WJ-J4suUoEQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=WJ-J4suUoEQ)
+[![Fault Trace](https://img.youtube.com/vi/Sulk7En_Zy0/maxresdefault.jpg)](https://www.youtube.com/watch?v=Sulk7En_Zy0)
