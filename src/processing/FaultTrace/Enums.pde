@@ -1,5 +1,5 @@
 public enum RenderType {
-	Edges, Faces, EdgesFaces, Points, FacesPoints, EdgesPoints, EdgesFacesPoints, Lines
+	Edges, Faces, EdgesFaces, Points, FacesPoints, EdgesPoints, EdgesFacesPoints, Lines, Particles, Rings
 }
 
 public enum MeshType {
@@ -12,8 +12,8 @@ public enum QuantizationType {
 	OneHalfNoteTriplet(3.0f),
 	OneQuarterNote(4.0f),
 	OneQuarterNoteTriplet(6.0f),
-	OneEigthNote(8.0f),
-	OneEigthNoteTriplet(12.0f),
+	OneEighthNote(8.0f),
+	OneEighthNoteTriplet(12.0f),
 	OneSixteenthNote(16.0f),
 	OneSixteenthNoteTriplet(24.0f),
 	OneThirtySecondNote(32.0f),

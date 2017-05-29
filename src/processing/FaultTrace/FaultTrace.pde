@@ -44,6 +44,7 @@ ArrayList<Integer> lightColours = new ArrayList();
 ArrayList<StateManager> states = new ArrayList();
 ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
 ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
+ArrayList<ArrayList<WB_Point4D>> segments = new ArrayList<ArrayList<WB_Point4D>>();
 
 PFont font;
 HE_Mesh globeMesh;
@@ -199,8 +200,8 @@ void setGlobeScale() {
 void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
-	colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffFD7400, 0xffFF385F, 0xffFF385F, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
-	lightColours.addAll( Arrays.asList( 0xFF1899CC, 0xFF79BD8F ) );
+	//colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffFD7400, 0xff28DAB1, 0xff28DAB1, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
+	//lightColours.addAll( Arrays.asList( 0xFF1899CC, 0xFF79BD8F ) );
 	uiGridWidth = Configuration.UI.GridWidth;
 	uiMargin = Configuration.UI.Margin;
 }
@@ -414,15 +415,15 @@ void setupFrameRate() {
 }
 
 void drawBackground() {
-	background( 225, 225, 230 );
+	background( 17, 19, 23 );
 }
 
 void drawLights( color colour ) {
-	//ambient( colour );
-	//directionalLight( red( colour ), green( colour ), blue( colour ), 0, 0, -1 );
-	//pointLight( red( lightColours.get(0) ), green( lightColours.get(0) ), blue( lightColours.get(0) ), 0, 0, 250 );
-	//pointLight( red( lightColours.get(1) ), green( lightColours.get(1) ), blue( lightColours.get(1) ), width, height, 0 );
-	//shininess( 0.03 );
+	ambient( colour );
+	directionalLight( red( colour ), green( colour ), blue( colour ), 0, 0, -1 );
+	pointLight( red( Configuration.Palette.Lights.Left ), green( Configuration.Palette.Lights.Left ), blue( Configuration.Palette.Lights.Left ), 0, 0, 250 );
+	pointLight( red( Configuration.Palette.Lights.Right ), green( Configuration.Palette.Lights.Right ), blue( Configuration.Palette.Lights.Right ), width, height, 0 );
+	shininess( 0.03 );
 }
 
 void drawRotation() {
@@ -431,7 +432,6 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
-	rotateX( theta / PI );
 }
 
 void drawMesh( color colour, WB_Point4D[] points ) {
@@ -449,7 +449,6 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 
 		noStroke();
 		fill( 225, 225, 230, 110 );
-		//sphere( Configuration.Mesh.GlobeSize - 2 );
 	}
 
 	strokeWeight( 0.5 );
@@ -520,6 +519,10 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 			break;
 		case Lines:
 			renderLines( points );
+		case Particles:
+			renderParticles( points );
+		case Rings:
+			renderRings( points );
 		default:
 			break;
 	}
@@ -572,7 +575,7 @@ void renderLines( WB_Point4D[] points ) {
 
 		if ( pow( endpoint.xf(), 2 ) + pow( endpoint.yf(), 2 ) + pow( endpoint.zf(), 2 ) < pow( radius, 2 ) )
 		{
-			stroke( lightColours.get( 0 ) );
+			stroke( Configuration.Palette.Mesh.Line );
 		}
 		else {
 			stroke( colour );
@@ -580,6 +583,91 @@ void renderLines( WB_Point4D[] points ) {
 
 		line( point.xf(), point.yf(), point.zf(), endpoint.xf(), endpoint.yf(), endpoint.zf() );
 	}
+}
+
+int getRingLevelFromPoint( WB_Point4D point ) {
+	float yf = point.yf();
+	return (int)((yf + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
+}
+
+double getAngleFromVector(float xf, float zf) {
+	return ((atan2(xf, zf) * ( 180 / Math.PI ) + 360) % 360);
+}
+
+float getRadiusOnYPlane( int y ) {
+	return (float)Math.sqrt( Math.pow( Configuration.Mesh.GlobeSize, 2 ) - Math.pow( y, 2 ) );
+}
+
+void renderRings( WB_Point4D[] points ) {
+	noFill();
+
+	int levels = ((Configuration.Mesh.GlobeSize * 2) * Configuration.Mesh.Rings.Distance);
+
+	segments.clear();
+
+	for ( int x = 0 ; x < levels ; x++ ) {
+		segments.add(new ArrayList<WB_Point4D>());
+	}
+
+	for ( WB_Point4D point : points ) {
+		int level = getRingLevelFromPoint( point );
+		segments.get(level).add(point);
+	}
+
+	float wf, xf, yf, zf, amp = 0.0;
+	double deg = 0.0;
+
+	for ( int y = 0-Configuration.Mesh.GlobeSize ; y < Configuration.Mesh.GlobeSize; y+=Configuration.Mesh.Rings.Distance) {
+		int level = (int)((y + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
+		float radius = getRadiusOnYPlane(y);
+
+		WB_Point4D segmentPoint;
+
+		pushMatrix();
+		translate( 0, y, 0 );
+		rotateX(radians(-90));
+		noFill();
+		blendMode(ADD);
+		strokeWeight(0.5);
+		beginShape();
+
+	  for ( int j = 0; j < 360; j+=Configuration.Mesh.Rings.RotationStep ) {
+			amp = 0.0;
+			for ( int k = 0 ; k < segments.get(level).size(); k++ ) {
+				segmentPoint = segments.get(level).get(k);
+
+				wf = segmentPoint.wf();
+				xf = segmentPoint.xf();
+				yf = segmentPoint.yf();
+				zf = segmentPoint.zf();
+
+				deg = getAngleFromVector(xf, zf);
+				if (deg >= j && deg <= j+Configuration.Mesh.Rings.RotationStep) {
+					//println(xf + ":" + zf + ":" + deg + ":" + cos(radians((float)deg)) * (radius) + ":" + sin(radians((float)deg)) * (radius) + ":" + cos(radians(j)) * radius +":" + sin(radians(j)) * radius);
+					//curveVertex( cos(radians(j)) * (radius * wf), sin(radians(j)) * (radius * wf) );
+
+					//vertex( zf, xf );
+					float mid = j - (Configuration.Mesh.Rings.RotationStep/2);
+
+					stroke( Configuration.Palette.Mesh.Line, 128 );
+					vertex( cos(radians(mid)) * (radius * wf), sin(radians(mid)) * (radius * wf)  );
+				}
+			}
+
+			stroke( Configuration.Palette.Mesh.Line, 64 );
+			vertex( cos(radians(j)) * radius, sin(radians(j)) * radius );
+	  }
+
+		endShape(CLOSE);
+
+		popMatrix();
+
+		blendMode(NORMAL);
+	}
+}
+
+void renderParticles( WB_Point4D[] points ) {
+
 }
 
 void drawGlobe() {
@@ -606,7 +694,7 @@ void drawGraph() {
 		graph = new Graph( graphPoints, width, height, (uiGridWidth*4) + (uiMargin*3), uiGridWidth, "right", "bottom" );
 		graph.setMargin( uiMargin );
 		graph.setFill( stateThread.getColour() );
-		graph.setLineStroke( 210 );
+		graph.setLineStroke( Configuration.Palette.UI.Foreground );
 		graph.getPoints( (uiGridWidth*4) + (uiMargin*3) );
 		graph.display();
 	}
@@ -619,7 +707,7 @@ void drawHUD() {
 		hud = new HUD( width, height, "left", "bottom", this.font);
 		hud.setMargin( uiMargin );
 		hud.setFill( stateThread.getColour() );
-		hud.setTextFill( 210 );
+		hud.setTextFill( Configuration.Palette.UI.Foreground );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( monthFormat ).substring(0,3), "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( dayFormat ), "bottom", "left" ) );
 		hud.addElement( new HUDElement( uiGridWidth, uiGridWidth, getDatePart( hourFormat ), "bottom", "left" ) );
@@ -643,12 +731,8 @@ int getChannelFromCoordinates( double latitude, double longitude ) {
 }
 
 color getColourFromMonth( Calendar date ) {
-	Calendar nextMonth = (Calendar)date.clone();
-	nextMonth.add( Calendar.MONTH, 1 );
-
 	int daysinmonth = date.getActualMaximum( Calendar.DAY_OF_MONTH );
-
-	return lerpColor( color( colours.get( date.get( Calendar.MONTH ) ) ), color( colours.get( nextMonth.get(Calendar.MONTH) ) ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth );
+	return lerpColor( color( Configuration.Palette.UI.Start.Background ), color( Configuration.Palette.UI.End.Background ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth );
 }
 
 void saveFrames() {
@@ -697,21 +781,4 @@ int invert( int n, int min, int max ) {
 
 float invert( float n, float min, float max ) {
 	return ( max - n ) + min;
-}
-
-
-void keyPressed() {
-	color newColor = color(random(255), random(255), random(255));
-
-	if ( keyCode == LEFT ) {
-		lightColours.set(0, newColor);
-
-		println("Left Light: " + hex(newColor));
-	}
-
-	if ( keyCode == RIGHT ) {
-		lightColours.set(1, newColor);
-
-		println("Right Light: " + hex(newColor));
-	}
 }
