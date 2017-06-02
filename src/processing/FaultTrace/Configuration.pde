@@ -1,20 +1,20 @@
 public static final class Configuration {
 
 	public static final class Palette {
-		public static final int Background = 0xff2D3450;
+		public static final int Background = 0xffF5245F;
 
 		public static final class UI {
 
-			public static final int Foreground = 0xffECF0F1;
+			public static final int Foreground = 0xffFBFBFC;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xffE74C3C;
+				public static final int Background = 0xffA82B65;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xffE74C3C;
+				public static final int Background = 0xffA82B65;
 			}
 		}
 
@@ -37,7 +37,7 @@ public static final class Configuration {
 			public static final int Faces = 0xff808080;
 
 			// Line colour
-			public static final int Line = 0xff2980B9;
+			public static final int Line = 0xff0996C2;
 		}
 	}
 
@@ -59,8 +59,7 @@ public static final class Configuration {
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
-			QuantizationType.OneThirtySecondNote.get(),
-			QuantizationType.OneThirtySecondNoteTriplet.get(),
+			QuantizationType.OneThirtySecondNote.get()
 		};
 
 		// Number of MIDI channels to use
@@ -188,10 +187,10 @@ public static final class Configuration {
 
 		public static final class Rings {
 			// Distance between rings
-			public static final int Distance = 10;
+			public static final int Distance = 17;
 
 			// Rotation step
-			public static final int RotationStep = 20;
+			public static final int RotationStep = 10;
 		}
 	}
 

@@ -315,19 +315,14 @@ void setupSong() {
 
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
-			// Violin
-			if ( depth >= 500 ) {
+			// Heavy guitar
+			if ( depth >= 300 ) {
 				setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
 			}
 
-			// Cello
-			if ( depth >= 750 ) {
+			// Drone
+			if ( depth >= 500 ) {
 				setNote( 9, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
-			}
-
-			// Double Bass
-			if ( depth >= 1000 ) {
-				setNote( 10, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
 			}
 
 			x++;
@@ -432,6 +427,7 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
+	rotateX( radians(23.5) );
 }
 
 void drawMesh( color colour, WB_Point4D[] points ) {
@@ -451,7 +447,7 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 		fill( 225, 225, 230, 110 );
 	}
 
-	strokeWeight( 0.5 );
+	strokeWeight( 0.66 );
 	stroke( colour+3 );
 
 	switch( Configuration.Mesh.Type ) {
@@ -587,7 +583,8 @@ void renderLines( WB_Point4D[] points ) {
 
 int getRingLevelFromPoint( WB_Point4D point ) {
 	float yf = point.yf();
-	return (int)((yf + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
+	int level = (int)Math.ceil((yf + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
+	return level < 0 ? 0 : level;
 }
 
 double getAngleFromVector(float xf, float zf) {
