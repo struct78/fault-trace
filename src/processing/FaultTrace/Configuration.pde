@@ -116,7 +116,7 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 2.0;
+			public static final float Min = 3.0;
 
 			// Maximum tween time
 			public static final float Max = 10.0;
@@ -180,8 +180,9 @@ public static final class Configuration {
 		// - Lines
 		// - Particles
 		// - Rings
+		// - Explosions
 
-		public static final RenderType Renderer = RenderType.Rings;
+		public static final RenderType Renderer = RenderType.Explosions;
 
 		public static final boolean UseIcosahedronBase = true;
 
@@ -191,6 +192,10 @@ public static final class Configuration {
 
 			// Rotation step
 			public static final int RotationStep = 10;
+		}
+
+		public static final class Explosions {
+			public static boolean UseTicks = true;
 		}
 	}
 
@@ -202,9 +207,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 0.5;
+			public static final float Min = 1.0;
 
-			public static final float Max = 0.8;
+			public static final float Max = 10.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";

@@ -519,9 +519,39 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 			renderParticles( points );
 		case Rings:
 			renderRings( points );
+		case Explosions:
+			renderExplosions( points );
 		default:
 			break;
 	}
+}
+
+void renderExplosions( WB_Point4D[] points ) {
+	for ( WB_Point4D point : points ) {
+		float distance = point.wf();
+		if ( distance > 100 ) {
+			continue;
+		}
+
+		float flareAmount = ceil(random(30)) + 20;
+		float a = 360/flareAmount;
+
+		noStroke();
+		strokeWeight(2);
+		stroke(colour, 1000/distance);
+
+		for (int i = 0; i < flareAmount + 1; i++){
+			pushMatrix();
+			translate(point.xf(), point.yf(), point.zf());
+
+			float x2 = sin(radians(i*a))*distance * cos(radians(i*a))*distance;
+			float y2 = cos(radians(i*a))*distance * cos(radians(i*a))*distance;
+			float z2 = sin(radians(i*a))*distance;
+
+			point(x2, y2, z2);
+			popMatrix();
+		 }
+	 }
 }
 
 void renderEdgesFaces( HE_Mesh globeMesh, HE_MeshCollection meshCollection ) {
