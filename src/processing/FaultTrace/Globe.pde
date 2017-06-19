@@ -140,12 +140,12 @@ public class GlobePoint {
 	}
 
 	public void addAnimation( float scale, float distance, float animationTime ) {
-	 	Ani animation = new Ani( this, animationTime, "scale", scale, Ani.BACK_OUT );
+	 	Ani animation = new Ani( this, animationTime, "scale", scale, Ani.EXPO_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
 
-		animation = new Ani( this, animationTime, "distance", distance, Ani.BACK_OUT );
+		animation = new Ani( this, animationTime, "distance", distance, Ani.EXPO_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -156,10 +156,10 @@ public class GlobePoint {
 	public void remove() {
 		this.isFinishing = true;
 		this.isFinished = false;
-		Ani animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.BACK_IN, "onEnd:onEnd" );
+		Ani animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
 		animation.start();
 
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.BACK_IN, "onEnd:onEnd" );
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
 		animation.start();
 	}
 
