@@ -410,7 +410,7 @@ void setupFrameRate() {
 }
 
 void drawBackground() {
-	background( 17, 19, 23 );
+	background( Configuration.Palette.Background );
 }
 
 void drawLights( color colour ) {
@@ -591,7 +591,7 @@ double getAngleFromVector(float xf, float zf) {
 	return ((atan2(xf, zf) * ( 180 / Math.PI ) + 360) % 360);
 }
 
-float getRadiusOnYPlane( int y ) {
+float getRadiusOnYPlane( float y ) {
 	return (float)Math.sqrt( Math.pow( Configuration.Mesh.GlobeSize, 2 ) - Math.pow( y, 2 ) );
 }
 
@@ -611,25 +611,34 @@ void renderRings( WB_Point4D[] points ) {
 		segments.get(level).add(point);
 	}
 
-	float wf, xf, yf, zf, amp = 0.0;
+	float wf, xf, yf, zf;
 	double deg = 0.0;
+	int opacity = 150;
 
 	for ( int y = 0-Configuration.Mesh.GlobeSize ; y < Configuration.Mesh.GlobeSize; y+=Configuration.Mesh.Rings.Distance) {
-		int level = (int)((y + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
-		float radius = getRadiusOnYPlane(y);
+		float r2 = abs((float)y/Configuration.Mesh.GlobeSize);
+		float eased_y = easing_cubic(r2) * (float)Configuration.Mesh.GlobeSize;
+
+		if ( y < 0 ) {
+			eased_y = -eased_y;
+		}
+
+		int level = (int)((eased_y + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
+		float radius = getRadiusOnYPlane(eased_y);
 
 		WB_Point4D segmentPoint;
 
 		pushMatrix();
-		translate( 0, y, 0 );
+		translate( 0, eased_y, 0 );
 		rotateX(radians(-90));
 		noFill();
 		blendMode(ADD);
-		strokeWeight(0.5);
+		strokeWeight(1.5);
 		beginShape();
 
+
 	  for ( int j = 0; j < 360; j+=Configuration.Mesh.Rings.RotationStep ) {
-			amp = 0.0;
+			boolean hasPoint = false;
 			for ( int k = 0 ; k < segments.get(level).size(); k++ ) {
 				segmentPoint = segments.get(level).get(k);
 
@@ -639,19 +648,21 @@ void renderRings( WB_Point4D[] points ) {
 				zf = segmentPoint.zf();
 
 				deg = getAngleFromVector(xf, zf);
-				if (deg >= j && deg <= j+Configuration.Mesh.Rings.RotationStep) {
+				if (deg >= j && deg <= j+Configuration.Mesh.Rings.RotationStep && !hasPoint) {
+					hasPoint = true;
 					//println(xf + ":" + zf + ":" + deg + ":" + cos(radians((float)deg)) * (radius) + ":" + sin(radians((float)deg)) * (radius) + ":" + cos(radians(j)) * radius +":" + sin(radians(j)) * radius);
 					//curveVertex( cos(radians(j)) * (radius * wf), sin(radians(j)) * (radius * wf) );
 
 					//vertex( zf, xf );
 					float mid = j - (Configuration.Mesh.Rings.RotationStep/2);
-
-					stroke( Configuration.Palette.Mesh.Line, 128 );
-					vertex( cos(radians(mid)) * (radius * wf), sin(radians(mid)) * (radius * wf)  );
+					float x2 = cos(radians(mid)) * (radius * wf);
+					float y2 = sin(radians(mid)) * (radius * wf);
+					stroke( Configuration.Palette.Mesh.Line, opacity );
+					vertex( x2, y2 );
 				}
 			}
 
-			stroke( Configuration.Palette.Mesh.Line, 64 );
+			stroke( Configuration.Palette.Mesh.Line, opacity );
 			vertex( cos(radians(j)) * radius, sin(radians(j)) * radius );
 	  }
 
@@ -778,4 +789,20 @@ int invert( int n, int min, int max ) {
 
 float invert( float n, float min, float max ) {
 	return ( max - n ) + min;
+}
+
+float easing_exp(float t) {
+	return (float)1 - (float)Math.pow(2, -10 * t);
+}
+
+float easing_quadratic(float t) {
+	return (float)t * (2 - t);
+}
+
+float easing_sin(float t) {
+	return (float)sin(t * HALF_PI);
+}
+
+float easing_cubic(float t) {
+	return (float)--t * t * t + 1;
 }
