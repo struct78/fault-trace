@@ -1,20 +1,20 @@
 public static final class Configuration {
 
 	public static final class Palette {
-		public static final int Background = 0xff020518;
+		public static final int Background = 0xff080E09;
 
 		public static final class UI {
 
-			public static final int Foreground = 0xffffffff;
+			public static final int Foreground = 0xff080E09;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xff1BA5C8;
+				public static final int Background = 0xff33ff33;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xff1BA5C8;
+				public static final int Background = 0xff33ff33;
 			}
 		}
 
@@ -37,7 +37,7 @@ public static final class Configuration {
 			public static final int Faces = 0xff808080;
 
 			// Line colour
-			public static final int Line = 0xff1BC6C8;
+			public static final int Line = 0xff00ff00;
 		}
 	}
 
@@ -123,18 +123,18 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 2.0;
+			public static final float Min = 0.5;
 
 			// Maximum tween time
-			public static final float Max = 10.0;
+			public static final float Max = 2.0;
 		}
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 1.0;
+			public static final float Min = 0.9;
 
 			// Maximum tween scale factor
-			public static final float Max = 0.1;
+			public static final float Max = 0.3;
 		}
 
 		// Rotation speed
@@ -160,7 +160,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 10000;
+		public static final int MaxPoints = 2500;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -194,10 +194,10 @@ public static final class Configuration {
 
 		public static final class Rings {
 			// Distance between rings
-			public static final int Distance = 8;
+			public static final int Distance = 12;
 
 			// Rotation step
-			public static final int RotationStep = 10;
+			public static final int RotationStep = 18;
 		}
 	}
 

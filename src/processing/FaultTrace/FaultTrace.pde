@@ -82,6 +82,24 @@ Point2D.Double rectanglePoint;
 int uiGridWidth;
 int uiMargin;
 
+//renderRings()
+int levels;
+int level;
+float wf, xf, yf, zf;
+int opacity = 150;
+int k, j, x, y;
+float eased_y;
+float radius;
+float mid, r2, x2, y2;
+double deg = 0.0;
+
+//quantize()
+int type;
+float milliseconds_per_beat;
+float milliseconds_per_measure;
+float milliseconds_per_note;
+
+
 public void settings() {
 	size(1920, 1080, P3D);
 	smooth(4);
@@ -224,12 +242,12 @@ void setupMIDI() {
 }
 
 long quantize( long delay ) {
-	int type = ( int ) ( ( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType.length );
-	float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
-	float milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
-	float milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType[ type ]);
+	type = ( int ) ( ( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.BeatDivision );
+	milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
+	milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
+	milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType[ type ]);
 
-	return (long)(Math.round( delay / milliseconds_per_note ) * milliseconds_per_note);
+	return (long)(Math.ceil( delay / milliseconds_per_note ) * milliseconds_per_note);
 }
 
 void setupSong() {
@@ -432,7 +450,7 @@ void drawRotation() {
 
 void drawMesh( color colour, WB_Point4D[] points ) {
 	hint(ENABLE_DEPTH_TEST);
-	if ( Configuration.Mesh.Renderer != RenderType.Lines ) {
+	if ( Configuration.Mesh.Renderer != RenderType.Lines && Configuration.Mesh.Renderer != RenderType.Rings ) {
 		creatorGlobe.setPoints( points );
 		globeMesh = new HE_Mesh( creatorGlobe );
 	}
@@ -582,8 +600,8 @@ void renderLines( WB_Point4D[] points ) {
 }
 
 int getRingLevelFromPoint( WB_Point4D point ) {
-	float yf = point.yf();
-	int level = (int)Math.ceil((yf + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
+	yf = point.yf();
+	level = (int)Math.ceil((yf + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
 	return level < 0 ? 0 : level;
 }
 
@@ -598,33 +616,29 @@ float getRadiusOnYPlane( float y ) {
 void renderRings( WB_Point4D[] points ) {
 	noFill();
 
-	int levels = ((Configuration.Mesh.GlobeSize * 2) * Configuration.Mesh.Rings.Distance);
+	levels = ((Configuration.Mesh.GlobeSize * 2) * Configuration.Mesh.Rings.Distance);
 
 	segments.clear();
 
-	for ( int x = 0 ; x < levels ; x++ ) {
+	for ( x = 0 ; x < levels ; x++ ) {
 		segments.add(new ArrayList<WB_Point4D>());
 	}
 
 	for ( WB_Point4D point : points ) {
-		int level = getRingLevelFromPoint( point );
+		level = getRingLevelFromPoint( point );
 		segments.get(level).add(point);
 	}
 
-	float wf, xf, yf, zf;
-	double deg = 0.0;
-	int opacity = 150;
-
-	for ( int y = 0-Configuration.Mesh.GlobeSize ; y < Configuration.Mesh.GlobeSize; y+=Configuration.Mesh.Rings.Distance) {
-		float r2 = abs((float)y/Configuration.Mesh.GlobeSize);
-		float eased_y = easing_cubic(r2) * (float)Configuration.Mesh.GlobeSize;
+	for ( y = 0-Configuration.Mesh.GlobeSize ; y < Configuration.Mesh.GlobeSize; y+=Configuration.Mesh.Rings.Distance) {
+		r2 = abs((float)y/Configuration.Mesh.GlobeSize);
+		eased_y = easing_cubic(r2) * (float)Configuration.Mesh.GlobeSize;
 
 		if ( y < 0 ) {
 			eased_y = -eased_y;
 		}
 
-		int level = (int)((eased_y + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
-		float radius = getRadiusOnYPlane(eased_y);
+		level = (int)((eased_y + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
+		radius = getRadiusOnYPlane(eased_y);
 
 		WB_Point4D segmentPoint;
 
@@ -633,13 +647,13 @@ void renderRings( WB_Point4D[] points ) {
 		rotateX(radians(-90));
 		noFill();
 		blendMode(ADD);
-		strokeWeight(1.5);
+		strokeWeight(2.25);
 		beginShape();
 
 
-	  for ( int j = 0; j < 360; j+=Configuration.Mesh.Rings.RotationStep ) {
+	  for ( j = 0; j < 360; j+=Configuration.Mesh.Rings.RotationStep ) {
 			boolean hasPoint = false;
-			for ( int k = 0 ; k < segments.get(level).size(); k++ ) {
+			for ( k = 0 ; k < segments.get(level).size(); k++ ) {
 				segmentPoint = segments.get(level).get(k);
 
 				wf = segmentPoint.wf();
@@ -650,13 +664,9 @@ void renderRings( WB_Point4D[] points ) {
 				deg = getAngleFromVector(xf, zf);
 				if (deg >= j && deg <= j+Configuration.Mesh.Rings.RotationStep && !hasPoint) {
 					hasPoint = true;
-					//println(xf + ":" + zf + ":" + deg + ":" + cos(radians((float)deg)) * (radius) + ":" + sin(radians((float)deg)) * (radius) + ":" + cos(radians(j)) * radius +":" + sin(radians(j)) * radius);
-					//curveVertex( cos(radians(j)) * (radius * wf), sin(radians(j)) * (radius * wf) );
-
-					//vertex( zf, xf );
-					float mid = j - (Configuration.Mesh.Rings.RotationStep/2);
-					float x2 = cos(radians(mid)) * (radius * wf);
-					float y2 = sin(radians(mid)) * (radius * wf);
+					mid = j - (Configuration.Mesh.Rings.RotationStep/2);
+					x2 = cos(radians(mid)) * (radius * wf);
+					y2 = sin(radians(mid)) * (radius * wf);
 					stroke( Configuration.Palette.Mesh.Line, opacity );
 					vertex( x2, y2 );
 				}
@@ -680,7 +690,6 @@ void renderParticles( WB_Point4D[] points ) {
 
 void drawGlobe() {
 	meshPoints = globe.getPoints( Configuration.Mesh.MaxPoints );
-
 	currentDate = (Calendar)stateThread.getDate();
 	colour = stateThread.getColour();
 
@@ -695,7 +704,7 @@ void drawGlobe() {
 }
 
 void drawGraph() {
-	Calendar currentDate = (Calendar)stateThread.getDate();
+	currentDate = (Calendar)stateThread.getDate();
 
 	if ( currentDate != null ) {
 		strokeWeight( 0.66 );
@@ -709,7 +718,7 @@ void drawGraph() {
 }
 
 void drawHUD() {
-	Calendar currentDate = (Calendar)stateThread.getDate();
+	currentDate = (Calendar)stateThread.getDate();
 
 	if ( currentDate != null ) {
 		hud = new HUD( width, height, "left", "bottom", this.font);
