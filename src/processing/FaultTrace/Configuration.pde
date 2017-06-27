@@ -160,7 +160,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 2500;
+		public static final int MaxPoints = 7500;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -194,10 +194,10 @@ public static final class Configuration {
 
 		public static final class Rings {
 			// Distance between rings
-			public static final int Distance = 12;
+			public static final int Distance = 8;
 
 			// Rotation step
-			public static final int RotationStep = 18;
+			public static final int RotationStep = 8;
 		}
 	}
 
