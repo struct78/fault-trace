@@ -1,7 +1,7 @@
  ﻿#!/bin/bash
  # Usage
  # > ./edit-render.sh ../../renders/march/render.mov 00:00:07 00:11:30 688 2.0 4K
- 
+
 if [ "$#" -ne 6 ]; then
 	echo "Requires 3 arguments:"
 	echo "1) Movie file"
@@ -24,11 +24,11 @@ echo "Converting $fn"
 echo $type
 
 if [ "$type" == "HD" ]; then
-	exec ffmpeg -i "${fn/.mov/}.mov" -vf "fade=t=out:st=${fadeout}:d=${fadeduration}:color=#E1E1E6,crop=3840:2160:0:120,scale=1920:1080" -codec:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -strict -2 -ss $start -to $end -async 1 -y "${fn/.mov/}-hd.mp4" &
+	exec ffmpeg -i "${fn/.mov/}.mov" -vf "fade=t=out:st=${fadeout}:d=${fadeduration}:color=#0F0500,crop=3840:2160:0:120,scale=1920:1080" -codec:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -strict -2 -ss $start -to $end -async 1 -y "${fn/.mov/}-hd.mp4" &
 elif [ "$type" == "Square" ]; then
-	exec ffmpeg -i "${fn/.mov/}.mov" -vf "fade=t=out:st=${fadeout}:d=${fadeduration}:color=#E1E1E6,crop=1890:1890:975:255,scale=1080:1080" -codec:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -strict -2 -ss $start -to $end -async 1 -y "${fn/.mov/}-square.mp4" &
+	exec ffmpeg -i "${fn/.mov/}.mov" -vf "fade=t=out:st=${fadeout}:d=${fadeduration}:color=#0F0500,crop=1890:1890:975:255,scale=1080:1080" -codec:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -strict -2 -ss $start -to $end -async 1 -y "${fn/.mov/}-square.mp4" &
 else
-	exec ffmpeg -i "${fn/.mov/}.mov" -vf "fade=t=out:st=${fadeout}:d=${fadeduration}:color=#E1E1E6,crop=3840:2160:0:120" -codec:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -strict -2 -ss $start -to $end -async 1 -y "${fn/.mov/}-4k.mp4" &
+	exec ffmpeg -i "${fn/.mov/}.mov" -vf "fade=t=out:st=${fadeout}:d=${fadeduration}:color=#0F0500,crop=3840:2160:0:120" -codec:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -strict -2 -ss $start -to $end -async 1 -y "${fn/.mov/}-4k.mp4" &
 fi
 
 echo "Done"
