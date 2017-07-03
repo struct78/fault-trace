@@ -1,20 +1,20 @@
 public static final class Configuration {
 
 	public static final class Palette {
-		public static final int Background = 0xff080E09;
+		public static final int Background = 0xff0F0500;
 
 		public static final class UI {
 
-			public static final int Foreground = 0xff080E09;
+			public static final int Foreground = 0xff0F0500;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xff33ff33;
+				public static final int Background = 0xff00BD20;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xff33ff33;
+				public static final int Background = 0xff00BD20;
 			}
 		}
 
@@ -37,7 +37,7 @@ public static final class Configuration {
 			public static final int Faces = 0xff808080;
 
 			// Line colour
-			public static final int Line = 0xff00ff00;
+			public static final int Line = 0xff00D924;
 		}
 	}
 
@@ -131,10 +131,10 @@ public static final class Configuration {
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 0.9;
+			public static final float Min = 1.0;
 
 			// Maximum tween scale factor
-			public static final float Max = 0.3;
+			public static final float Max = 1.0;
 		}
 
 		// Rotation speed
@@ -190,14 +190,14 @@ public static final class Configuration {
 
 		public static final RenderType Renderer = RenderType.Rings;
 
-		public static final boolean UseIcosahedronBase = true;
+		public static final boolean UseIcosahedronBase = false;
 
 		public static final class Rings {
 			// Distance between rings
 			public static final int Distance = 8;
 
 			// Rotation step
-			public static final int RotationStep = 8;
+			public static final int RotationStep = 6;
 		}
 	}
 
@@ -209,9 +209,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 0.8;
+			public static final float Min = 0.9;
 
-			public static final float Max = 1.2;
+			public static final float Max = 1.1;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
