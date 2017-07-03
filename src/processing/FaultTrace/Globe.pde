@@ -6,6 +6,12 @@ public class Globe {
 	HE_Mesh icosahedron;
 	List<WB_Coord> icosahedronPoints;
 
+	GlobePoint point;
+	int size;
+	int newSize;
+	int x;
+	WB_Vector vec;
+
 	public Globe( ArrayList<GlobePoint> points ) {
 		this.points = points;
 		this.creator = new HEC_Geodesic();
@@ -23,12 +29,11 @@ public class Globe {
 			return null;
 		}
 
-		int size = this.points.size();
-		GlobePoint point;
+		size = this.points.size();
 
 		for ( int x = 0 ; x < size ; x++ ) {
 			point = this.points.get(x);
-			WB_Vector vec = point.point.subToVector3D( newPoint.point );
+			vec = point.point.subToVector3D( newPoint.point );
 
 			if (
 				abs((float)vec.xd()) <= Configuration.Optimisations.PointDistanceTolerance &&
@@ -61,10 +66,10 @@ public class Globe {
 		this.buffer.clear();
 		this.buffer.addAll( this.bufferBase );
 		GlobePoint point;
-		int newSize = this.bufferBase.size();
-		int size = this.points.size();
+		newSize = this.bufferBase.size();
+		size = this.points.size();
 
-		for ( int x = 0 ; x < size ; x++ ) {
+		for ( x = 0 ; x < size ; x++ ) {
 			point = this.points.get(x);
 			if ( point.canDisplay() ) {
 				point.animate();
@@ -74,7 +79,7 @@ public class Globe {
 		}
 
 		if ( newSize > max ) {
-			for ( int x = 0 ; x < newSize-max ; x++ ) {
+			for ( x = 0 ; x < newSize-max ; x++ ) {
 				if ( x < size ) {
 					point = this.points.get(x);
 
@@ -109,6 +114,7 @@ public class GlobePoint {
 	int index;
 	WB_Point point;
 	Ani animation;
+	WB_Point4D point4D;
 
 	public GlobePoint( WB_Point point ) {
 		this.delays = new ArrayList<Long>();
@@ -142,12 +148,16 @@ public class GlobePoint {
 	}
 
 	public void addAnimation( float scale, float distance, float animationTime ) {
+<<<<<<< HEAD
 	 	Ani animation = new Ani( this, animationTime, "scale", scale, Ani.BACK_OUT, "onEnd:onScaleEnd" );
+=======
+	 	animation = new Ani( this, animationTime, "scale", scale, Ani.EXPO_OUT );
+>>>>>>> may
 		animation.pause();
 
 		this.animations.add( animation );
 
-		animation = new Ani( this, animationTime, "distance", distance, Ani.BACK_OUT );
+		animation = new Ani( this, animationTime, "distance", distance, Ani.EXPO_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -158,10 +168,10 @@ public class GlobePoint {
 	public void remove() {
 		this.isFinishing = true;
 		this.isFinished = false;
-		Ani animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.BACK_IN, "onEnd:onEnd" );
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
 		animation.start();
 
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.BACK_IN, "onEnd:onEnd" );
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
 		animation.start();
 	}
 
@@ -176,8 +186,8 @@ public class GlobePoint {
 
 	public boolean canDisplay() {
 		for ( int x = this.delays.size()-1 ; x >= 0 ; x-- ) {
-			long delay = this.delays.get( x );
-			float animationTime = this.animationTimes.get( x );
+			delay = this.delays.get( x );
+			animationTime = this.animationTimes.get( x );
 			if ( millis() >= delay ) {
 				this.index = x;
 				return true;
@@ -192,7 +202,7 @@ public class GlobePoint {
 			this.ticks += 1;
 		}
 		for ( int x = 0 ; x < 2 ; x++ ) {
-			Ani animation = this.animations.get( this.index + x );
+			animation = this.animations.get( this.index + x );
 
 			if ( animation != null ) {
 				if ( !animation.isPlaying() && !animation.isEnded() ) {
@@ -203,6 +213,7 @@ public class GlobePoint {
 	}
 
 	public WB_Point4D getPoint() {
+<<<<<<< HEAD
 		WB_Point4D point4D = new WB_Point4D( this.point.scale( this.scale ) );
 
 		if ( Configuration.Mesh.Explosions.UseTicks ) {
@@ -210,6 +221,10 @@ public class GlobePoint {
 		} else {
 			point4D.setW( this.distance );
 		}
+=======
+		point4D = new WB_Point4D( this.point.scale( this.scale ) );
+		point4D.setW( this.distance );
+>>>>>>> may
 
 		return point4D;
 	}

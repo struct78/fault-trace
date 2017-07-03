@@ -1,20 +1,20 @@
 public static final class Configuration {
 
 	public static final class Palette {
-		public static final int Background = 0xffF5245F;
+		public static final int Background = 0xff0F0500;
 
 		public static final class UI {
 
-			public static final int Foreground = 0xffFBFBFC;
+			public static final int Foreground = 0xff0F0500;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xffA82B65;
+				public static final int Background = 0xff00BD20;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xffA82B65;
+				public static final int Background = 0xff00BD20;
 			}
 		}
 
@@ -37,7 +37,7 @@ public static final class Configuration {
 			public static final int Faces = 0xff808080;
 
 			// Line colour
-			public static final int Line = 0xff0996C2;
+			public static final int Line = 0xff00D924;
 		}
 	}
 
@@ -46,20 +46,27 @@ public static final class Configuration {
 		public static final long StartOffset = 5000;
 
 		// Time acceleration
-		public static final long Acceleration = 2000;
+		public static final long Acceleration = 7000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 90;
+		public static final int BeatsPerMinute = 133;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 12;
+		public static final float BeatsPerBar = 9;
 
 		// 4/X
-		public static final float BeatDivision = 4;
+		public static final float BeatDivision = 8;
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
-			QuantizationType.OneThirtySecondNote.get()
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneSixteenthNote.get(),
+			QuantizationType.OneSixteenthNote.get(),
+			QuantizationType.OneHalfNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneHalfNoteTriplet.get()
 		};
 
 		// Number of MIDI channels to use
@@ -68,24 +75,24 @@ public static final class Configuration {
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
-			public static final int Min = 10;
+			public static final int Min = 20;
 
 			// Maximum pitch (0 - 127)
-			public static final int Max = 110;
+			public static final int Max = 100;
 		}
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 40;
+			public static final int Min = 20;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 127;
+			public static final int Max = 110;
 		}
 
 
 		public static final class Note {
 			// Minimum note duration in milliseconds
-			public static final int Min = 100;
+			public static final int Min = 10;
 
 			// Maximum note duration in milliseconds
 			public static final int Max = 500;
@@ -102,7 +109,7 @@ public static final class Configuration {
 
 		public static final class HUD {
 			// Size of the HUD font
-			public static final int FontSize = 42;
+			public static final int FontSize = 40;
 
 			// The HUD font
 			public static final String Font = "HelveticaNeue-Bold-42.vlw";
@@ -119,7 +126,7 @@ public static final class Configuration {
 			public static final float Min = 3.0;
 
 			// Maximum tween time
-			public static final float Max = 10.0;
+			public static final float Max = 2.0;
 		}
 
 		public static final class Scale {
@@ -127,7 +134,7 @@ public static final class Configuration {
 			public static final float Min = 1.0;
 
 			// Maximum tween scale factor
-			public static final float Max = 0.1;
+			public static final float Max = 1.0;
 		}
 
 		// Rotation speed
@@ -153,7 +160,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 10000;
+		public static final int MaxPoints = 7500;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -184,14 +191,14 @@ public static final class Configuration {
 
 		public static final RenderType Renderer = RenderType.Explosions;
 
-		public static final boolean UseIcosahedronBase = true;
+		public static final boolean UseIcosahedronBase = false;
 
 		public static final class Rings {
 			// Distance between rings
-			public static final int Distance = 17;
+			public static final int Distance = 8;
 
 			// Rotation step
-			public static final int RotationStep = 10;
+			public static final int RotationStep = 6;
 		}
 
 		public static final class Explosions {
@@ -217,10 +224,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-04-01T00:00:00.000Z";
+		public static final String StartDate = "2017-05-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-04-30T23:59:59.999Z";
+		public static final String EndDate = "2017-05-31T23:59:59.999Z";
 	}
 
 	public static final class IO {
