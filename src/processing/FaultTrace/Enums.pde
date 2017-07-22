@@ -1,5 +1,5 @@
 public enum RenderType {
-	Edges, Faces, EdgesFaces, Points, FacesPoints, EdgesPoints, EdgesFacesPoints, Lines, Particles, Rings, Explosions
+	Edges, Faces, EdgesFaces, Points, FacesPoints, EdgesPoints, EdgesFacesPoints, Lines, Particles, Rings, Explosions, Meteors
 }
 
 public enum MeshType {
