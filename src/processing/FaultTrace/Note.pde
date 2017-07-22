@@ -3,6 +3,7 @@ public class Note extends Thread {
 	int velocity;
 	int pitch;
 	long duration;
+	long delay;
 	MidiBus bus;
 
 	Note(MidiBus bus) {
