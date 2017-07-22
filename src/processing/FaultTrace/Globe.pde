@@ -131,6 +131,10 @@ public class GlobePoint {
 		this.ticks = 0;
 	}
 
+	public void addDefaultScale( float scale ) {
+		this.scale = scale;
+	}
+
 	public void addDelay( long delay ) {
 		this.delays.add( delay );
 	}
@@ -148,16 +152,14 @@ public class GlobePoint {
 	}
 
 	public void addAnimation( float scale, float distance, float animationTime ) {
-<<<<<<< HEAD
-	 	Ani animation = new Ani( this, animationTime, "scale", scale, Ani.BACK_OUT, "onEnd:onScaleEnd" );
-=======
-	 	animation = new Ani( this, animationTime, "scale", scale, Ani.EXPO_OUT );
->>>>>>> may
+		this.distance = distance;
+
+	 	animation = new Ani( this, animationTime, "scale", scale, Ani.BOUNCE_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
 
-		animation = new Ani( this, animationTime, "distance", distance, Ani.EXPO_OUT );
+		animation = new Ani( this, animationTime * .36, "distance", 0.0, Ani.EXPO_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -213,7 +215,6 @@ public class GlobePoint {
 	}
 
 	public WB_Point4D getPoint() {
-<<<<<<< HEAD
 		WB_Point4D point4D = new WB_Point4D( this.point.scale( this.scale ) );
 
 		if ( Configuration.Mesh.Explosions.UseTicks ) {
@@ -221,10 +222,6 @@ public class GlobePoint {
 		} else {
 			point4D.setW( this.distance );
 		}
-=======
-		point4D = new WB_Point4D( this.point.scale( this.scale ) );
-		point4D.setW( this.distance );
->>>>>>> may
 
 		return point4D;
 	}
