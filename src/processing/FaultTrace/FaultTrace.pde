@@ -36,6 +36,7 @@ ThreadTask task;
 StateManagerThread stateThread;
 Note note;
 MidiBus bus;
+boolean isDuplicateNote = false;
 
 Iterable<TableRow> rows;
 ArrayList<Rectangle> grid = new ArrayList();
@@ -58,12 +59,14 @@ HEMC_VoronoiCells voronoi;
 HE_MeshCollection meshCollection;
 HEM_Extrude extrude;
 HEC_Geodesic geodesic;
+HEC_Sphere sphere;
 
 WB_Point4D[] meshPoints;
 Globe globe;
 Graph graph;
 Ani globeAnimation;
 float globeScale = 1.0;
+boolean isHeMeshRenderer = false;
 
 Calendar startDate;
 Calendar endDate;
@@ -93,10 +96,14 @@ float radius;
 float mid, r2, x2, y2;
 double deg = 0.0;
 
+//renderPoints
+float trailInterval;
+WB_Point4D trail;
+
 //quantize()
 int type;
-float milliseconds_per_beat;
-float milliseconds_per_measure;
+float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
+float milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
 float milliseconds_per_note;
 
 
@@ -143,8 +150,8 @@ void setupGlobe() {
 void setupTiming() {
 	start_ms = startDate.getTimeInMillis();
 	end_ms = endDate.getTimeInMillis();
-	diff_accelerated_ms = Configuration.MIDI.StartOffset + ( ( ( end_ms-start_ms )/Configuration.MIDI.Acceleration ) );
-	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize( ( ( end_ms-start_ms ) / Configuration.MIDI.Acceleration ) );
+	diff_accelerated_ms = Configuration.MIDI.StartOffset + ( ( ( end_ms-start_ms )/Configuration.MIDI.TimeCompression ) );
+	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize( ( ( end_ms-start_ms ) / Configuration.MIDI.TimeCompression ) );
 }
 
 void setup3D() {
@@ -171,6 +178,11 @@ void setup3D() {
 	geodesic.setB( 2 );
 	geodesic.setC( 2 );
 	geodesic.setType( HEC_Geodesic.ICOSAHEDRON );
+
+	sphere = new HEC_Sphere();
+	sphere.setRadius( Configuration.Mesh.GlobeSize );
+	sphere.setUFacets( 40 );
+	sphere.setVFacets( 40 );
 }
 
 void setupTimezone() {
@@ -209,7 +221,7 @@ void setupAnimation() {
 
 void setGlobeScale() {
 	float endValue = globeAnimation.getEnd();
-	globeScale = random( 1.0, 1.5 );
+	globeScale = random( 0.9, 1.6 );
 	globeAnimation.setBegin( endValue );
 	globeAnimation.setEnd( globeScale );
 	globeAnimation.start();
@@ -242,12 +254,9 @@ void setupMIDI() {
 }
 
 long quantize( long delay ) {
-	type = ( int ) ( ( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.BeatDivision );
-	milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
-	milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
+	type = (int)(delay / milliseconds_per_beat) % Configuration.MIDI.NoteType.length;
 	milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType[ type ]);
-
-	return (long)(Math.ceil( delay / milliseconds_per_note ) * milliseconds_per_note);
+	return (long)(Math.ceil( delay / milliseconds_per_note ) * milliseconds_per_note) ;
 }
 
 void setupSong() {
@@ -295,8 +304,7 @@ void setupSong() {
 			long diff = d2.getTimeInMillis() - d1.getTimeInMillis();
 
 			// Increase the delay
-			delay += (diff/Configuration.MIDI.Acceleration);
-			quantized_delay = quantize(delay);
+			delay += (diff/Configuration.MIDI.TimeCompression);
 
 			int channel = getChannelFromCoordinates( latitude, longitude );
 			int velocity = mapMagnitude( magnitude );
@@ -306,6 +314,7 @@ void setupSong() {
 			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float distance = mapMagnitude( magnitude, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			color colour = getColourFromMonth( d2 );
+			quantized_delay = quantize(delay);
 
 			WB_Point wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, scale, Configuration.Mesh.GlobeSize );
 
@@ -313,36 +322,56 @@ void setupSong() {
 			GlobePoint existingPoint = globe.getExistingPoint( newPoint );
 
 			if ( existingPoint != null ) {
-				existingPoint.addDelay( quantized_delay + millis() );
+				existingPoint.addDelay( quantized_delay + millis() - Configuration.MIDI.AnimationOffset);
 				existingPoint.addAnimationTime( animationTime );
+				existingPoint.addDefaultScale( Configuration.Animation.Scale.Default );
 				existingPoint.addScale( scale );
 				existingPoint.addAnimation( scale, distance, animationTime );
 				existingPoint.addDistance( distance );
 			}
 			else {
-				newPoint.addDelay( quantized_delay + millis() );
+				newPoint.addDelay( quantized_delay + millis() - Configuration.MIDI.AnimationOffset);
 				newPoint.addAnimationTime( animationTime );
 				newPoint.addScale( scale );
+				newPoint.addDefaultScale( Configuration.Animation.Scale.Default );
 				newPoint.addAnimation( scale, distance, animationTime );
 				newPoint.addDistance( distance );
 				points.add( newPoint );
 			}
 
 			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
-			states.add( new StateManager( d2, colour, (long)(diff/Configuration.MIDI.Acceleration) ) );
+			states.add( new StateManager( d2, colour, (long)(diff/Configuration.MIDI.TimeCompression) ) );
 
-			setNote( channel, velocity, pitch, duration, quantized_delay );
+			if (note != null) {
+				isDuplicateNote = (note.channel == channel && note.delay == quantized_delay);
+			}
+
+			if (!isDuplicateNote) {
+				setNote( channel, velocity, pitch, duration, quantized_delay );
+			}
+			else {
+				y++;
+			}
 
 			// Heavy guitar
-			if ( depth >= 300 ) {
-				setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+			if ( depth >= 300 && depth < 500 ) {
+				setNote( 8, velocity, 60, 100, quantized_delay );
 			}
 
 			// Drone
-			if ( depth >= 500 ) {
-				setNote( 9, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+			if ( depth >= 500 && depth < 700) {
+				setNote( 9, velocity, 60, 100, quantized_delay );
 			}
 
+			// Drone
+			if ( depth >= 700 && depth < 1000) {
+				setNote( 10, velocity, 60, 100, quantized_delay );
+			}
+
+			// Crash
+			if ( magnitude > 6.0 ) {
+				setNote( 11, velocity, 60, 100, quantized_delay );
+			}
 			x++;
 		}
 
@@ -367,6 +396,9 @@ void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
 	// How long the note is played for, on some instruments this makes no difference
 	note.duration = duration;
 
+	// Time until note is played, this is to prevent duplicate notes playing at the same time causing out of phase weirdness
+	note.delay = delay;
+
 	// Add the note to task schedule
 	timer.schedule( new ThreadTask(note), delay );
 }
@@ -388,6 +420,7 @@ void setupUIThread() {
 
 void setupRenderer() {
 	render = new WB_Render3D( this );
+	isHeMeshRenderer = (Configuration.Mesh.Renderer != RenderType.Lines && Configuration.Mesh.Renderer != RenderType.Rings && Configuration.Mesh.Renderer != RenderType.Meteors);
 }
 
 void setupDebug() {
@@ -397,12 +430,19 @@ void setupDebug() {
 	println("Total " + diff_accelerated_ms + "ms");
 	println("Quantized " + diff_quantized_ms + "ms");
 	println("Total Data Points: " + points.size() );
+
+	float sum = 0.0;
+	for( x = 0; x < Configuration.MIDI.NoteType.length ; x++) {
+		sum += (1/Configuration.MIDI.NoteType[x]);
+	}
+
+	println("Bar accuracy: " + sum + " (expected " + ((Configuration.MIDI.BeatsPerBar / Configuration.MIDI.BeatDivision)) + ")");
 }
 
 String getDatePart( SimpleDateFormat dateFormat ) {
 	long start = startDate.getTimeInMillis();
 	long end = endDate.getTimeInMillis();
-	long diff = start+(((long)millis()-setupTime)*Configuration.MIDI.Acceleration);
+	long diff = start+(((long)millis()-setupTime)*Configuration.MIDI.TimeCompression);
 
 	if ( diff > end ) {
 		return dateFormat.format( end );
@@ -432,11 +472,12 @@ void drawBackground() {
 }
 
 void drawLights( color colour ) {
-	ambient( colour );
-	directionalLight( red( colour ), green( colour ), blue( colour ), 0, 0, -1 );
-	pointLight( red( Configuration.Palette.Lights.Left ), green( Configuration.Palette.Lights.Left ), blue( Configuration.Palette.Lights.Left ), 0, 0, 250 );
-	pointLight( red( Configuration.Palette.Lights.Right ), green( Configuration.Palette.Lights.Right ), blue( Configuration.Palette.Lights.Right ), width, height, 0 );
-	shininess( 0.03 );
+	//ambient( Configuration.Palette.Lights.Centre );
+	//spotLight(255, 255, 255, 0, 0, 250, 0, 0, -1, PI, 10000 );
+	//directionalLight( red( Configuration.Palette.Lights.Left ), green( Configuration.Palette.Lights.Left ), blue( Configuration.Palette.Lights.Left ), 0, 0, -1 );
+	//pointLight( red( Configuration.Palette.Lights.Left ), green( Configuration.Palette.Lights.Left ), blue( Configuration.Palette.Lights.Left ), 0, 0, 250 );
+	//pointLight( red( Configuration.Palette.Lights.Right ), green( Configuration.Palette.Lights.Right ), blue( Configuration.Palette.Lights.Right ), width, height, 0 );
+	//shininess( 0.03 );
 }
 
 void drawRotation() {
@@ -445,12 +486,12 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
-	rotateX( radians(23.5) );
+	rotateX( radians(-23.5) );
 }
 
 void drawMesh( color colour, WB_Point4D[] points ) {
 	hint(ENABLE_DEPTH_TEST);
-	if ( Configuration.Mesh.Renderer != RenderType.Lines && Configuration.Mesh.Renderer != RenderType.Rings ) {
+	if ( isHeMeshRenderer ) {
 		creatorGlobe.setPoints( points );
 		globeMesh = new HE_Mesh( creatorGlobe );
 	}
@@ -539,9 +580,16 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 			renderRings( points );
 		case Explosions:
 			renderExplosions( points );
+		case Meteors:
+			renderMeteors( points );
+			break;
 		default:
 			break;
 	}
+}
+
+void renderPoints( HE_Mesh globeMesh ) {
+	// TODO
 }
 
 void renderExplosions( WB_Point4D[] points ) {
@@ -593,8 +641,50 @@ void renderFacesPoints( HE_Mesh globeMesh, HE_MeshCollection meshCollection ) {
 	}
 }
 
-void renderPoints( HE_Mesh globMesh ) {
-	render.drawPoint( globeMesh.getPoints(), (double)2 );
+void renderMeteors( WB_Point4D[] points ) {
+	hint(ENABLE_DEPTH_TEST);
+	hint(ENABLE_DEPTH_SORT);
+	noStroke();
+	blendMode(ADD);
+
+	fill( Configuration.Palette.Mesh.Faces, 10 );
+	sphereDetail( 40 );
+	sphere( Configuration.Mesh.GlobeSize );
+	sphere( Configuration.Mesh.GlobeSize * .9 );
+
+	noFill();
+	y = 0;
+	for ( WB_Point4D point : points ) {
+		xf = point.xf();
+		yf = point.yf();
+		zf = point.zf();
+		wf = point.wf();
+		y++;
+
+		opacity = (int)lerp(0, Configuration.Mesh.Meteors.TrailOpacity, invert( map(wf, 0, 3, 0, 1), 0, 1) );
+
+		if (wf > 0) {
+			for ( x = 0 ; x < Configuration.Mesh.Meteors.TrailLength ; x++ ) {
+				trailInterval = lerp(0, wf, (float)x/Configuration.Mesh.Meteors.TrailLength);
+				trail = point.mul( 1 + trailInterval );
+
+				strokeWeight(lerp(Configuration.Mesh.Meteors.Min, Configuration.Mesh.Meteors.Max, 1-(float)x/Configuration.Mesh.Meteors.TrailLength));
+				stroke( Configuration.Palette.Mesh.Line, opacity);
+				point(trail.xf(), trail.yf(), trail.zf());
+			}
+			trail = null;
+		}
+
+		opacity = Configuration.Mesh.Meteors.RestingOpacity;
+
+		strokeWeight( Configuration.Mesh.Meteors.Max );
+		stroke( Configuration.Palette.Mesh.Line, opacity);
+		point(xf, yf, zf);
+	}
+
+	blendMode(NORMAL);
+	hint(DISABLE_DEPTH_TEST);
+	hint(DISABLE_DEPTH_SORT);
 }
 void renderEdgesPoints( HE_Mesh globeMesh ) {
 	noFill();
@@ -723,7 +813,7 @@ void drawGlobe() {
 	currentDate = (Calendar)stateThread.getDate();
 	colour = stateThread.getColour();
 
-	if ( currentDate != null && meshPoints.length > 4 ) {
+	if ( currentDate != null && (meshPoints.length > 4 || !isHeMeshRenderer)) {
 		drawLights( colour );
 		drawRotation();
 		drawMesh( colour, meshPoints );
