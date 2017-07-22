@@ -1,32 +1,32 @@
 public static final class Configuration {
 
 	public static final class Palette {
-		public static final int Background = 0xff0F0500;
+		public static final int Background = 0xffFF5564;
 
 		public static final class UI {
 
-			public static final int Foreground = 0xff0F0500;
+			public static final int Foreground = 0xffefefef;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xff00BD20;
+				public static final int Background = 0xffFF7378;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xff00BD20;
+				public static final int Background = 0xffFF7378;
 			}
 		}
 
 		public static final class Lights {
 			// Left Light
-			public static final int Left = 0xff1899cc;
+			public static final int Left = 0xffFF7378;
 
 			// Right Light
 			public static final int Right = 0xff79bd8f;
 
 			// Centre Light
-			public static final int Centre = 0xffffff;
+			public static final int Centre = 0xffFF7381;
 		}
 
 		public static final class Mesh {
@@ -34,10 +34,10 @@ public static final class Configuration {
 			public static final int Wireframe = 0xff808080;
 
 			// Face colour
-			public static final int Faces = 0xff808080;
+			public static final int Faces = 0xffFF7378;
 
 			// Line colour
-			public static final int Line = 0xff00D924;
+			public static final int Line = 0xffFF5564;
 		}
 	}
 
@@ -45,14 +45,18 @@ public static final class Configuration {
 		// Approximate time to parse CSV file (milliseconds)
 		public static final long StartOffset = 5000;
 
-		// Time acceleration
-		public static final long Acceleration = 7000;
+		// If you're using an easing type such as elastic or bounce, you will need to adjust
+		// this value to sync objects colliding
+		public static final long AnimationOffset = 1000;
+
+		// Time compression
+		public static final long TimeCompression = 8200;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 133;
+		public static final int BeatsPerMinute = 120;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 9;
+		public static final float BeatsPerBar = 42;
 
 		// 4/X
 		public static final float BeatDivision = 8;
@@ -61,12 +65,21 @@ public static final class Configuration {
 		public static final float[] NoteType = new float[] {
 			QuantizationType.OneQuarterNote.get(),
 			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneHalfNote.get(),
 			QuantizationType.OneSixteenthNote.get(),
+			QuantizationType.OneEighthNote.get(),
+			QuantizationType.OneEighthNote.get(),
 			QuantizationType.OneSixteenthNote.get(),
 			QuantizationType.OneHalfNote.get(),
 			QuantizationType.OneQuarterNote.get(),
 			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneHalfNoteTriplet.get()
+			QuantizationType.OneWholeNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneWholeNote.get(),
+			QuantizationType.OneQuarterNote.get(),
+			QuantizationType.OneSixteenthNote.get(),
+			QuantizationType.OneSixteenthNote.get()
 		};
 
 		// Number of MIDI channels to use
@@ -78,15 +91,15 @@ public static final class Configuration {
 			public static final int Min = 20;
 
 			// Maximum pitch (0 - 127)
-			public static final int Max = 100;
+			public static final int Max = 50;
 		}
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 20;
+			public static final int Min = 100;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 110;
+			public static final int Max = 127;
 		}
 
 
@@ -126,7 +139,7 @@ public static final class Configuration {
 			public static final float Min = 3.0;
 
 			// Maximum tween time
-			public static final float Max = 2.0;
+			public static final float Max = 3.0;
 		}
 
 		public static final class Scale {
@@ -135,10 +148,13 @@ public static final class Configuration {
 
 			// Maximum tween scale factor
 			public static final float Max = 1.0;
+
+			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
+			public static final float Default = 4.0;
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.01;
+		public static final float Speed = 0.005;
 
 
 		public static final class Zoom {
@@ -160,7 +176,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 7500;
+		public static final int MaxPoints = 10000;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -189,7 +205,7 @@ public static final class Configuration {
 		// - Rings
 		// - Explosions
 
-		public static final RenderType Renderer = RenderType.Explosions;
+		public static final RenderType Renderer = RenderType.Meteors;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -202,7 +218,24 @@ public static final class Configuration {
 		}
 
 		public static final class Explosions {
-			public static boolean UseTicks = true;
+			public static boolean UseTicks = false;
+		}
+
+		public static final class Meteors {
+			// Minimum point size for the end of the trail
+			public static float Min = 0.25;
+
+			// Maximum point size for the meteor
+			public static float Max = 4.25;
+
+			// Trail length in pixels
+			public static int TrailLength = 200;
+
+			// Opacity when in flight
+			public static int TrailOpacity = 120;
+
+			// Resting Opacity
+			public static int RestingOpacity = 200;
 		}
 	}
 
@@ -214,9 +247,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 1.0;
+			public static final float Min = 5.0;
 
-			public static final float Max = 10.0;
+			public static final float Max = 5.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
@@ -224,10 +257,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-05-01T00:00:00.000Z";
+		public static final String StartDate = "2017-06-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-05-31T23:59:59.999Z";
+		public static final String EndDate = "2017-06-30T23:59:59.999Z";
 	}
 
 	public static final class IO {
