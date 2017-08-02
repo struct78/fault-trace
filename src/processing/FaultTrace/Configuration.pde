@@ -1,7 +1,7 @@
 public static final class Configuration {
 
 	public static final class Palette {
-		public static final int Background = 0xffFF5564;
+		public static final int Background = 0xff030406;
 
 		public static final class UI {
 
@@ -9,24 +9,30 @@ public static final class Configuration {
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xffFF7378;
+				public static final int Background = 0xff505050;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xffFF7378;
+				public static final int Background = 0xff505050;
 			}
 		}
 
 		public static final class Lights {
 			// Left Light
-			public static final int Left = 0xffFF7378;
+			public static final int Left = 0xffED049C;
 
 			// Right Light
-			public static final int Right = 0xff79bd8f;
+			public static final int Right = 0xff323348;
+
+			// Right Light
+			public static final int Inside = 0xff4B11AB;
+
+			// Right Light
+			public static final int Outside = 0xff0688D9;
 
 			// Centre Light
-			public static final int Centre = 0xffFF7381;
+			public static final int Centre = 0xffffffff;
 		}
 
 		public static final class Mesh {
@@ -34,52 +40,45 @@ public static final class Configuration {
 			public static final int Wireframe = 0xff808080;
 
 			// Face colour
-			public static final int Faces = 0xffFF7378;
+			public static final int Faces = 0xff404040;
 
 			// Line colour
-			public static final int Line = 0xffFF5564;
+			public static final int Line = 0xffBF214B;
+
+			public static final int[] Plasma = {
+				0xffED049C,
+				0xff0688D9,
+				0xffD90265,
+				0xff4B11AB,
+				0xff003372,
+				0xffE038B8
+			};
 		}
 	}
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 5000;
+		public static final long StartOffset = 2000;
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
-		public static final long AnimationOffset = 1000;
+		public static final long AnimationOffset = 10;
 
 		// Time compression
 		public static final long TimeCompression = 8200;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 120;
+		public static final int BeatsPerMinute = 124;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 42;
+		public static final float BeatsPerBar = 4;
 
 		// 4/X
-		public static final float BeatDivision = 8;
+		public static final float BeatDivision = 4;
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
-			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneHalfNote.get(),
-			QuantizationType.OneSixteenthNote.get(),
-			QuantizationType.OneEighthNote.get(),
-			QuantizationType.OneEighthNote.get(),
-			QuantizationType.OneSixteenthNote.get(),
-			QuantizationType.OneHalfNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneWholeNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneWholeNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-			QuantizationType.OneSixteenthNote.get(),
-			QuantizationType.OneSixteenthNote.get()
+			QuantizationType.OneWholeNote.get()
 		};
 
 		// Number of MIDI channels to use
@@ -136,10 +135,10 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 3.0;
+			public static final float Min = 0.01;
 
 			// Maximum tween time
-			public static final float Max = 3.0;
+			public static final float Max = 0.01;
 		}
 
 		public static final class Scale {
@@ -150,7 +149,7 @@ public static final class Configuration {
 			public static final float Max = 1.0;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
-			public static final float Default = 4.0;
+			public static final float Default = 1.0;
 		}
 
 		// Rotation speed
@@ -165,10 +164,10 @@ public static final class Configuration {
 
 	public static final class Optimisations {
 		// In an effort to keep animation speed consistent, increase this number to group neighbouring points into a single point
-		public static final float PointDistanceTolerance = 0.001;
+		public static final float PointDistanceTolerance = 1.2;
 
 		// Re-use existing points
-		public static final boolean GroupPoints = false;
+		public static final boolean GroupPoints = true;
 	}
 
 	public static final class Mesh {
@@ -176,7 +175,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 10000;
+		public static final int MaxPoints = 50;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -204,8 +203,10 @@ public static final class Configuration {
 		// - Particles
 		// - Rings
 		// - Explosions
+		// - Meteors
+		// - Plasma
 
-		public static final RenderType Renderer = RenderType.Meteors;
+		public static final RenderType Renderer = RenderType.Plasma;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -237,6 +238,14 @@ public static final class Configuration {
 			// Resting Opacity
 			public static int RestingOpacity = 200;
 		}
+
+		public static final class Plasma {
+			// Minimum ribbon width
+			public static float Min = 1.0;
+
+			// Maximum ribbon width
+			public static float Max = 4.0;
+		}
 	}
 
 	public static final class Data {
@@ -247,9 +256,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 5.0;
+			public static final float Min = 0.0;
 
-			public static final float Max = 5.0;
+			public static final float Max = 1.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
