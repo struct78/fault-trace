@@ -152,14 +152,12 @@ public class GlobePoint {
 	}
 
 	public void addAnimation( float scale, float distance, float animationTime ) {
-		this.distance = distance;
-
-	 	animation = new Ani( this, animationTime, "scale", scale, Ani.BOUNCE_OUT );
+	 	animation = new Ani( this, animationTime, "scale", scale, Ani.QUAD_IN_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
-
-		animation = new Ani( this, animationTime * .36, "distance", 0.0, Ani.EXPO_OUT );
+		
+		animation = new Ani( this, animationTime, "distance", distance, Ani.QUAD_IN_OUT );
 		animation.pause();
 
 		this.animations.add( animation );
