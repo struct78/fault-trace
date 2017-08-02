@@ -28,6 +28,7 @@ long start_ms;
 long end_ms;
 long diff_quantized_ms;
 long diff_accelerated_ms;
+long startTime;
 
 float theta = 180;
 
@@ -95,9 +96,11 @@ float eased_y;
 float radius;
 float mid, r2, x2, y2;
 double deg = 0.0;
+float xf2, yf2, zf2, wf2, d2, xf3, yf3, zf3, xoff;
+float axf, ayf, azf;
 
 //renderPoints
-float trailInterval;
+float interval;
 WB_Point4D trail;
 
 //quantize()
@@ -105,6 +108,7 @@ int type;
 float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
 float milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
 float milliseconds_per_note;
+int barLength = int(milliseconds_per_beat * Configuration.MIDI.BeatsPerBar);
 
 
 public void settings() {
@@ -228,10 +232,6 @@ void setGlobeScale() {
 }
 
 void setupUI() {
-	// Colours are seasonal
-	// Left -> Right = January - December
-	//colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffFD7400, 0xff28DAB1, 0xff28DAB1, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
-	//lightColours.addAll( Arrays.asList( 0xFF1899CC, 0xFF79BD8F ) );
 	uiGridWidth = Configuration.UI.GridWidth;
 	uiMargin = Configuration.UI.Margin;
 }
@@ -259,9 +259,19 @@ long quantize( long delay ) {
 	return (long)(Math.ceil( delay / milliseconds_per_note ) * milliseconds_per_note) ;
 }
 
+void loop(int channel, int velocity, int pitch) {
+	delay = Configuration.MIDI.StartOffset - startTime;
+	while (delay < quantized_delay) {
+		setNote(channel, velocity, pitch, barLength, delay);
+		delay += barLength;
+	}
+}
+
 void setupSong() {
 	// Set the delay between notes
 	delay = Configuration.MIDI.StartOffset;
+	delay += barLength;
+	startTime = millis();
 	quantized_delay = delay;
 
 	// CSV
@@ -312,7 +322,7 @@ void setupSong() {
 			int duration = mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
 			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
-			float distance = mapMagnitude( magnitude, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
+			float distance = Configuration.Data.Distance.Max;//mapMagnitude( magnitude, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			color colour = getColourFromMonth( d2 );
 			quantized_delay = quantize(delay);
 
@@ -372,12 +382,17 @@ void setupSong() {
 			if ( magnitude > 6.0 ) {
 				setNote( 11, velocity, 60, 100, quantized_delay );
 			}
+
 			x++;
 		}
 
 		// Update the previous date to the current date for the next iteration
 		previousDate = date;
 	}
+
+	startTime = millis() - startTime;
+
+	loop( 10, 127, 40 );
 }
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
@@ -420,12 +435,16 @@ void setupUIThread() {
 
 void setupRenderer() {
 	render = new WB_Render3D( this );
-	isHeMeshRenderer = (Configuration.Mesh.Renderer != RenderType.Lines && Configuration.Mesh.Renderer != RenderType.Rings && Configuration.Mesh.Renderer != RenderType.Meteors);
+	isHeMeshRenderer = (Configuration.Mesh.Renderer != RenderType.Lines &&
+		Configuration.Mesh.Renderer != RenderType.Rings &&
+		Configuration.Mesh.Renderer != RenderType.Meteors &&
+		Configuration.Mesh.Renderer != RenderType.Plasma);
 }
 
 void setupDebug() {
 	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
 	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatDivision);
+	println("Bar Length: " + barLength + "ms");
 	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
 	println("Total " + diff_accelerated_ms + "ms");
 	println("Quantized " + diff_quantized_ms + "ms");
@@ -472,12 +491,8 @@ void drawBackground() {
 }
 
 void drawLights( color colour ) {
-	//ambient( Configuration.Palette.Lights.Centre );
-	//spotLight(255, 255, 255, 0, 0, 250, 0, 0, -1, PI, 10000 );
-	//directionalLight( red( Configuration.Palette.Lights.Left ), green( Configuration.Palette.Lights.Left ), blue( Configuration.Palette.Lights.Left ), 0, 0, -1 );
-	//pointLight( red( Configuration.Palette.Lights.Left ), green( Configuration.Palette.Lights.Left ), blue( Configuration.Palette.Lights.Left ), 0, 0, 250 );
-	//pointLight( red( Configuration.Palette.Lights.Right ), green( Configuration.Palette.Lights.Right ), blue( Configuration.Palette.Lights.Right ), width, height, 0 );
-	//shininess( 0.03 );
+	ambient( Configuration.Palette.Lights.Centre );
+	directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
 }
 
 void drawRotation() {
@@ -583,6 +598,9 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 		case Meteors:
 			renderMeteors( points );
 			break;
+		case Plasma:
+			renderPlasma( points );
+			break;
 		default:
 			break;
 	}
@@ -665,8 +683,8 @@ void renderMeteors( WB_Point4D[] points ) {
 
 		if (wf > 0) {
 			for ( x = 0 ; x < Configuration.Mesh.Meteors.TrailLength ; x++ ) {
-				trailInterval = lerp(0, wf, (float)x/Configuration.Mesh.Meteors.TrailLength);
-				trail = point.mul( 1 + trailInterval );
+				interval = lerp(0, wf, (float)x/Configuration.Mesh.Meteors.TrailLength);
+				trail = point.mul( 1 + interval );
 
 				strokeWeight(lerp(Configuration.Mesh.Meteors.Min, Configuration.Mesh.Meteors.Max, 1-(float)x/Configuration.Mesh.Meteors.TrailLength));
 				stroke( Configuration.Palette.Mesh.Line, opacity);
@@ -686,6 +704,113 @@ void renderMeteors( WB_Point4D[] points ) {
 	hint(DISABLE_DEPTH_TEST);
 	hint(DISABLE_DEPTH_SORT);
 }
+
+void renderPlasma( WB_Point4D[] points ) {
+
+	hint(ENABLE_DEPTH_TEST);
+	hint(ENABLE_DEPTH_SORT);
+	noStroke();
+
+	/*
+
+	sphereDetail( 60 );
+	sphere( Configuration.Mesh.GlobeSize );
+	*/
+	fill( Configuration.Palette.Mesh.Faces, 100 );
+	sphereDetail( 60 );
+	sphere(50);
+	noFill();
+	blendMode(ADD);
+	curveDetail(10);
+
+	y = 10;
+	j = 0;
+
+	axf = 0.0;
+	ayf = 0.0;
+	azf = 0.0;
+
+	for ( WB_Point4D point : points ) {
+		xf = point.xf();
+		yf = point.yf();
+		zf = point.zf();
+		wf = point.wf();
+
+		axf += xf;
+		ayf += yf;
+		azf += zf;
+	}
+
+	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), width/2+(axf/points.length), height/2+(ayf/points.length), 0, -1, -1, -1, PI, TWO_PI);
+	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), width/2+(axf/points.length), height/2+(ayf/points.length), 0, -1, -1, -1, PI, TWO_PI);
+	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), width/2+(axf/points.length), height/2+(ayf/points.length), 0, 0, 0, -1, PI, TWO_PI);
+	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), width/2+(axf/points.length), height/2+(ayf/points.length), 0, 0, 0, -1, PI, TWO_PI);
+	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), width/2+(axf/points.length), height/2+(ayf/points.length), azf/points.length, -1, -1, -1, PI, TWO_PI);
+	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), width/2+(axf/points.length), height/2+(ayf/points.length), azf/points.length, -1, -1, -1, PI, TWO_PI);
+
+
+	for ( WB_Point4D point : points ) {
+		xf = point.xf();
+		yf = point.yf();
+		zf = point.zf();
+		wf = point.wf();
+		j++;
+
+		strokeWeight( Configuration.Mesh.Plasma.Min );
+
+		//line(0, 0, 0, xf, yf, zf);
+		beginShape();
+		vertex(0, 0, 0);
+		xoff = 0.0;
+		float xoffvalue = 0.1;
+
+		for ( x = 0 ; x <= y ; x++ ) {
+			interval = (float)x/y;
+
+			if (interval <= wf) {
+				xf2 = lerp(0.0, xf, interval);
+				yf2 = lerp(0.0, yf, interval);
+				zf2 = lerp(0.0, zf, interval);
+				d2 = 200 * ((x<y/2) ? interval:1-interval);
+
+				stroke( Configuration.Palette.Mesh.Plasma[ j ] );
+
+				strokeWeight( invert( (float)map(x, y, 0, Configuration.Mesh.Plasma.Max, Configuration.Mesh.Plasma.Min ), Configuration.Mesh.Plasma.Min, Configuration.Mesh.Plasma.Max ) );
+
+				xf3 = map(noise( sin(xf2), theta), 0, 1, xf2-d2, xf2+d2);
+				yf3 = map(noise( cos(yf2), theta), 0, 1, yf2-d2, yf2+d2);
+				zf3 = map(noise( tan(zf2), theta), 0, 1, zf2-d2, zf2+d2);
+
+				curveVertex( xf3, yf3, zf3 );
+				xoff += xoffvalue;
+			}
+
+			if (j == Configuration.Palette.Mesh.Plasma.length-1) {
+				j = 0;
+			}
+		}
+
+		curveVertex( xf3, yf3, zf3 );
+		endShape();
+
+		if (wf == 1.0) {
+			for ( x = 1 ; x < 15; x++ ) {
+				stroke( Configuration.Palette.Mesh.Plasma[ j ], 150/x );
+				strokeWeight( x );
+				point(xf3, yf3, zf3);
+			}
+		}
+	}
+
+	noStroke();
+	fill(255, 23);
+	sphere(Configuration.Mesh.GlobeSize);
+
+	blendMode(NORMAL);
+	hint(DISABLE_DEPTH_TEST);
+	hint(DISABLE_DEPTH_SORT);
+}
+
 void renderEdgesPoints( HE_Mesh globeMesh ) {
 	noFill();
 	render.drawEdges( globeMesh );
