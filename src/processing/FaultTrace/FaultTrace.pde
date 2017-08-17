@@ -24,6 +24,8 @@ import wblut.processing.*;
 long setupTime;
 long delay;
 long quantized_delay;
+long loopTime;
+long loopDuration;
 long start_ms;
 long end_ms;
 long diff_quantized_ms;
@@ -80,7 +82,7 @@ SimpleDateFormat monthFormat;
 SimpleDateFormat dayFormat;
 SimpleDateFormat hourFormat;
 SimpleDateFormat minuteFormat;
-color colour;
+color colour, background;
 HUD hud;
 Point2D.Double rectanglePoint;
 int uiGridWidth;
@@ -97,7 +99,7 @@ float radius;
 float mid, r2, x2, y2;
 double deg = 0.0;
 float xf2, yf2, zf2, wf2, d2, xf3, yf3, zf3, xoff;
-float axf, ayf, azf;
+float axf, ayf, azf, nxf, nyf, nzf;
 
 //renderPoints
 float interval;
@@ -259,20 +261,11 @@ long quantize( long delay ) {
 	return (long)(Math.ceil( delay / milliseconds_per_note ) * milliseconds_per_note) ;
 }
 
-void loop(int channel, int velocity, int pitch) {
-	delay = Configuration.MIDI.StartOffset - startTime;
-	while (delay < quantized_delay) {
-		setNote(channel, velocity, pitch, barLength, delay);
-		delay += barLength;
-	}
-}
-
 void setupSong() {
 	// Set the delay between notes
 	delay = Configuration.MIDI.StartOffset;
-	delay += barLength;
 	startTime = millis();
-	quantized_delay = delay;
+	quantized_delay = quantize(delay);
 
 	// CSV
 	double latitude, longitude;
@@ -288,6 +281,9 @@ void setupSong() {
 
 	int x = 0;
 
+	loopTime = millis();
+	loopDuration = millis();
+
 	for (TableRow row : rows ) {
 		// Extract the data
 		date = row.getString("time");
@@ -296,6 +292,7 @@ void setupSong() {
 		depth = row.getFloat("depth");
 		magnitude = row.getFloat("mag");
 		rms = row.getFloat("rms");
+		loopTime = millis() - loopDuration;
 
 		try {
 			if (previousDate != null) {
@@ -324,7 +321,18 @@ void setupSong() {
 			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float distance = Configuration.Data.Distance.Max;//mapMagnitude( magnitude, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			color colour = getColourFromMonth( d2 );
-			quantized_delay = quantize(delay);
+			color background = getBackgroundFromMonth( d2 );
+
+			// Looping notes
+			// NOTE: Timing may be off, so we want the difference between the current delay and the previous delay minus
+			// the note time to be more than 10%
+			if (((quantize(delay) - loopTime) - quantized_delay) > (barLength * .1)) {
+				//channel, velocity, pitch, duration, quantized_delay
+				setNote( 10, 127, 40, barLength, quantized_delay );
+			}
+
+			quantized_delay = quantize(delay) - loopTime;
+
 
 			WB_Point wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, scale, Configuration.Mesh.GlobeSize );
 
@@ -350,7 +358,7 @@ void setupSong() {
 			}
 
 			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
-			states.add( new StateManager( d2, colour, (long)(diff/Configuration.MIDI.TimeCompression) ) );
+			states.add( new StateManager( d2, colour, background, (long)(diff/Configuration.MIDI.TimeCompression) ) );
 
 			if (note != null) {
 				isDuplicateNote = (note.channel == channel && note.delay == quantized_delay);
@@ -363,36 +371,15 @@ void setupSong() {
 				y++;
 			}
 
-			// Heavy guitar
-			if ( depth >= 300 && depth < 500 ) {
-				setNote( 8, velocity, 60, 100, quantized_delay );
-			}
-
-			// Drone
-			if ( depth >= 500 && depth < 700) {
-				setNote( 9, velocity, 60, 100, quantized_delay );
-			}
-
-			// Drone
-			if ( depth >= 700 && depth < 1000) {
-				setNote( 10, velocity, 60, 100, quantized_delay );
-			}
-
-			// Crash
-			if ( magnitude > 6.0 ) {
-				setNote( 11, velocity, 60, 100, quantized_delay );
-			}
-
 			x++;
 		}
 
 		// Update the previous date to the current date for the next iteration
 		previousDate = date;
+		loopDuration = millis();
 	}
 
 	startTime = millis() - startTime;
-
-	loop( 10, 127, 40 );
 }
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
@@ -487,12 +474,14 @@ void setupFrameRate() {
 }
 
 void drawBackground() {
-	background( Configuration.Palette.Background );
+	background = stateThread.getBackground();
+	background( background );
 }
 
 void drawLights( color colour ) {
 	ambient( Configuration.Palette.Lights.Centre );
-	directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
+	pointLight( red(colour), green(colour), blue(colour), width, 400, width/2 );
+	//directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
 }
 
 void drawRotation() {
@@ -706,22 +695,10 @@ void renderMeteors( WB_Point4D[] points ) {
 }
 
 void renderPlasma( WB_Point4D[] points ) {
-
 	hint(ENABLE_DEPTH_TEST);
 	hint(ENABLE_DEPTH_SORT);
+
 	noStroke();
-
-	/*
-
-	sphereDetail( 60 );
-	sphere( Configuration.Mesh.GlobeSize );
-	*/
-	fill( Configuration.Palette.Mesh.Faces, 100 );
-	sphereDetail( 60 );
-	sphere(50);
-	noFill();
-	blendMode(ADD);
-	curveDetail(10);
 
 	y = 10;
 	j = 0;
@@ -741,12 +718,38 @@ void renderPlasma( WB_Point4D[] points ) {
 		azf += zf;
 	}
 
-	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), width/2+(axf/points.length), height/2+(ayf/points.length), 0, -1, -1, -1, PI, TWO_PI);
-	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), width/2+(axf/points.length), height/2+(ayf/points.length), 0, -1, -1, -1, PI, TWO_PI);
-	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), width/2+(axf/points.length), height/2+(ayf/points.length), 0, 0, 0, -1, PI, TWO_PI);
-	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), width/2+(axf/points.length), height/2+(ayf/points.length), 0, 0, 0, -1, PI, TWO_PI);
-	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), width/2+(axf/points.length), height/2+(ayf/points.length), azf/points.length, -1, -1, -1, PI, TWO_PI);
-	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), width/2+(axf/points.length), height/2+(ayf/points.length), azf/points.length, -1, -1, -1, PI, TWO_PI);
+	axf = axf/points.length;
+	ayf = ayf/points.length;
+	azf = azf/points.length;
+
+	nxf = (axf < 0) ? -1 : 1;
+	nyf = (ayf < 0) ? -1 : 1;
+	nzf = (azf < 0) ? -1 : 1;
+
+	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), axf, ayf, azf, nxf, nyf, nzf, PI, 1);
+	spotLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), axf, ayf, azf, -nxf, -nyf, -nzf, PI/3, 12);
+
+	pushMatrix();
+	rotateY(radians(-30));
+	spotLight( red(Configuration.Palette.Lights.Inside), green(Configuration.Palette.Lights.Inside), blue(Configuration.Palette.Lights.Inside), axf, ayf, azf, nxf, nyf, nzf, PI, 1);
+	rotateY(radians(100));
+	spotLight( red(Configuration.Palette.Lights.Inside), green(Configuration.Palette.Lights.Inside), blue(Configuration.Palette.Lights.Inside), axf, ayf, azf, -nxf, -nyf, -nzf, PI/3, 12);
+	popMatrix();
+
+	pushMatrix();
+	rotateX(radians(30));
+	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), axf, ayf, azf, nxf, nyf, nzf, PI, 1);
+	rotateX(radians(-100));
+	spotLight( red(Configuration.Palette.Lights.Right), green(Configuration.Palette.Lights.Right), blue(Configuration.Palette.Lights.Right), axf, ayf, azf, -nxf, -nyf, -nzf, PI/3, 12);
+	popMatrix();
+
+	noStroke();
+	fill( Configuration.Palette.Mesh.Faces, 250 );
+	sphereDetail( 60 );
+	sphere(50);
+	noFill();
+	curveDetail(20);
+	blendMode(ADD);
 
 
 	for ( WB_Point4D point : points ) {
@@ -762,7 +765,7 @@ void renderPlasma( WB_Point4D[] points ) {
 		beginShape();
 		vertex(0, 0, 0);
 		xoff = 0.0;
-		float xoffvalue = 0.1;
+		float xoffvalue = 0.01;
 
 		for ( x = 0 ; x <= y ; x++ ) {
 			interval = (float)x/y;
@@ -771,15 +774,15 @@ void renderPlasma( WB_Point4D[] points ) {
 				xf2 = lerp(0.0, xf, interval);
 				yf2 = lerp(0.0, yf, interval);
 				zf2 = lerp(0.0, zf, interval);
-				d2 = 200 * ((x<y/2) ? interval:1-interval);
+				d2 = 180 * ((x<y/2) ? interval:1-interval);
 
 				stroke( Configuration.Palette.Mesh.Plasma[ j ] );
 
 				strokeWeight( invert( (float)map(x, y, 0, Configuration.Mesh.Plasma.Max, Configuration.Mesh.Plasma.Min ), Configuration.Mesh.Plasma.Min, Configuration.Mesh.Plasma.Max ) );
 
-				xf3 = map(noise( sin(xf2), theta), 0, 1, xf2-d2, xf2+d2);
-				yf3 = map(noise( cos(yf2), theta), 0, 1, yf2-d2, yf2+d2);
-				zf3 = map(noise( tan(zf2), theta), 0, 1, zf2-d2, zf2+d2);
+				xf3 = map(noise( sin(xf2) * PI, theta), 0, 1, xf2-d2, xf2+d2);
+				yf3 = map(noise( cos(yf2) * PI, theta), 0, 1, yf2-d2, yf2+d2);
+				zf3 = map(noise( tan(zf2) * PI, theta), 0, 1, zf2-d2, zf2+d2);
 
 				curveVertex( xf3, yf3, zf3 );
 				xoff += xoffvalue;
@@ -792,9 +795,10 @@ void renderPlasma( WB_Point4D[] points ) {
 
 		curveVertex( xf3, yf3, zf3 );
 		endShape();
+		resetShader();
 
 		if (wf == 1.0) {
-			for ( x = 1 ; x < 15; x++ ) {
+			for ( x = 1 ; x < 10; x++ ) {
 				stroke( Configuration.Palette.Mesh.Plasma[ j ], 150/x );
 				strokeWeight( x );
 				point(xf3, yf3, zf3);
@@ -803,10 +807,9 @@ void renderPlasma( WB_Point4D[] points ) {
 	}
 
 	noStroke();
-	fill(255, 23);
+	fill(255, 15);
 	sphere(Configuration.Mesh.GlobeSize);
 
-	blendMode(NORMAL);
 	hint(DISABLE_DEPTH_TEST);
 	hint(DISABLE_DEPTH_SORT);
 }
@@ -995,6 +998,11 @@ int getChannelFromCoordinates( double latitude, double longitude ) {
 color getColourFromMonth( Calendar date ) {
 	int daysinmonth = date.getActualMaximum( Calendar.DAY_OF_MONTH );
 	return lerpColor( color( Configuration.Palette.UI.Start.Background ), color( Configuration.Palette.UI.End.Background ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth );
+}
+
+color getBackgroundFromMonth( Calendar date ) {
+	int daysinmonth = date.getActualMaximum( Calendar.DAY_OF_MONTH );
+	return lerpColor( color( Configuration.Palette.Background.Start ), color( Configuration.Palette.Background.End ), (float)date.get(Calendar.DAY_OF_MONTH)/daysinmonth );
 }
 
 void saveFrames() {
