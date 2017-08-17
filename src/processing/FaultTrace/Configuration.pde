@@ -1,7 +1,11 @@
 public static final class Configuration {
 
 	public static final class Palette {
-		public static final int Background = 0xff030406;
+		public static final class Background {
+			public static final int Start = 0xff1F0A22;
+
+			public static final int End = 0xff090A24;
+		}
 
 		public static final class UI {
 
@@ -9,12 +13,12 @@ public static final class Configuration {
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xff505050;
+				public static final int Background = 0xff631F6E;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xff505050;
+				public static final int Background = 0xff0688D9;
 			}
 		}
 
@@ -22,14 +26,17 @@ public static final class Configuration {
 			// Left Light
 			public static final int Left = 0xffED049C;
 
-			// Right Light
-			public static final int Right = 0xff323348;
+			// Inside Light
+			public static final int Inside = 0xff9D31AE;
 
 			// Right Light
-			public static final int Inside = 0xff4B11AB;
+			public static final int Right = 0xff16B3BA;
 
 			// Right Light
-			public static final int Outside = 0xff0688D9;
+			public static final int Outside = 0xff9D31AE;
+
+			// Bottom light
+			public static final int Bottom = 0xff0688D9;
 
 			// Centre Light
 			public static final int Centre = 0xffffffff;
@@ -51,7 +58,9 @@ public static final class Configuration {
 				0xffD90265,
 				0xff4B11AB,
 				0xff003372,
-				0xffE038B8
+				0xffE038B8,
+				0xffB20232,
+				0xffC27310
 			};
 		}
 	}
@@ -104,10 +113,10 @@ public static final class Configuration {
 
 		public static final class Note {
 			// Minimum note duration in milliseconds
-			public static final int Min = 10;
+			public static final int Min = 967;
 
 			// Maximum note duration in milliseconds
-			public static final int Max = 500;
+			public static final int Max = 1935;
 		}
 	}
 
@@ -135,10 +144,10 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 0.01;
+			public static final float Min = 0.001;
 
 			// Maximum tween time
-			public static final float Max = 0.01;
+			public static final float Max = 0.001;
 		}
 
 		public static final class Scale {
@@ -153,7 +162,7 @@ public static final class Configuration {
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.005;
+		public static final float Speed = 0.01935;
 
 
 		public static final class Zoom {
@@ -244,7 +253,7 @@ public static final class Configuration {
 			public static float Min = 1.0;
 
 			// Maximum ribbon width
-			public static float Max = 4.0;
+			public static float Max = 6.0;
 		}
 	}
 
@@ -266,10 +275,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-06-01T00:00:00.000Z";
+		public static final String StartDate = "2017-07-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-06-30T23:59:59.999Z";
+		public static final String EndDate = "2017-07-31T23:59:59.999Z";
 	}
 
 	public static final class IO {
