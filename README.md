@@ -10,16 +10,16 @@ This song was inspired by artists such as Brian Eno, Rae Howell, and Fabrizio Pa
 
 ## SONG INFORMATION
 
-Track: March
+Track: July
 
 Time Signature: 4/4
 
-Time Compression: 4000x
+Time Compression: 8200x
 
-Tempo: 100 BPM
+Tempo: 124 BPM
 
-Earthquakes 7602
+Earthquakes 12,024
 
 ## Video
 
-[![Fault Trace](https://img.youtube.com/vi/WJ-J4suUoEQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=WJ-J4suUoEQ)
+[![Fault Trace](https://img.youtube.com/vi/2bYOFinQsQo/maxresdefault.jpg)](https://www.youtube.com/watch?v=2bYOFinQsQo)
