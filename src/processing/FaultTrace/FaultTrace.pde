@@ -49,12 +49,12 @@ ArrayList<StateManager> states = new ArrayList();
 ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
 ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
 ArrayList<ArrayList<WB_Point4D>> segments = new ArrayList<ArrayList<WB_Point4D>>();
+ArrayList<ArrayList<WB_Point5D>> segments5D = new ArrayList<ArrayList<WB_Point5D>>();
 
 PFont font;
 HE_Mesh globeMesh;
 HE_Mesh wireframeMesh;
 WB_Render3D render;
-WB_DebugRender3D debugRender;
 HEC_ConvexHull creatorGlobe;
 HEM_Twist twist;
 HEM_Lattice lattice;
@@ -65,6 +65,10 @@ HEC_Geodesic geodesic;
 HEC_Sphere sphere;
 
 WB_Point4D[] meshPoints;
+WB_Point5D[] meshPoints5D;
+WB_Point wbPoint;
+WB_Point4D segmentPoint;
+WB_Point5D segmentPoint5D;
 Globe globe;
 Graph graph;
 Ani globeAnimation;
@@ -93,12 +97,12 @@ int levels;
 int level;
 float wf, xf, yf, zf;
 int opacity = 150;
-int k, j, x, y;
+int k, j, x, y, z;
 float eased_y;
 float radius;
 float mid, r2, x2, y2;
 double deg = 0.0;
-float xf2, yf2, zf2, wf2, d2, xf3, yf3, zf3, xoff;
+float xf2, yf2, zf2, wf2, d2, xf3, yf3, zf3, xoff, yoff;
 float axf, ayf, azf, nxf, nyf, nzf;
 
 //renderPoints
@@ -114,7 +118,7 @@ int barLength = int(milliseconds_per_beat * Configuration.MIDI.BeatsPerBar);
 
 
 public void settings() {
-	size(1920, 1080, P3D);
+	size(1920, 1080, Configuration.UI.Mode);
 	smooth(4);
 	pixelDensity(2);
 }
@@ -137,7 +141,7 @@ void setup() {
 	setupShutdownHook();
 	setupFrameRate();
 	setupTime = millis();
-	setupDebug();
+	setupInfo();
 }
 
 void draw() {
@@ -323,18 +327,14 @@ void setupSong() {
 			color colour = getColourFromMonth( d2 );
 			color background = getBackgroundFromMonth( d2 );
 
-			// Looping notes
-			// NOTE: Timing may be off, so we want the difference between the current delay and the previous delay minus
-			// the note time to be more than 10%
-			if (((quantize(delay) - loopTime) - quantized_delay) > (barLength * .1)) {
-				//channel, velocity, pitch, duration, quantized_delay
-				setNote( 10, 127, 40, barLength, quantized_delay );
-			}
-
 			quantized_delay = quantize(delay) - loopTime;
 
-
-			WB_Point wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, scale, Configuration.Mesh.GlobeSize );
+			if ( Configuration.Mesh.Renderer == RenderType.PulsarSignal ) {
+				wbPoint = Geography.CoordinatesTo2DWBPoint( latitude, longitude, Configuration.Mesh.PulsarSignal.Width, Configuration.Mesh.PulsarSignal.Height );
+			}
+			else {
+				wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, scale, Configuration.Mesh.GlobeSize );
+			}
 
 			GlobePoint newPoint = new GlobePoint( wbPoint );
 			GlobePoint existingPoint = globe.getExistingPoint( newPoint );
@@ -346,6 +346,7 @@ void setupSong() {
 				existingPoint.addScale( scale );
 				existingPoint.addAnimation( scale, distance, animationTime );
 				existingPoint.addDistance( distance );
+				existingPoint.addMagnitude( magnitude );
 			}
 			else {
 				newPoint.addDelay( quantized_delay + millis() - Configuration.MIDI.AnimationOffset);
@@ -354,6 +355,7 @@ void setupSong() {
 				newPoint.addDefaultScale( Configuration.Animation.Scale.Default );
 				newPoint.addAnimation( scale, distance, animationTime );
 				newPoint.addDistance( distance );
+				newPoint.addMagnitude( magnitude );
 				points.add( newPoint );
 			}
 
@@ -422,13 +424,10 @@ void setupUIThread() {
 
 void setupRenderer() {
 	render = new WB_Render3D( this );
-	isHeMeshRenderer = (Configuration.Mesh.Renderer != RenderType.Lines &&
-		Configuration.Mesh.Renderer != RenderType.Rings &&
-		Configuration.Mesh.Renderer != RenderType.Meteors &&
-		Configuration.Mesh.Renderer != RenderType.Plasma);
+	isHeMeshRenderer = Configuration.Mesh.Renderer.toBoolean();
 }
 
-void setupDebug() {
+void setupInfo() {
 	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
 	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatDivision);
 	println("Bar Length: " + barLength + "ms");
@@ -491,6 +490,17 @@ void drawRotation() {
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
 	rotateX( radians(-23.5) );
+}
+
+void drawMesh5D( color colour, WB_Point5D[] points ) {
+	hint(ENABLE_DEPTH_TEST);
+
+	switch ( Configuration.Mesh.Renderer ) {
+		case PulsarSignal:
+			renderPulsarSignal( points );
+		default:
+			break;
+	}
 }
 
 void drawMesh( color colour, WB_Point4D[] points ) {
@@ -593,6 +603,82 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 		default:
 			break;
 	}
+}
+
+void renderPulsarSignal( WB_Point5D[] points ) {
+	int offset = 50;
+	translate( width / 2 - Configuration.Mesh.PulsarSignal.Width / 2, height / 2 - Configuration.Mesh.PulsarSignal.Height / 2 - offset );
+	levels = (Configuration.Mesh.PulsarSignal.Height / Configuration.Mesh.PulsarSignal.Distance);
+
+	segments5D.clear();
+
+
+	for ( x = 0 ; x < levels ; x++ ) {
+		segments5D.add(new ArrayList<WB_Point5D>());
+	}
+
+	strokeWeight(1);
+
+	stroke( Configuration.Palette.Mesh.Line );
+	for ( WB_Point5D point : points ) {
+		yf = point.yf();
+		level = (int)Math.floor(yf / Configuration.Mesh.PulsarSignal.Distance);
+		segments5D.get(level).add(point);
+	}
+
+	level = 0;
+	xoff = 0;
+
+	curveDetail( 5 );
+
+	for ( y = Configuration.Mesh.PulsarSignal.Distance ; y < Configuration.Mesh.PulsarSignal.Height; y+=Configuration.Mesh.PulsarSignal.Distance ) {
+		fill( background );
+		beginShape();
+		curveVertex(0, y);
+
+		mid = (Configuration.Mesh.PulsarSignal.Width/2) - (sin(level)*100);
+		//mid = map(noise(xoff, yoff), 0, 1, mid-100, mid+100);
+		float xoffvalue = 100.0;
+		float y3;
+		y2 = y;
+
+		for ( z = 0 ; z < segments5D.get(level).size(); z++ ) {
+			segmentPoint = segments5D.get(level).get(z);
+			wf = segmentPoint.wf();
+			xoffvalue += wf;
+		}
+
+		for ( k = 0; k <= Configuration.Mesh.PulsarSignal.Width; k+=Configuration.Mesh.PulsarSignal.Step ) {
+			float percentile = (k<mid) ? ((float)k/mid) : (Configuration.Mesh.PulsarSignal.Width/(float)k)-1.0;
+			//y3 = pow(xoffvalue, percentile);
+			y3 = xoffvalue * percentile;
+			y2 = y;
+			y2 -= map(noise(xoff, yoff), 0, 1, 10, y3);
+
+			vertex( k, y2 );
+			xoff += 0.05;
+		}
+
+		curveVertex( Configuration.Mesh.PulsarSignal.Width, y );
+		vertex( Configuration.Mesh.PulsarSignal.Width, Configuration.Mesh.PulsarSignal.Height );
+		vertex( 0, Configuration.Mesh.PulsarSignal.Height );
+
+		endShape(CLOSE);
+
+		level++;
+	}
+	yoff += 0.01;
+
+	strokeWeight( 2 );
+	stroke( background );
+	noFill();
+
+	beginShape();
+	vertex(0, 0);
+	vertex(0, Configuration.Mesh.PulsarSignal.Height);
+	vertex(Configuration.Mesh.PulsarSignal.Width, Configuration.Mesh.PulsarSignal.Height);
+	vertex(Configuration.Mesh.PulsarSignal.Width, 0);
+	endShape();
 }
 
 void renderPoints( HE_Mesh globeMesh ) {
@@ -888,8 +974,6 @@ void renderRings( WB_Point4D[] points ) {
 		level = (int)((eased_y + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
 		radius = getRadiusOnYPlane(eased_y);
 
-		WB_Point4D segmentPoint;
-
 		pushMatrix();
 		translate( 0, eased_y, 0 );
 		rotateX(radians(-90));
@@ -937,16 +1021,23 @@ void renderParticles( WB_Point4D[] points ) {
 }
 
 void drawGlobe() {
-	meshPoints = globe.getPoints( Configuration.Mesh.MaxPoints );
+	if (Configuration.Mesh.Renderer == RenderType.PulsarSignal) {
+		meshPoints5D = globe.getPoints5D( Configuration.Mesh.MaxPoints );
+	} else {
+		meshPoints = globe.getPoints( Configuration.Mesh.MaxPoints );
+	}
 	currentDate = (Calendar)stateThread.getDate();
 	colour = stateThread.getColour();
 
-	if ( currentDate != null && (meshPoints.length > 4 || !isHeMeshRenderer)) {
+	if ( currentDate != null && ((meshPoints != null && (meshPoints.length > 4 || !isHeMeshRenderer)))) {
 		drawLights( colour );
-		drawRotation();
+		//drawRotation();
 		drawMesh( colour, meshPoints );
-	}
-	else {
+	} else if ( currentDate != null && ((meshPoints5D != null && (meshPoints5D.length > 4 || !isHeMeshRenderer)))) {
+		drawLights( colour );
+		//drawRotation();
+		drawMesh5D( colour, meshPoints5D );
+	} else {
 		setupTime = millis();
 	}
 }

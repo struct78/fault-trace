@@ -8,4 +8,15 @@ public static class Geography {
 
 		return new WB_Point( x, y, z );
 	}
+
+	public static WB_Point CoordinatesTo2DWBPoint( double latitude, double longitude, double width, double height ) {
+		double d2r = PI / 180;
+		double scale = 512;
+		double lambda = longitude * d2r;
+		double phi = latitude * d2r;
+		double x = scale * (lambda + PI) / (TWO_PI);
+		double y = scale * (PI - Math.log(Math.tan(PI/4 + (phi / 2)))) / (TWO_PI);
+
+		return new WB_Point( x, y, 0 );
+	}
 }

@@ -2,6 +2,8 @@ public class Globe {
 	ArrayList<GlobePoint> points;
 	ArrayList<WB_Point4D> buffer;
 	ArrayList<WB_Point4D> bufferBase;
+	ArrayList<WB_Point5D> buffer5D;
+	ArrayList<WB_Point5D> bufferBase5D;
 	HEC_Geodesic creator;
 	HE_Mesh icosahedron;
 	List<WB_Coord> icosahedronPoints;
@@ -54,12 +56,48 @@ public class Globe {
 	private void fillBuffer() {
 		this.bufferBase = new ArrayList<WB_Point4D>();
 		this.buffer = new ArrayList<WB_Point4D>();
+		this.bufferBase5D = new ArrayList<WB_Point5D>();
+		this.buffer5D = new ArrayList<WB_Point5D>();
 
 		if ( Configuration.Mesh.UseIcosahedronBase ) {
 			for ( WB_Coord coord : this.icosahedronPoints ) {
 				this.bufferBase.add( new WB_Point4D( coord ) );
 			}
 		}
+	}
+
+	public WB_Point5D[] getPoints5D( int max ) {
+		this.buffer5D.clear();
+		this.buffer5D.addAll( this.bufferBase5D );
+		GlobePoint point;
+		newSize = this.bufferBase5D.size();
+		size = this.points.size();
+
+		for ( x = 0 ; x < size ; x++ ) {
+			point = this.points.get(x);
+			if ( point.canDisplay() ) {
+				point.animate();
+				this.buffer5D.add( point.getPoint5D() );
+				newSize++;
+			}
+		}
+
+		if ( newSize > max ) {
+			for ( x = 0 ; x < newSize-max ; x++ ) {
+				if ( x < size ) {
+					point = this.points.get(x);
+
+					if ( !point.isFinishing && !point.isFinished ) {
+						point.remove();
+					}
+
+					if ( point.isFinished ) {
+						this.points.remove( x );
+					}
+				}
+			}
+		}
+		return this.buffer5D.toArray( new WB_Point5D[ newSize ] );
 	}
 
 	public WB_Point4D[] getPoints( int max ) {
@@ -103,14 +141,17 @@ public class GlobePoint {
 	ArrayList<Float> scales;
 	ArrayList<Ani> animations;
 	ArrayList<Float> distances;
+	ArrayList<Float> magnitudes;
 
 	long delay;
 	float animationTime;
 	float scale;
 	float distance;
-	int ticks;
+	float ticks;
+	float magnitude;
 	boolean isFinished;
 	boolean isFinishing;
+	boolean isScaling;
 	int index;
 	WB_Point point;
 	Ani animation;
@@ -122,13 +163,15 @@ public class GlobePoint {
 		this.scales = new ArrayList<Float>();
 		this.animations = new ArrayList<Ani>();
 		this.distances = new ArrayList<Float>();
+		this.magnitudes = new ArrayList<Float>();
 		this.point = point;
 		this.scale = 0.0;
-		this.distance = 0.0;
+		this.distance = 1.0;
+		this.magnitude = 0.0;
 		this.index = 0;
 		this.isFinished = false;
 		this.isFinishing = false;
-		this.ticks = 0;
+		this.isScaling = true;
 	}
 
 	public void addDefaultScale( float scale ) {
@@ -151,13 +194,17 @@ public class GlobePoint {
 		this.distances.add( distance );
 	}
 
-	public void addAnimation( float scale, float distance, float animationTime ) {
-	 	animation = new Ani( this, animationTime, "scale", scale, Ani.QUAD_IN_OUT );
-		animation.pause();
+	public void addMagnitude( float magnitude ) {
+		this.magnitudes.add( magnitude );
+	}
 
-		this.animations.add( animation );
-		
-		animation = new Ani( this, animationTime, "distance", distance, Ani.QUAD_IN_OUT );
+	public void addAnimation( float scale, float distance, float animationTime ) {
+	 	//animation = new Ani( this, animationTime, "scale", scale, Ani.ELASTIC_IN_OUT, "onEnd:onScaleEnd" );
+		//animation.pause();
+
+		//this.animations.add( animation );
+
+		animation = new Ani( this, animationTime, "distance", distance, Ani.EXPO_IN );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -168,10 +215,10 @@ public class GlobePoint {
 	public void remove() {
 		this.isFinishing = true;
 		this.isFinished = false;
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
-		animation.start();
+		//animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
+		//animation.start();
 
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_OUT, "onEnd:onEnd" );
 		animation.start();
 	}
 
@@ -181,13 +228,14 @@ public class GlobePoint {
 	}
 
 	public void onScaleEnd() {
-		this.ticks = 1;
+		this.isScaling = false;
 	}
 
 	public boolean canDisplay() {
 		for ( int x = this.delays.size()-1 ; x >= 0 ; x-- ) {
 			delay = this.delays.get( x );
 			animationTime = this.animationTimes.get( x );
+			magnitude = this.magnitudes.get( x );
 			if ( millis() >= delay ) {
 				this.index = x;
 				return true;
@@ -198,16 +246,15 @@ public class GlobePoint {
 	}
 
 	public void animate() {
-		if ( this.ticks >= 1) {
-			this.ticks += 1;
+		if ( this.isScaling ) {
+			this.ticks += Configuration.Animation.Speed;
 		}
-		for ( int x = 0 ; x < 2 ; x++ ) {
-			animation = this.animations.get( this.index + x );
 
-			if ( animation != null ) {
-				if ( !animation.isPlaying() && !animation.isEnded() ) {
-					animation.resume();
-				}
+		animation = this.animations.get( this.index );
+
+		if ( animation != null ) {
+			if ( !animation.isPlaying() && !animation.isEnded() ) {
+				animation.resume();
 			}
 		}
 	}
@@ -215,12 +262,26 @@ public class GlobePoint {
 	public WB_Point4D getPoint() {
 		WB_Point4D point4D = new WB_Point4D( this.point.scale( this.scale ) );
 
-		if ( Configuration.Mesh.Explosions.UseTicks ) {
+		if ( Configuration.Animation.Scale.UseTicks ) {
 			point4D.setW( this.ticks );
 		} else {
 			point4D.setW( this.distance );
 		}
 
 		return point4D;
+	}
+
+	public WB_Point5D getPoint5D() {
+		WB_Point5D point5D = new WB_Point5D( this.point.scale( this.scale ) );
+
+		if ( Configuration.Animation.Scale.UseTicks ) {
+			point5D.setW( this.ticks );
+		} else {
+			point5D.setW( this.distance );
+		}
+
+		point5D.setM( this.magnitude );
+
+		return point5D;
 	}
 }

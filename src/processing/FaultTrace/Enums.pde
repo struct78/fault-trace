@@ -1,9 +1,37 @@
 public enum RenderType {
-	Edges, Faces, EdgesFaces, Points, FacesPoints, EdgesPoints, EdgesFacesPoints, Lines, Particles, Rings, Explosions, Meteors, Plasma
+	Edges(true),
+	Faces(true),
+	EdgesFaces(true),
+	Points(true),
+	FacesPoints(true),
+	EdgesPoints(true),
+	EdgesFacesPoints(true),
+	Lines(false),
+	Particles(false),
+	Rings(false),
+	Explosions(false),
+	Meteors(false),
+	Plasma(false),
+	PulsarSignal(false);
+
+	private boolean value;
+
+	private RenderType( boolean value ) {
+		this.value = value;
+	}
+
+	public boolean toBoolean() {
+	 return this.value;
+	}
 }
 
 public enum MeshType {
-	Normal, Dual, Lattice, Twisted, Voronoi, Extrude
+	Normal,
+	Dual,
+	Lattice,
+	Twisted,
+	Voronoi,
+	Extrude
 }
 
 public enum QuantizationType {
@@ -29,7 +57,7 @@ public enum QuantizationType {
 		this.value = value;
 	}
 
-	public float get() {
+	public float toFloat() {
 	 return this.value;
 	}
 }
