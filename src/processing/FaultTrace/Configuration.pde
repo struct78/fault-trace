@@ -2,23 +2,23 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff0C0904;
+			public static final int Start = 0xff020C14;
 
-			public static final int End = 0xff0C0904;
+			public static final int End = 0xff020C14;
 		}
 
 		public static final class UI {
 
-			public static final int Foreground = 0xff0C0904;
+			public static final int Foreground = 0xffCFCFCF;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xffF1F0F4;
+				public static final int Background = 0xff126872;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xffF1F0F4;
+				public static final int Background = 0xff126872;
 			}
 		}
 
@@ -62,6 +62,11 @@ public static final class Configuration {
 				0xffB20232,
 				0xffC27310
 			};
+
+			public static final int[] Waves = {
+				0xff0E5159,
+				0xff28E8FF
+			};
 		}
 	}
 
@@ -71,39 +76,31 @@ public static final class Configuration {
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
-		public static final long AnimationOffset = 10;
+		public static final long AnimationOffset = 100;
 
 		// Time compression
-		public static final long TimeCompression = 7500;
+		public static final long TimeCompression = 2790;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 100;
+		public static final int BeatsPerMinute = 50;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 12;
+		public static final float BeatsPerBar = 4;
 
 		// 4/X
-		public static final float BeatDivision = 16;
+		public static final float BeatDivision = 4;
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
 			// First bar
 			QuantizationType.OneQuarterNote.toFloat(),
-			QuantizationType.OneSixteenthNoteTriplet.toFloat(),
-			QuantizationType.OneSixteenthNoteTriplet.toFloat(),
-			QuantizationType.OneQuarterNote.toFloat(),
-			QuantizationType.OneWholeNote.toFloat(),
-			QuantizationType.OneSixteenthNoteTriplet.toFloat(),
-			// Second bar
-			QuantizationType.OneSixteenthNoteTriplet.toFloat(),
 			QuantizationType.OneQuarterNote.toFloat(),
 			QuantizationType.OneQuarterNote.toFloat(),
-			QuantizationType.OneSixteenthNoteTriplet.toFloat(),
-			QuantizationType.OneHalfNote.toFloat()
+			QuantizationType.OneQuarterNote.toFloat()
 		};
 
 		// Number of MIDI channels to use
-		public static final int Channels = 13;
+		public static final int Channels = 16;
 
 
 		public static final class Pitch {
@@ -125,10 +122,10 @@ public static final class Configuration {
 
 		public static final class Note {
 			// Minimum note duration in milliseconds
-			public static final int Min = 967;
+			public static final int Min = 1000;
 
 			// Maximum note duration in milliseconds
-			public static final int Max = 1935;
+			public static final int Max = 10000;
 		}
 	}
 
@@ -137,7 +134,7 @@ public static final class Configuration {
 		public static final int FPS = 60;
 
 		// Processing rendering mode
-		public static final String Mode = P2D;
+		public static final String Mode = P3D;
 
 		public static final class HUD {
 			// Size of the HUD font
@@ -155,10 +152,10 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 1.5;
+			public static final float Min = 1.0;
 
 			// Maximum tween time
-			public static final float Max = 4.0;
+			public static final float Max = 10.0;
 		}
 
 		public static final class Scale {
@@ -197,7 +194,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 200;
+		public static final int MaxPoints = 60;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -228,8 +225,9 @@ public static final class Configuration {
 		// - Meteors
 		// - Plasma
 		// - PulsarSignal
+		// - Waves
 
-		public static final RenderType Renderer = RenderType.PulsarSignal;
+		public static final RenderType Renderer = RenderType.Waves;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -279,6 +277,18 @@ public static final class Configuration {
 			// Distance between points
 			public static final int Step = 10;
 		}
+
+		public static final class Waves {
+			public static final int Distance = 6;
+
+			public static final int Step = 6;
+
+			public static final float Velocity = 0.1368;
+
+			public static final int Density = 5;
+
+			public static final int WaveLength = 6;
+		}
 	}
 
 	public static final class Data {
@@ -289,9 +299,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 1.25;
+			public static final float Min = 0.15;
 
-			public static final float Max = 2.25;
+			public static final float Max = 5.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
@@ -299,10 +309,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-07-01T00:00:00.000Z";
+		public static final String StartDate = "2017-08-08T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-07-31T23:59:59.999Z";
+		public static final String EndDate = "2017-08-31T23:59:59.999Z";
 	}
 
 	public static final class IO {

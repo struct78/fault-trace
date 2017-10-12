@@ -166,7 +166,7 @@ public class GlobePoint {
 		this.magnitudes = new ArrayList<Float>();
 		this.point = point;
 		this.scale = 0.0;
-		this.distance = 1.0;
+		this.distance = 0.0;
 		this.magnitude = 0.0;
 		this.index = 0;
 		this.isFinished = false;
@@ -204,7 +204,7 @@ public class GlobePoint {
 
 		//this.animations.add( animation );
 
-		animation = new Ani( this, animationTime, "distance", distance, Ani.EXPO_IN );
+		animation = new Ani( this, animationTime, "distance", distance, Ani.LINEAR, "onEnd:onDistanceEnd" );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -218,8 +218,8 @@ public class GlobePoint {
 		//animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
 		//animation.start();
 
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_OUT, "onEnd:onEnd" );
-		animation.start();
+		//animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_OUT, "onEnd:onEnd" );
+		//animation.start();
 	}
 
 	public void onEnd() {
@@ -229,6 +229,11 @@ public class GlobePoint {
 
 	public void onScaleEnd() {
 		this.isScaling = false;
+	}
+
+	public void onDistanceEnd() {
+		animation = new Ani( this, animationTime, "distance", 0.0, Ani.LINEAR );
+		animation.start();
 	}
 
 	public boolean canDisplay() {

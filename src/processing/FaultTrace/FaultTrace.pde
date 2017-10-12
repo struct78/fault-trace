@@ -33,6 +33,7 @@ long diff_accelerated_ms;
 long startTime;
 
 float theta = 180;
+float phi = 0.0;
 
 Timer timer;
 ThreadTask task;
@@ -50,6 +51,8 @@ ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
 ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
 ArrayList<ArrayList<WB_Point4D>> segments = new ArrayList<ArrayList<WB_Point4D>>();
 ArrayList<ArrayList<WB_Point5D>> segments5D = new ArrayList<ArrayList<WB_Point5D>>();
+ArrayList<Float> amplitudes = new ArrayList<Float>();
+ArrayList<Float> amplitudesSmoothed = new ArrayList<Float>();
 
 PFont font;
 HE_Mesh globeMesh;
@@ -74,7 +77,7 @@ Graph graph;
 Ani globeAnimation;
 float globeScale = 1.0;
 boolean isHeMeshRenderer = false;
-
+boolean is5D = false;
 Calendar startDate;
 Calendar endDate;
 Calendar calendar;
@@ -104,6 +107,7 @@ float mid, r2, x2, y2;
 double deg = 0.0;
 float xf2, yf2, zf2, wf2, d2, xf3, yf3, zf3, xoff, yoff;
 float axf, ayf, azf, nxf, nyf, nzf;
+float amplitude, mf;
 
 //renderPoints
 float interval;
@@ -116,6 +120,7 @@ float milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.Beat
 float milliseconds_per_note;
 int barLength = int(milliseconds_per_beat * Configuration.MIDI.BeatsPerBar);
 
+PShader pointShader;
 
 public void settings() {
 	size(1920, 1080, Configuration.UI.Mode);
@@ -147,9 +152,9 @@ void setup() {
 void draw() {
 	noCursor();
 	drawBackground();
+	drawGlobe();
 	drawHUD();
 	drawGraph();
-	drawGlobe();
 	saveFrames();
 }
 
@@ -247,9 +252,19 @@ void setupFonts() {
 }
 
 void setupGrid() {
-	for ( int x = 0 ; x < 360; x += 90 ) {
-		for ( int y = 0 ; y < 180 ; y += 90 ) {
-			grid.add( new Rectangle( x, y, 90, 90 ) );
+	int rows = 2;
+
+	while (Configuration.MIDI.Channels % rows > 0) {
+		rows++;
+	}
+
+	int columns = Configuration.MIDI.Channels / rows;
+	int squareWidth = (360/rows);
+	int squareHeight = (180/columns);
+
+	for ( int y = 0 ; y < 180 ; y += squareHeight ) {
+		for ( int x = 0 ; x < 360; x += squareWidth ) {
+			grid.add( new Rectangle( x, y, squareWidth, squareHeight ) );
 		}
 	}
 }
@@ -323,7 +338,7 @@ void setupSong() {
 			int duration = mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
 			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
-			float distance = Configuration.Data.Distance.Max;//mapMagnitude( magnitude, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
+			float distance = mapMagnitude( magnitude, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			color colour = getColourFromMonth( d2 );
 			color background = getBackgroundFromMonth( d2 );
 
@@ -346,7 +361,7 @@ void setupSong() {
 				existingPoint.addScale( scale );
 				existingPoint.addAnimation( scale, distance, animationTime );
 				existingPoint.addDistance( distance );
-				existingPoint.addMagnitude( magnitude );
+				existingPoint.addMagnitude( channel );
 			}
 			else {
 				newPoint.addDelay( quantized_delay + millis() - Configuration.MIDI.AnimationOffset);
@@ -355,7 +370,7 @@ void setupSong() {
 				newPoint.addDefaultScale( Configuration.Animation.Scale.Default );
 				newPoint.addAnimation( scale, distance, animationTime );
 				newPoint.addDistance( distance );
-				newPoint.addMagnitude( magnitude );
+				newPoint.addMagnitude( channel );
 				points.add( newPoint );
 			}
 
@@ -425,6 +440,7 @@ void setupUIThread() {
 void setupRenderer() {
 	render = new WB_Render3D( this );
 	isHeMeshRenderer = Configuration.Mesh.Renderer.toBoolean();
+	is5D = (Configuration.Mesh.Renderer == RenderType.PulsarSignal || Configuration.Mesh.Renderer == RenderType.Waves);
 }
 
 void setupInfo() {
@@ -498,6 +514,10 @@ void drawMesh5D( color colour, WB_Point5D[] points ) {
 	switch ( Configuration.Mesh.Renderer ) {
 		case PulsarSignal:
 			renderPulsarSignal( points );
+			break;
+		case Waves:
+			renderWaves( points );
+			break;
 		default:
 			break;
 	}
@@ -505,6 +525,7 @@ void drawMesh5D( color colour, WB_Point5D[] points ) {
 
 void drawMesh( color colour, WB_Point4D[] points ) {
 	hint(ENABLE_DEPTH_TEST);
+
 	if ( isHeMeshRenderer ) {
 		creatorGlobe.setPoints( points );
 		globeMesh = new HE_Mesh( creatorGlobe );
@@ -605,13 +626,97 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 	}
 }
 
+void renderWaves( WB_Point5D[] points ) {
+	pushMatrix();
+	translate( 0, (height / 2) - ((levels*Configuration.Mesh.Waves.Distance)/2), 300);
+	rotateX(radians(6));
+	rotateY(radians(-23));
+
+	levels = Configuration.MIDI.Channels;
+
+	amplitudes.clear();
+	amplitudesSmoothed.clear();
+	segments5D.clear();
+
+	for ( x = 0 ; x < levels; x++ ) {
+		segments5D.add(new ArrayList<WB_Point5D>());
+	}
+
+	for ( x = 0 ; x < levels * Configuration.Mesh.Waves.Density ; x++ ) {
+		amplitudes.add(0.0);
+	}
+
+	// Add points
+	for ( WB_Point5D point : points ) {
+		mf = point.mf();
+
+		int base = floor(mf);
+		segments5D.get(base).add(point);
+	}
+
+	// Get the amplitudes for each row
+	for ( y = 0 ; y < levels; y++ ) {
+		amplitude = 0.0;
+
+		for ( z = 0 ; z < segments5D.get(y).size(); z++ ) {
+			segmentPoint5D = segments5D.get(y).get(z);
+			wf = segmentPoint5D.wf();
+			amplitude += wf;
+		}
+
+		amplitudes.set(y, amplitude);
+	}
+
+	levels *= Configuration.Mesh.Waves.Density;
+
+	float nextAmplitude;
+	float previousAmplitude;
+
+	for ( x = 0 ; x < levels ; x++ ) {
+		amplitude = amplitudes.get(x);
+		nextAmplitude = (x+1) < levels ? amplitudes.get(x+1) : 0;
+		for ( y = 0 ; y < Configuration.Mesh.Waves.Density; y++ ) {
+			amplitudesSmoothed.add(lerp(amplitude, nextAmplitude, (float)y/Configuration.Mesh.Waves.Density));
+		}
+	}
+
+
+	float dx = (TWO_PI / (width/Configuration.Mesh.Waves.WaveLength)) * Configuration.Mesh.Waves.Step;
+
+	for ( y = 0 ; y < levels; y++ ) {
+		amplitude = amplitudesSmoothed.get(y);
+		noFill();
+
+		xf = phi + y + (amplitude/Configuration.Data.Distance.Max);
+		xf2 = xf;
+		yf2 = y*Configuration.Mesh.Waves.Distance;
+
+		for ( k = 0; k <= width; k+=Configuration.Mesh.Waves.Step ) {
+			strokeWeight( 4.25 );
+
+			xf2 = k + sin(xf);
+			yf2 = (sin(xf)*amplitude) + (y*Configuration.Mesh.Waves.Distance);
+			zf2 = 0;//(sin(xf)*amplitude);
+
+			stroke( lerpColor( Configuration.Palette.Mesh.Waves[0], Configuration.Palette.Mesh.Waves[1], amplitude/Configuration.Data.Distance.Max ) );
+			point( xf2, yf2, zf2 );
+
+			xf += dx;
+		}
+	}
+
+	phi += Configuration.Mesh.Waves.Velocity;
+
+	popMatrix();
+	hint(DISABLE_DEPTH_TEST);
+}
+
 void renderPulsarSignal( WB_Point5D[] points ) {
 	int offset = 50;
 	translate( width / 2 - Configuration.Mesh.PulsarSignal.Width / 2, height / 2 - Configuration.Mesh.PulsarSignal.Height / 2 - offset );
 	levels = (Configuration.Mesh.PulsarSignal.Height / Configuration.Mesh.PulsarSignal.Distance);
 
 	segments5D.clear();
-
 
 	for ( x = 0 ; x < levels ; x++ ) {
 		segments5D.add(new ArrayList<WB_Point5D>());
@@ -1021,7 +1126,7 @@ void renderParticles( WB_Point4D[] points ) {
 }
 
 void drawGlobe() {
-	if (Configuration.Mesh.Renderer == RenderType.PulsarSignal) {
+	if (is5D) {
 		meshPoints5D = globe.getPoints5D( Configuration.Mesh.MaxPoints );
 	} else {
 		meshPoints = globe.getPoints( Configuration.Mesh.MaxPoints );
@@ -1034,7 +1139,7 @@ void drawGlobe() {
 		//drawRotation();
 		drawMesh( colour, meshPoints );
 	} else if ( currentDate != null && ((meshPoints5D != null && (meshPoints5D.length > 4 || !isHeMeshRenderer)))) {
-		drawLights( colour );
+		//drawLights( colour );
 		//drawRotation();
 		drawMesh5D( colour, meshPoints5D );
 	} else {
@@ -1058,7 +1163,6 @@ void drawGraph() {
 
 void drawHUD() {
 	currentDate = (Calendar)stateThread.getDate();
-
 	if ( currentDate != null ) {
 		hud = new HUD( width, height, "left", "bottom", this.font);
 		hud.setMargin( uiMargin );
