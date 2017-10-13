@@ -199,12 +199,12 @@ public class GlobePoint {
 	}
 
 	public void addAnimation( float scale, float distance, float animationTime ) {
-	 	//animation = new Ani( this, animationTime, "scale", scale, Ani.ELASTIC_IN_OUT, "onEnd:onScaleEnd" );
-		//animation.pause();
+	 	animation = new Ani( this, animationTime, "scale", scale, Ani.ELASTIC_IN_OUT, "onEnd:onScaleEnd" );
+		animation.pause();
 
-		//this.animations.add( animation );
+		this.animations.add( animation );
 
-		animation = new Ani( this, animationTime, "distance", distance, Ani.LINEAR, "onEnd:onDistanceEnd" );
+		animation = new Ani( this, animationTime, "distance", distance, Ani.ELASTIC_OUT, "onEnd:onDistanceEnd" );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -215,11 +215,11 @@ public class GlobePoint {
 	public void remove() {
 		this.isFinishing = true;
 		this.isFinished = false;
-		//animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.EXPO_IN, "onEnd:onEnd" );
-		//animation.start();
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", 0.0, Ani.ELASTIC_OUT, "onEnd:onEnd" );
+		animation.start();
 
-		//animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_OUT, "onEnd:onEnd" );
-		//animation.start();
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.EXPO_OUT, "onEnd:onEnd" );
+		animation.start();
 	}
 
 	public void onEnd() {
@@ -232,7 +232,7 @@ public class GlobePoint {
 	}
 
 	public void onDistanceEnd() {
-		animation = new Ani( this, animationTime, "distance", 0.0, Ani.LINEAR );
+		animation = new Ani( this, animationTime, "distance", 0.0, Ani.ELASTIC_OUT );
 		animation.start();
 	}
 

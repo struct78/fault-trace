@@ -742,7 +742,6 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 		curveVertex(0, y);
 
 		mid = (Configuration.Mesh.PulsarSignal.Width/2) - (sin(level)*100);
-		//mid = map(noise(xoff, yoff), 0, 1, mid-100, mid+100);
 		float xoffvalue = 100.0;
 		float y3;
 		y2 = y;
@@ -755,7 +754,6 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 
 		for ( k = 0; k <= Configuration.Mesh.PulsarSignal.Width; k+=Configuration.Mesh.PulsarSignal.Step ) {
 			float percentile = (k<mid) ? ((float)k/mid) : (Configuration.Mesh.PulsarSignal.Width/(float)k)-1.0;
-			//y3 = pow(xoffvalue, percentile);
 			y3 = xoffvalue * percentile;
 			y2 = y;
 			y2 -= map(noise(xoff, yoff), 0, 1, 10, y3);
@@ -952,7 +950,6 @@ void renderPlasma( WB_Point4D[] points ) {
 
 		strokeWeight( Configuration.Mesh.Plasma.Min );
 
-		//line(0, 0, 0, xf, yf, zf);
 		beginShape();
 		vertex(0, 0, 0);
 		xoff = 0.0;
@@ -1135,13 +1132,17 @@ void drawGlobe() {
 	colour = stateThread.getColour();
 
 	if ( currentDate != null && ((meshPoints != null && (meshPoints.length > 4 || !isHeMeshRenderer)))) {
-		drawLights( colour );
-		//drawRotation();
+		//drawLights( colour );
+		pushMatrix();
+		drawRotation();
 		drawMesh( colour, meshPoints );
+		popMatrix();
 	} else if ( currentDate != null && ((meshPoints5D != null && (meshPoints5D.length > 4 || !isHeMeshRenderer)))) {
 		//drawLights( colour );
-		//drawRotation();
+		pushMatrix();
+		drawRotation();
 		drawMesh5D( colour, meshPoints5D );
+		popMatrix();
 	} else {
 		setupTime = millis();
 	}

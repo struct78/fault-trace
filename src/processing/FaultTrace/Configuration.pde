@@ -76,31 +76,41 @@ public static final class Configuration {
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
-		public static final long AnimationOffset = 100;
+		public static final long AnimationOffset = 0;
 
 		// Time compression
-		public static final long TimeCompression = 2790;
+		public static final long TimeCompression = 7000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 50;
+		public static final int BeatsPerMinute = 90;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 4;
+		public static final float BeatsPerBar = 28;
 
 		// 4/X
-		public static final float BeatDivision = 4;
+		public static final float BeatDivision = 16;
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
 			// First bar
-			QuantizationType.OneQuarterNote.toFloat(),
-			QuantizationType.OneQuarterNote.toFloat(),
-			QuantizationType.OneQuarterNote.toFloat(),
-			QuantizationType.OneQuarterNote.toFloat()
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneEighthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneEighthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneEighthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneEighthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat(),
+			QuantizationType.OneSixteenthNote.toFloat()
 		};
 
 		// Number of MIDI channels to use
-		public static final int Channels = 16;
+		public static final int Channels = 4;
 
 
 		public static final class Pitch {
@@ -113,7 +123,7 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 100;
+			public static final int Min = 10;
 
 			// Maximum velocity (0 - 127)
 			public static final int Max = 127;
@@ -122,7 +132,7 @@ public static final class Configuration {
 
 		public static final class Note {
 			// Minimum note duration in milliseconds
-			public static final int Min = 1000;
+			public static final int Min = 2000;
 
 			// Maximum note duration in milliseconds
 			public static final int Max = 10000;
@@ -152,7 +162,7 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 1.0;
+			public static final float Min = 2.0;
 
 			// Maximum tween time
 			public static final float Max = 10.0;
@@ -163,16 +173,16 @@ public static final class Configuration {
 			public static final float Min = 1.0;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.0;
+			public static final float Max = 1.3;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
-			public static final float Default = 1.0;
+			public static final float Default = 0.0;
 
 			public static boolean UseTicks = false;
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.01935;
+		public static final float Speed = 0.00335;
 
 
 		public static final class Zoom {
@@ -194,7 +204,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 60;
+		public static final int MaxPoints = 200;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -209,7 +219,7 @@ public static final class Configuration {
 		// - Twisted
 		// - Voronoi
 		// - Extrude
-		public static final MeshType Type = MeshType.Normal;
+		public static final MeshType Type = MeshType.Dual;
 
 		// Available types:
 		// - Edges
@@ -227,7 +237,7 @@ public static final class Configuration {
 		// - PulsarSignal
 		// - Waves
 
-		public static final RenderType Renderer = RenderType.Waves;
+		public static final RenderType Renderer = RenderType.EdgesPoints;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -309,7 +319,7 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-08-08T00:00:00.000Z";
+		public static final String StartDate = "2017-08-01T00:00:00.000Z";
 
 		// End date
 		public static final String EndDate = "2017-08-31T23:59:59.999Z";
