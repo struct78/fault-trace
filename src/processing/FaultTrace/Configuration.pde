@@ -309,7 +309,7 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-08-08T00:00:00.000Z";
+		public static final String StartDate = "2017-08-01T00:00:00.000Z";
 
 		// End date
 		public static final String EndDate = "2017-08-31T23:59:59.999Z";
