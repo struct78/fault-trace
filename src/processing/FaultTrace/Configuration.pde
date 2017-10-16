@@ -283,7 +283,7 @@ public static final class Configuration {
 
 			public static final int Step = 6;
 
-			public static final float Velocity = 0.1368;
+			public static final float Velocity = 0.174;
 
 			public static final int Density = 5;
 
