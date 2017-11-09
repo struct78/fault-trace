@@ -417,7 +417,7 @@ void setupSong() {
 		}
 
 		// Timpani
-		if ( magnitude > 5.0 ) {
+		if ( magnitude > 5.5 ) {
 			setNote( 10, 80, 60, 3000, quantized_delay );
 		}
 
