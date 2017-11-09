@@ -13,7 +13,8 @@ public enum RenderType {
 	Meteors(false),
 	Plasma(false),
 	PulsarSignal(false),
-	Waves(false);
+	Waves(false),
+	Spikes(false);
 
 	private boolean value;
 
