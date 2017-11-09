@@ -32,7 +32,7 @@ long diff_quantized_ms;
 long diff_accelerated_ms;
 long startTime;
 
-float theta = 180;
+float theta = radians(180);
 float phi = 0.0;
 
 Timer timer;
@@ -49,7 +49,7 @@ ArrayList<Integer> lightColours = new ArrayList();
 ArrayList<StateManager> states = new ArrayList();
 ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
 ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
-ArrayList<ArrayList<WB_Point4D>> segments = new ArrayList<ArrayList<WB_Point4D>>();
+ArrayList<ArrayList<WB_Point5D>> segments = new ArrayList<ArrayList<WB_Point5D>>();
 ArrayList<ArrayList<WB_Point5D>> segments5D = new ArrayList<ArrayList<WB_Point5D>>();
 ArrayList<Float> amplitudes = new ArrayList<Float>();
 ArrayList<Float> amplitudesSmoothed = new ArrayList<Float>();
@@ -67,17 +67,18 @@ HEM_Extrude extrude;
 HEC_Geodesic geodesic;
 HEC_Sphere sphere;
 
-WB_Point4D[] meshPoints;
+WB_Point5D[] meshPoints;
 WB_Point5D[] meshPoints5D;
 WB_Point wbPoint;
-WB_Point4D segmentPoint;
+WB_Point5D segmentPoint;
 WB_Point5D segmentPoint5D;
 Globe globe;
 Graph graph;
 Ani globeAnimation;
+Ani globeOffsetAnimation;
 float globeScale = 1.0;
+float globeOffset = 1.0;
 boolean isHeMeshRenderer = false;
-boolean is5D = false;
 Calendar startDate;
 Calendar endDate;
 Calendar calendar;
@@ -112,6 +113,12 @@ float amplitude, mf;
 //renderPoints
 float interval;
 WB_Point4D trail;
+
+//renderSpikes
+float step;
+float distance;
+float azimuth;
+float elevation;
 
 //quantize()
 int type;
@@ -232,14 +239,23 @@ void setupTimezone() {
 void setupAnimation() {
 	Ani.init(this);
   globeAnimation = new Ani(this, Configuration.Animation.Zoom.Time, "globeScale", globeScale, Ani.QUAD_IN_OUT, "onEnd:setGlobeScale");
+	globeOffsetAnimation = new Ani(this, Configuration.Animation.Zoom.Time, "globeOffset", globeOffset, Ani.QUAD_IN_OUT, "onEnd:setGlobeOffset");
 }
 
 void setGlobeScale() {
 	float endValue = globeAnimation.getEnd();
-	globeScale = random( 0.9, 1.6 );
+	globeScale = random( 0.8, 2.5 );
 	globeAnimation.setBegin( endValue );
 	globeAnimation.setEnd( globeScale );
 	globeAnimation.start();
+}
+
+void setGlobeOffset() {
+	float endValue = globeOffsetAnimation.getEnd();
+	globeOffset = random( -100, 100 );
+	globeOffsetAnimation.setBegin( endValue );
+	globeOffsetAnimation.setEnd( globeOffset );
+	globeOffsetAnimation.start();
 }
 
 void setupUI() {
@@ -275,9 +291,17 @@ void setupMIDI() {
 }
 
 long quantize( long delay ) {
-	type = (int)(delay / milliseconds_per_beat) % Configuration.MIDI.NoteType.length;
-	milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType[ type ]);
-	return (long)(Math.ceil( delay / milliseconds_per_note ) * milliseconds_per_note) ;
+	//
+	if (Configuration.MIDI.ModuloNotes) {
+		// This
+		type =  (int)(( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType.length );
+	} else {
+		// This cycles through each note type sequentially
+		type = (int)(delay / milliseconds_per_beat) % Configuration.MIDI.NoteType.length;
+	}
+
+	milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatNoteValue / Configuration.MIDI.NoteType[ type ].toFloat());
+	return (long)(Math.round( delay / milliseconds_per_note ) * milliseconds_per_note);
 }
 
 void setupSong() {
@@ -333,12 +357,13 @@ void setupSong() {
 			delay += (diff/Configuration.MIDI.TimeCompression);
 
 			int channel = getChannelFromCoordinates( latitude, longitude );
-			int velocity = mapMagnitude( magnitude );
+			int velocity = mapMagnitude( magnitude, Configuration.MIDI.Velocity.Min, Configuration.MIDI.Velocity.Max );
 			int pitch = mapDepth( depth );
 			int duration = mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
-			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
-			float distance = mapMagnitude( magnitude, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
+			float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			float distance = mapexp( depth, 0, Configuration.Data.Depth.Max, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
+			float mag = mapMagnitude( magnitude, Configuration.Mesh.Spikes.Radius.Min, Configuration.Mesh.Spikes.Radius.Max );
 			color colour = getColourFromMonth( d2 );
 			color background = getBackgroundFromMonth( d2 );
 
@@ -354,14 +379,14 @@ void setupSong() {
 			GlobePoint newPoint = new GlobePoint( wbPoint );
 			GlobePoint existingPoint = globe.getExistingPoint( newPoint );
 
-			if ( existingPoint != null ) {
+			if ( Configuration.Optimisations.GroupPoints && existingPoint != null ) {
 				existingPoint.addDelay( quantized_delay + millis() - Configuration.MIDI.AnimationOffset);
 				existingPoint.addAnimationTime( animationTime );
 				existingPoint.addDefaultScale( Configuration.Animation.Scale.Default );
 				existingPoint.addScale( scale );
 				existingPoint.addAnimation( scale, distance, animationTime );
 				existingPoint.addDistance( distance );
-				existingPoint.addMagnitude( channel );
+				existingPoint.addMagnitude( mag );
 			}
 			else {
 				newPoint.addDelay( quantized_delay + millis() - Configuration.MIDI.AnimationOffset);
@@ -370,7 +395,7 @@ void setupSong() {
 				newPoint.addDefaultScale( Configuration.Animation.Scale.Default );
 				newPoint.addAnimation( scale, distance, animationTime );
 				newPoint.addDistance( distance );
-				newPoint.addMagnitude( channel );
+				newPoint.addMagnitude( mag );
 				points.add( newPoint );
 			}
 
@@ -389,6 +414,11 @@ void setupSong() {
 			}
 
 			x++;
+		}
+
+		// Timpani
+		if ( magnitude > 5.0 ) {
+			setNote( 10, 80, 60, 3000, quantized_delay );
 		}
 
 		// Update the previous date to the current date for the next iteration
@@ -440,12 +470,11 @@ void setupUIThread() {
 void setupRenderer() {
 	render = new WB_Render3D( this );
 	isHeMeshRenderer = Configuration.Mesh.Renderer.toBoolean();
-	is5D = (Configuration.Mesh.Renderer == RenderType.PulsarSignal || Configuration.Mesh.Renderer == RenderType.Waves);
 }
 
 void setupInfo() {
 	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
-	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatDivision);
+	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatNoteValue);
 	println("Bar Length: " + barLength + "ms");
 	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
 	println("Total " + diff_accelerated_ms + "ms");
@@ -454,10 +483,10 @@ void setupInfo() {
 
 	float sum = 0.0;
 	for( x = 0; x < Configuration.MIDI.NoteType.length ; x++) {
-		sum += (1/Configuration.MIDI.NoteType[x]);
+		sum += (1/Configuration.MIDI.NoteType[x].toFloat());
 	}
 
-	println("Bar accuracy: " + sum + " (expected " + ((Configuration.MIDI.BeatsPerBar / Configuration.MIDI.BeatDivision)) + ")");
+	println("Bar accuracy: " + sum + " (expected " + ((Configuration.MIDI.BeatsPerBar / Configuration.MIDI.BeatNoteValue)) + ")");
 }
 
 String getDatePart( SimpleDateFormat dateFormat ) {
@@ -495,7 +524,7 @@ void drawBackground() {
 
 void drawLights( color colour ) {
 	ambient( Configuration.Palette.Lights.Centre );
-	pointLight( red(colour), green(colour), blue(colour), width, 400, width/2 );
+	//pointLight( red(colour), green(colour), blue(colour), width, 400, width/2 );
 	//directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
 }
 
@@ -508,22 +537,7 @@ void drawRotation() {
 	rotateX( radians(-23.5) );
 }
 
-void drawMesh5D( color colour, WB_Point5D[] points ) {
-	hint(ENABLE_DEPTH_TEST);
-
-	switch ( Configuration.Mesh.Renderer ) {
-		case PulsarSignal:
-			renderPulsarSignal( points );
-			break;
-		case Waves:
-			renderWaves( points );
-			break;
-		default:
-			break;
-	}
-}
-
-void drawMesh( color colour, WB_Point4D[] points ) {
+void drawMesh( color colour, WB_Point5D[] points ) {
 	hint(ENABLE_DEPTH_TEST);
 
 	if ( isHeMeshRenderer ) {
@@ -599,7 +613,7 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 			renderFacesPoints( globeMesh, meshCollection );
 			break;
 		case Points:
-			renderPoints( globeMesh );
+			renderPoints( points );
 			break;
 		case EdgesPoints:
 			renderEdgesPoints( globeMesh );
@@ -607,19 +621,29 @@ void drawMesh( color colour, WB_Point4D[] points ) {
 		case EdgesFacesPoints:
 			renderEdgesFacesPoints( globeMesh );
 			break;
-		case Lines:
-			renderLines( points );
 		case Particles:
 			renderParticles( points );
+			break;
 		case Rings:
 			renderRings( points );
+			break;
 		case Explosions:
 			renderExplosions( points );
+			break;
 		case Meteors:
 			renderMeteors( points );
 			break;
 		case Plasma:
 			renderPlasma( points );
+			break;
+		case PulsarSignal:
+			renderPulsarSignal( points );
+			break;
+		case Waves:
+			renderWaves( points );
+			break;
+		case Spikes:
+			renderSpikes( points );
 			break;
 		default:
 			break;
@@ -784,12 +808,86 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 	endShape();
 }
 
-void renderPoints( HE_Mesh globeMesh ) {
-	// TODO
+void renderPoints( WB_Point5D[] points ) {
+	strokeWeight(4.5);
+	stroke(Configuration.Palette.Mesh.Line);
+	for ( WB_Point5D point : points ) {
+		point(point.xf(), point.yf(), point.zf());
+	}
 }
 
-void renderExplosions( WB_Point4D[] points ) {
-	for ( WB_Point4D point : points ) {
+void renderSpikes( WB_Point5D[] points ) {
+	noStroke();
+	//strokeWeight(1.0);
+	WB_Point4D endpoint;
+
+
+	fill(Configuration.Palette.Mesh.Line);
+	sphereDetail(90);
+	sphere(Configuration.Mesh.GlobeSize);
+
+	blendMode(MULTIPLY);
+
+	x = 0;
+
+	for ( WB_Point5D point : points ) {
+		endpoint = point.mul(point.wf());
+		float b = (points.length < Configuration.Mesh.Spikes.LerpSteps) ? points.length : Configuration.Mesh.Spikes.LerpSteps;
+		float c = (x > points.length-b) ? ((points.length-x)/b) : 1.0;
+
+		fill(lerpColor(color(30, 30, 30), Configuration.Palette.Mesh.Line, c), 110);
+		pushMatrix();
+		translate(point.xf(), point.yf(), point.zf());
+
+		azimuth = atan2(endpoint.yf(), endpoint.xf());
+		elevation = atan2(sqrt(sq(endpoint.xf()) + sq(endpoint.yf())), endpoint.zf());
+
+		rotateZ(azimuth);
+		rotateY(elevation);
+
+		drawSpike(Configuration.Mesh.Spikes.Sides, point.mf(), 0, dist(0, 0, 0, endpoint.xf(), endpoint.yf(), endpoint.zf()));
+
+		popMatrix();
+		x++;
+	}
+
+	blendMode(NORMAL);
+}
+
+void drawSpike( int sides, float r1, float r2, float h )
+{
+	float angle = 360 / sides;
+	// top
+	beginShape();
+	for (int i = 0; i < sides; i++) {
+		float x = cos( radians( i * angle ) ) * r1;
+		float y = sin( radians( i * angle ) ) * r1;
+		vertex( x, y, 0 );
+	}
+	endShape(CLOSE);
+	// bottom
+	beginShape();
+	for (int i = 0; i < sides; i++) {
+		float x = cos( radians( i * angle ) ) * r2;
+		float y = sin( radians( i * angle ) ) * r2;
+		vertex( x, y, h );
+	}
+	endShape(CLOSE);
+	// draw body
+	beginShape(TRIANGLE_STRIP);
+	for (int i = 0; i < sides + 1; i++) {
+		float x1 = cos( radians( i * angle ) ) * r1;
+		float y1 = sin( radians( i * angle ) ) * r1;
+		float x2 = cos( radians( i * angle ) ) * r2;
+		float y2 = sin( radians( i * angle ) ) * r2;
+		vertex( x1, y1, 0 );
+		vertex( x2, y2, h );
+	}
+	endShape(CLOSE);
+}
+
+void renderExplosions( WB_Point5D[] points ) {
+	for ( WB_Point5D point : points ) {
 		float distance = point.wf();
 		if ( distance > 100 ) {
 			continue;
@@ -837,7 +935,7 @@ void renderFacesPoints( HE_Mesh globeMesh, HE_MeshCollection meshCollection ) {
 	}
 }
 
-void renderMeteors( WB_Point4D[] points ) {
+void renderMeteors( WB_Point5D[] points ) {
 	hint(ENABLE_DEPTH_TEST);
 	hint(ENABLE_DEPTH_SORT);
 	noStroke();
@@ -850,7 +948,7 @@ void renderMeteors( WB_Point4D[] points ) {
 
 	noFill();
 	y = 0;
-	for ( WB_Point4D point : points ) {
+	for ( WB_Point5D point : points ) {
 		xf = point.xf();
 		yf = point.yf();
 		zf = point.zf();
@@ -883,7 +981,7 @@ void renderMeteors( WB_Point4D[] points ) {
 	hint(DISABLE_DEPTH_SORT);
 }
 
-void renderPlasma( WB_Point4D[] points ) {
+void renderPlasma( WB_Point5D[] points ) {
 	hint(ENABLE_DEPTH_TEST);
 	hint(ENABLE_DEPTH_SORT);
 
@@ -896,7 +994,7 @@ void renderPlasma( WB_Point4D[] points ) {
 	ayf = 0.0;
 	azf = 0.0;
 
-	for ( WB_Point4D point : points ) {
+	for ( WB_Point5D point : points ) {
 		xf = point.xf();
 		yf = point.yf();
 		zf = point.zf();
@@ -941,7 +1039,7 @@ void renderPlasma( WB_Point4D[] points ) {
 	blendMode(ADD);
 
 
-	for ( WB_Point4D point : points ) {
+	for ( WB_Point5D point : points ) {
 		xf = point.xf();
 		yf = point.yf();
 		zf = point.zf();
@@ -1015,8 +1113,8 @@ void renderEdgesFacesPoints( HE_Mesh globeMesh ) {
 	render.drawFaces( globeMesh );
 }
 
-void renderLines( WB_Point4D[] points ) {
-	for ( WB_Point4D point : points ) {
+void renderLines( WB_Point5D[] points ) {
+	for ( WB_Point5D point : points ) {
 		float distance = point.wf();
 		WB_Point4D endpoint = point.mul( distance );
 		float radius = Configuration.Mesh.GlobeSize;
@@ -1035,7 +1133,7 @@ void renderLines( WB_Point4D[] points ) {
 	}
 }
 
-int getRingLevelFromPoint( WB_Point4D point ) {
+int getRingLevelFromPoint( WB_Point5D point ) {
 	yf = point.yf();
 	level = (int)Math.ceil((yf + Configuration.Mesh.GlobeSize) / Configuration.Mesh.Rings.Distance);
 	return level < 0 ? 0 : level;
@@ -1049,7 +1147,7 @@ float getRadiusOnYPlane( float y ) {
 	return (float)Math.sqrt( Math.pow( Configuration.Mesh.GlobeSize, 2 ) - Math.pow( y, 2 ) );
 }
 
-void renderRings( WB_Point4D[] points ) {
+void renderRings( WB_Point5D[] points ) {
 	noFill();
 
 	levels = ((Configuration.Mesh.GlobeSize * 2) * Configuration.Mesh.Rings.Distance);
@@ -1057,10 +1155,10 @@ void renderRings( WB_Point4D[] points ) {
 	segments.clear();
 
 	for ( x = 0 ; x < levels ; x++ ) {
-		segments.add(new ArrayList<WB_Point4D>());
+		segments.add(new ArrayList<WB_Point5D>());
 	}
 
-	for ( WB_Point4D point : points ) {
+	for ( WB_Point5D point : points ) {
 		level = getRingLevelFromPoint( point );
 		segments.get(level).add(point);
 	}
@@ -1118,30 +1216,20 @@ void renderRings( WB_Point4D[] points ) {
 	}
 }
 
-void renderParticles( WB_Point4D[] points ) {
+void renderParticles( WB_Point5D[] points ) {
 
 }
 
 void drawGlobe() {
-	if (is5D) {
-		meshPoints5D = globe.getPoints5D( Configuration.Mesh.MaxPoints );
-	} else {
-		meshPoints = globe.getPoints( Configuration.Mesh.MaxPoints );
-	}
+	meshPoints = globe.getPoints( Configuration.Mesh.MaxPoints );
 	currentDate = (Calendar)stateThread.getDate();
 	colour = stateThread.getColour();
 
 	if ( currentDate != null && ((meshPoints != null && (meshPoints.length > 4 || !isHeMeshRenderer)))) {
-		//drawLights( colour );
+		drawLights( colour );
 		pushMatrix();
 		drawRotation();
 		drawMesh( colour, meshPoints );
-		popMatrix();
-	} else if ( currentDate != null && ((meshPoints5D != null && (meshPoints5D.length > 4 || !isHeMeshRenderer)))) {
-		//drawLights( colour );
-		pushMatrix();
-		drawRotation();
-		drawMesh5D( colour, meshPoints5D );
 		popMatrix();
 	} else {
 		setupTime = millis();
@@ -1215,7 +1303,7 @@ int mapDepth( float depth, int min, int max ) {
 	return invert( int( mapexp( depth, 0, Configuration.Data.Depth.Max, min, max ) ), min, max );
 }
 
-float mapDepth(float depth, float min, float max) {
+float mapDepth( float depth, float min, float max ) {
 	return invert( mapexp( depth, 0, Configuration.Data.Depth.Max, min, max ), min, max);
 }
 
