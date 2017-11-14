@@ -72,23 +72,23 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 3000;
+		public static final long StartOffset = 4000;
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
 		public static final long AnimationOffset = 375;
 
 		// Time compression
-		public static final long TimeCompression = 2000;
+		public static final long TimeCompression = 9400;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 80;
+		public static final int BeatsPerMinute = 75;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 24;
+		public static final float BeatsPerBar = 19;
 
 		// 4/X
-		public static final float BeatNoteValue = 8;
+		public static final float BeatNoteValue = 4;
 
 		// Bar structure
 		public static final QuantizationType[] NoteType = new QuantizationType[] {
@@ -106,9 +106,6 @@ public static final class Configuration {
 			QuantizationType.OneSixteenthNote,
 			QuantizationType.OneEighthNote,
 			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneSixteenthNote,
-			//
-			QuantizationType.OneSixteenthNote,
 			QuantizationType.OneEighthNote,
 			QuantizationType.OneSixteenthNote,
 			QuantizationType.OneQuarterNote,
@@ -116,7 +113,10 @@ public static final class Configuration {
 			QuantizationType.OneSixteenthNote,
 			QuantizationType.OneQuarterNote,
 			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneSixteenthNote,
+			QuantizationType.OneQuarterNote,
+			QuantizationType.OneHalfNote,
+			QuantizationType.OneWholeNote,
+			QuantizationType.OneQuarterNote,
 			QuantizationType.OneQuarterNote
 		};
 
@@ -196,7 +196,7 @@ public static final class Configuration {
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.002813;
+		public static final float Speed = 0.007813;
 
 
 		public static final class Zoom {
@@ -218,7 +218,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 10000;
+		public static final int MaxPoints = 3000;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;

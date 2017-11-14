@@ -361,7 +361,8 @@ void setupSong() {
 			int pitch = mapDepth( depth );
 			int duration = mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
-			float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			//float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			float scale = Configuration.Animation.Scale.Max;
 			float distance = mapexp( depth, 0, Configuration.Data.Depth.Max, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			float mag = mapMagnitude( magnitude, Configuration.Mesh.Spikes.Radius.Min, Configuration.Mesh.Spikes.Radius.Max );
 			color colour = getColourFromMonth( d2 );
@@ -483,10 +484,10 @@ void setupInfo() {
 
 	float sum = 0.0;
 	for( x = 0; x < Configuration.MIDI.NoteType.length ; x++) {
-		sum += (1/Configuration.MIDI.NoteType[x].toFloat());
+		sum += Configuration.MIDI.BeatNoteValue/Configuration.MIDI.NoteType[x].toFloat();
 	}
 
-	println("Bar accuracy: " + sum + " (expected " + ((Configuration.MIDI.BeatsPerBar / Configuration.MIDI.BeatNoteValue)) + ")");
+	println("Note value sum: " + sum + " (expected " + Configuration.MIDI.BeatsPerBar + ")");
 }
 
 String getDatePart( SimpleDateFormat dateFormat ) {
