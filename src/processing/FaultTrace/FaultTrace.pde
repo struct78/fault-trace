@@ -1,3 +1,4 @@
+import com.hamoid.*;
 import de.looksgood.ani.*;
 import de.looksgood.ani.easing.*;
 import java.util.Arrays;
@@ -40,7 +41,7 @@ ThreadTask task;
 StateManagerThread stateThread;
 Note note;
 MidiBus bus;
-boolean isDuplicateNote = false;
+boolean is2D;
 
 Iterable<TableRow> rows;
 ArrayList<Rectangle> grid = new ArrayList();
@@ -53,6 +54,7 @@ ArrayList<ArrayList<WB_Point5D>> segments = new ArrayList<ArrayList<WB_Point5D>>
 ArrayList<ArrayList<WB_Point5D>> segments5D = new ArrayList<ArrayList<WB_Point5D>>();
 ArrayList<Float> amplitudes = new ArrayList<Float>();
 ArrayList<Float> amplitudesSmoothed = new ArrayList<Float>();
+ArrayList<NoteStub> stubs = new ArrayList<NoteStub>();
 
 PFont font;
 HE_Mesh globeMesh;
@@ -95,6 +97,7 @@ HUD hud;
 Point2D.Double rectanglePoint;
 int uiGridWidth;
 int uiMargin;
+NoteStub stub;
 
 //renderRings()
 int levels;
@@ -128,6 +131,8 @@ float milliseconds_per_note;
 int barLength = int(milliseconds_per_beat * Configuration.MIDI.BeatsPerBar);
 
 PShader pointShader;
+VideoExport videoExport;
+boolean isExporting = false;
 
 public void settings() {
 	size(1920, 1080, Configuration.UI.Mode);
@@ -138,6 +143,7 @@ public void settings() {
 void setup() {
 	setupTimezone();
 	setupTiming();
+	setup2D();
 	setup3D();
 	setupUI();
 	setupFonts();
@@ -160,8 +166,8 @@ void draw() {
 	noCursor();
 	drawBackground();
 	drawGlobe();
-	drawHUD();
-	drawGraph();
+	//drawHUD();
+	//drawGraph();
 	saveFrames();
 }
 
@@ -173,7 +179,11 @@ void setupTiming() {
 	start_ms = startDate.getTimeInMillis();
 	end_ms = endDate.getTimeInMillis();
 	diff_accelerated_ms = Configuration.MIDI.StartOffset + ( ( ( end_ms-start_ms )/Configuration.MIDI.TimeCompression ) );
-	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize( ( ( end_ms-start_ms ) / Configuration.MIDI.TimeCompression ) );
+	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize( ( ( end_ms-start_ms ) / Configuration.MIDI.TimeCompression ), 0 );
+}
+
+void setup2D() {
+	is2D = (Configuration.Mesh.Renderer == RenderType.PulsarSignal);
 }
 
 void setup3D() {
@@ -238,7 +248,7 @@ void setupTimezone() {
 
 void setupAnimation() {
 	Ani.init(this);
-  globeAnimation = new Ani(this, Configuration.Animation.Zoom.Time, "globeScale", globeScale, Ani.QUAD_IN_OUT, "onEnd:setGlobeScale");
+	globeAnimation = new Ani(this, Configuration.Animation.Zoom.Time, "globeScale", globeScale, Ani.QUAD_IN_OUT, "onEnd:setGlobeScale");
 	globeOffsetAnimation = new Ani(this, Configuration.Animation.Zoom.Time, "globeOffset", globeOffset, Ani.QUAD_IN_OUT, "onEnd:setGlobeOffset");
 }
 
@@ -290,25 +300,65 @@ void setupMIDI() {
 	bus = new MidiBus( this, -1, "FaultTrace" );
 }
 
-long quantize( long delay ) {
-	//
-	if (Configuration.MIDI.ModuloNotes) {
-		// This
-		type =  (int)(( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType.length );
-	} else {
-		// This cycles through each note type sequentially
-		type = (int)(delay / milliseconds_per_beat) % Configuration.MIDI.NoteType.length;
+long quantize( long delay, int channel ) {
+	int barType = 0;
+
+	for ( x = 0 ; x < Configuration.MIDI.BarToChannel.length ; x++ ) {
+		for ( y = 0 ; y < Configuration.MIDI.BarToChannel[x].length ; y++ ) {
+			// Channel is 0 based
+			if ( Configuration.MIDI.BarToChannel[x][y] == (channel+1) ) {
+				barType = x;
+			}
+		}
 	}
 
-	milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatNoteValue / Configuration.MIDI.NoteType[ type ].toFloat());
+	//
+	if (Configuration.MIDI.ModuloNotes) {
+		// This takes a beat from the modulo of the delay and the beats per bar and the note type, using the same notes but not sequentially, giving the song a more varied feel
+		type =  (int)(( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType[ barType ].length );
+	} else {
+		// This cycles through each note sequentially
+		type = (int)(delay / milliseconds_per_beat) % Configuration.MIDI.NoteType[ barType ].length;
+	}
+
+	milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatNoteValue / Configuration.MIDI.NoteType[ barType ][ type ].toFloat());
 	return (long)(Math.round( delay / milliseconds_per_note ) * milliseconds_per_note);
+}
+
+// TODO
+// - Duration to come from quantization
+// - quantize() to come from BeatNoteValue
+
+int quantize_duration( long channel ) {
+	int barType = 0;
+
+	for ( x = 0 ; x < Configuration.MIDI.BarToChannel.length ; x++ ) {
+		for ( y = 0 ; y < Configuration.MIDI.BarToChannel[x].length ; y++ ) {
+			// Channel is 0 based
+			if ( Configuration.MIDI.BarToChannel[x][y] == (channel+1) ) {
+				barType = x;
+			}
+		}
+	}
+
+	if (Configuration.MIDI.ModuloNotes) {
+		// This takes a beat from the modulo of the delay and the beats per bar and the note type, using the same notes but not sequentially, giving the song a more varied feel
+		type =  (int)(( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType[ barType ].length );
+	} else {
+		// This cycles through each note sequentially
+		type = (int)(delay / milliseconds_per_beat) % Configuration.MIDI.NoteType[ barType ].length;
+	}
+
+	// TODO
+	milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatNoteValue / Configuration.MIDI.NoteType[ barType ][ type ].toFloat());
+	return (int)milliseconds_per_note;
 }
 
 void setupSong() {
 	// Set the delay between notes
 	delay = Configuration.MIDI.StartOffset;
 	startTime = millis();
-	quantized_delay = quantize(delay);
+	quantized_delay = quantize(delay, 0);
 
 	// CSV
 	double latitude, longitude;
@@ -359,7 +409,7 @@ void setupSong() {
 			int channel = getChannelFromCoordinates( latitude, longitude );
 			int velocity = mapMagnitude( magnitude, Configuration.MIDI.Velocity.Min, Configuration.MIDI.Velocity.Max );
 			int pitch = mapDepth( depth );
-			int duration = mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
+			int duration = quantize_duration( channel ); //mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
 			//float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float scale = Configuration.Animation.Scale.Max;
@@ -368,9 +418,9 @@ void setupSong() {
 			color colour = getColourFromMonth( d2 );
 			color background = getBackgroundFromMonth( d2 );
 
-			quantized_delay = quantize(delay) - loopTime;
+			quantized_delay = quantize(delay, channel);
 
-			if ( Configuration.Mesh.Renderer == RenderType.PulsarSignal ) {
+			if ( is2D ) {
 				wbPoint = Geography.CoordinatesTo2DWBPoint( latitude, longitude, Configuration.Mesh.PulsarSignal.Width, Configuration.Mesh.PulsarSignal.Height );
 			}
 			else {
@@ -403,12 +453,10 @@ void setupSong() {
 			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
 			states.add( new StateManager( d2, colour, background, (long)(diff/Configuration.MIDI.TimeCompression) ) );
 
-			if (note != null) {
-				isDuplicateNote = (note.channel == channel && note.delay == quantized_delay);
-			}
-
-			if (!isDuplicateNote) {
+			if ( !isDuplicateNote( quantized_delay, channel ) ) {
 				setNote( channel, velocity, pitch, duration, quantized_delay );
+				stub = new NoteStub( quantized_delay, channel );
+				stubs.add( stub );
 			}
 			else {
 				y++;
@@ -428,6 +476,17 @@ void setupSong() {
 	}
 
 	startTime = millis() - startTime;
+}
+
+boolean isDuplicateNote( long delay, int channel ) {
+	for ( x = 0 ; x < stubs.size(); x++ ) {
+		stub = stubs.get(x);
+		if ( stub.delay == delay && stub.channel == channel ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
@@ -482,12 +541,13 @@ void setupInfo() {
 	println("Quantized " + diff_quantized_ms + "ms");
 	println("Total Data Points: " + points.size() );
 
-	float sum = 0.0;
-	for( x = 0; x < Configuration.MIDI.NoteType.length ; x++) {
-		sum += Configuration.MIDI.BeatNoteValue/Configuration.MIDI.NoteType[x].toFloat();
+	for ( x = 0; x < Configuration.MIDI.NoteType.length ; x++ ) {
+		float sum = 0.0;
+		for ( y = 0 ; y < Configuration.MIDI.NoteType[x].length ; y++ ) {
+			sum += Configuration.MIDI.BeatNoteValue/Configuration.MIDI.NoteType[x][y].toFloat();
+		}
+		println("Note value sum for channels (" + join(nf(Configuration.MIDI.BarToChannel[x], 0), ", ") + ") "  + sum + " (expected " + Configuration.MIDI.BeatsPerBar + ")");
 	}
-
-	println("Note value sum: " + sum + " (expected " + Configuration.MIDI.BeatsPerBar + ")");
 }
 
 String getDatePart( SimpleDateFormat dateFormat ) {
@@ -533,9 +593,11 @@ void drawRotation() {
 	// Move
 	theta += Configuration.Animation.Speed;
 
-	translate( width / 2, ( height / 2 ), 0 );
-	rotateY( theta );
-	rotateX( radians(-23.5) );
+	if (!is2D) {
+		translate( width / 2, ( height / 2 ), 0 );
+		rotateY( theta );
+		rotateX( radians(-23.5) );
+	}
 }
 
 void drawMesh( color colour, WB_Point5D[] points ) {
@@ -737,7 +799,8 @@ void renderWaves( WB_Point5D[] points ) {
 }
 
 void renderPulsarSignal( WB_Point5D[] points ) {
-	int offset = 50;
+	hint(DISABLE_OPTIMIZED_STROKE);
+	int offset = 0;
 	translate( width / 2 - Configuration.Mesh.PulsarSignal.Width / 2, height / 2 - Configuration.Mesh.PulsarSignal.Height / 2 - offset );
 	levels = (Configuration.Mesh.PulsarSignal.Height / Configuration.Mesh.PulsarSignal.Distance);
 
@@ -747,27 +810,26 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 		segments5D.add(new ArrayList<WB_Point5D>());
 	}
 
-	strokeWeight(1);
-
-	stroke( Configuration.Palette.Mesh.Line );
 	for ( WB_Point5D point : points ) {
 		yf = point.yf();
 		level = (int)Math.floor(yf / Configuration.Mesh.PulsarSignal.Distance);
-		segments5D.get(level).add(point);
+		segments5D.get((level < 0) ? 0 : level).add(point);
 	}
 
 	level = 0;
 	xoff = 0;
 
-	curveDetail( 5 );
+	float barrier = 0.25;
 
 	for ( y = Configuration.Mesh.PulsarSignal.Distance ; y < Configuration.Mesh.PulsarSignal.Height; y+=Configuration.Mesh.PulsarSignal.Distance ) {
+		strokeWeight(2);
+		stroke( Configuration.Palette.Mesh.Line );
 		fill( background );
 		beginShape();
-		curveVertex(0, y);
+		vertex(0, y);
 
-		mid = (Configuration.Mesh.PulsarSignal.Width/2) - (sin(level)*100);
-		float xoffvalue = 100.0;
+		mid = (Configuration.Mesh.PulsarSignal.Width/2) - (map(noise(y, yoff, random(0.0, 0.005)), 0, 1, -(Configuration.Mesh.PulsarSignal.Width*barrier), (Configuration.Mesh.PulsarSignal.Width*barrier)));
+		float xoffvalue = map(noise(y, yoff), 0, 1, 5, 75.0);
 		float y3;
 		y2 = y;
 
@@ -778,16 +840,24 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 		}
 
 		for ( k = 0; k <= Configuration.Mesh.PulsarSignal.Width; k+=Configuration.Mesh.PulsarSignal.Step ) {
-			float percentile = (k<mid) ? ((float)k/mid) : (Configuration.Mesh.PulsarSignal.Width/(float)k)-1.0;
-			y3 = xoffvalue * percentile;
+			float noise = random(0, 5);
+			float percentile = (k<mid) ? ((float)k/mid) : 1.0-(((float)k-mid)/(Configuration.Mesh.PulsarSignal.Width-mid));
+
+			y3 = noise;
+
+			if (percentile > barrier) {
+				percentile = mapexp(percentile, barrier, 1.0, 0.01, 1.0);
+				y3 = (xoffvalue * percentile) + noise;
+			}
+
 			y2 = y;
-			y2 -= map(noise(xoff, yoff), 0, 1, 10, y3);
+			y2 -= map(noise(xoff, yoff), 0, 1, -2, y3);
 
 			vertex( k, y2 );
-			xoff += 0.05;
+			xoff += 0.06;
 		}
 
-		curveVertex( Configuration.Mesh.PulsarSignal.Width, y );
+		vertex( Configuration.Mesh.PulsarSignal.Width, y );
 		vertex( Configuration.Mesh.PulsarSignal.Width, Configuration.Mesh.PulsarSignal.Height );
 		vertex( 0, Configuration.Mesh.PulsarSignal.Height );
 
@@ -795,9 +865,9 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 
 		level++;
 	}
-	yoff += 0.01;
+	yoff += 0.005;
 
-	strokeWeight( 2 );
+	strokeWeight( 4 );
 	stroke( background );
 	noFill();
 
@@ -807,6 +877,7 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 	vertex(Configuration.Mesh.PulsarSignal.Width, Configuration.Mesh.PulsarSignal.Height);
 	vertex(Configuration.Mesh.PulsarSignal.Width, 0);
 	endShape();
+	hint(ENABLE_OPTIMIZED_STROKE);
 }
 
 void renderPoints( WB_Point5D[] points ) {
@@ -853,6 +924,8 @@ void renderSpikes( WB_Point5D[] points ) {
 	}
 
 	blendMode(NORMAL);
+
+	theta += points.length / 10000;
 }
 
 void drawSpike( int sides, float r1, float r2, float h )
@@ -1184,7 +1257,7 @@ void renderRings( WB_Point5D[] points ) {
 		beginShape();
 
 
-	  for ( j = 0; j < 360; j+=Configuration.Mesh.Rings.RotationStep ) {
+		for ( j = 0; j < 360; j+=Configuration.Mesh.Rings.RotationStep ) {
 			boolean hasPoint = false;
 			for ( k = 0 ; k < segments.get(level).size(); k++ ) {
 				segmentPoint = segments.get(level).get(k);
@@ -1207,7 +1280,7 @@ void renderRings( WB_Point5D[] points ) {
 
 			stroke( Configuration.Palette.Mesh.Line, opacity );
 			vertex( cos(radians(j)) * radius, sin(radians(j)) * radius );
-	  }
+		}
 
 		endShape(CLOSE);
 
@@ -1291,8 +1364,21 @@ color getBackgroundFromMonth( Calendar date ) {
 }
 
 void saveFrames() {
-	if ( Configuration.IO.SaveFrames ) {
-		saveFrame("frameGrabs/frame-########.tga");
+	if ( isExporting ) {
+		videoExport.saveFrame();
+	}
+}
+
+void keyPressed() {
+	if (key == 's') {
+		isExporting = true;
+		videoExport = new VideoExport(this, "../../../renders/october/render-" + day() + "-" + month() + "-" + year() + ".mp4");
+		videoExport.startMovie();
+	}
+
+	if (key == 'q') {
+		videoExport.endMovie();
+		exit();
 	}
 }
 

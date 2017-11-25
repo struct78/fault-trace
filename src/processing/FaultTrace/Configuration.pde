@@ -2,14 +2,14 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xffF2F2F2;
+			public static final int Start = 0xff1A1A1B;
 
-			public static final int End = 0xffF2F2F2;
+			public static final int End = 0xff1A1A1B;
 		}
 
 		public static final class UI {
 
-			public static final int Foreground = 0xffFFFFFF;
+			public static final int Foreground = 0xffF9F5F7;
 
 			public static final class Start {
 				// Background colour of HUD
@@ -50,7 +50,7 @@ public static final class Configuration {
 			public static final int Faces = 0xff404040;
 
 			// Line colour
-			public static final int Line = 0xff00B2B2;
+			public static final int Line = 0xffefefff;
 
 			public static final int[] Plasma = {
 				0xffED049C,
@@ -72,75 +72,76 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 4000;
+		public static final long StartOffset = 3000;
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
-		public static final long AnimationOffset = 375;
+		public static final long AnimationOffset = 0;
 
 		// Time compression
-		public static final long TimeCompression = 9400;
+		public static final long TimeCompression = 5315;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 75;
+		public static final int BeatsPerMinute = 140;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 19;
+		public static final float BeatsPerBar = 4;
 
 		// 4/X
 		public static final float BeatNoteValue = 4;
 
 		// Bar structure
-		public static final QuantizationType[] NoteType = new QuantizationType[] {
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneEighthNote,
-			QuantizationType.OneHalfNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneEighthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneEighthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneEighthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneEighthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneQuarterNote,
-			QuantizationType.OneEighthNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneQuarterNote,
-			QuantizationType.OneSixteenthNote,
-			QuantizationType.OneQuarterNote,
-			QuantizationType.OneHalfNote,
-			QuantizationType.OneWholeNote,
-			QuantizationType.OneQuarterNote,
-			QuantizationType.OneQuarterNote
+		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
+			new QuantizationType[] {
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote
+			},
+			new QuantizationType[] {
+				QuantizationType.OneHalfNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote
+			},
+			new QuantizationType[] {
+				QuantizationType.OneWholeNote
+			},
+			new QuantizationType[] {
+				QuantizationType.OneHalfNote,
+				QuantizationType.OneHalfNote
+			}
+		};
+
+		// Bar to channel
+		public static final int[][] BarToChannel = new int[][] {
+			new int[] { 1, 2, 7 },
+			new int[] { 4 },
+			new int[] { 5, 6 },
+			new int[] { 3 }
 		};
 
 		// Stitch notes
-		public static final boolean ModuloNotes = true;
+		public static final boolean ModuloNotes = false;
 
 		// Number of MIDI channels to use
-		public static final int Channels = 10;
+		public static final int Channels = 8;
 
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
-			public static final int Min = 20;
+			public static final int Min = 0;
 
 			// Maximum pitch (0 - 127)
-			public static final int Max = 60;
+			public static final int Max = 127;
 		}
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 70;
+			public static final int Min = 127;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 120;
+			public static final int Max = 127;
 		}
 
 
@@ -218,7 +219,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 3000;
+		public static final int MaxPoints = 200;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -252,7 +253,7 @@ public static final class Configuration {
 		// - Waves
 		// - Spikes
 
-		public static final RenderType Renderer = RenderType.Spikes;
+		public static final RenderType Renderer = RenderType.PulsarSignal;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -294,13 +295,13 @@ public static final class Configuration {
 			public static final int Width = 800;
 
 			// Height of the viewport
-			public static final int Height = 900;
+			public static final int Height = 800;
 
 			// Distance between lines
 			public static final int Distance = 20;
 
 			// Distance between points
-			public static final int Step = 10;
+			public static final int Step = 5;
 		}
 
 		public static final class Waves {
@@ -338,9 +339,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 0.075;
+			public static final float Min = 3.0;
 
-			public static final float Max = 2.0;
+			public static final float Max = 8.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
@@ -348,10 +349,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-09-01T00:00:00.000Z";
+		public static final String StartDate = "2017-10-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-09-30T23:59:59.999Z";
+		public static final String EndDate = "2017-10-31T23:59:59.999Z";
 	}
 
 	public static final class IO {

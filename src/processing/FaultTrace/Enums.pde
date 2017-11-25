@@ -37,6 +37,7 @@ public enum MeshType {
 }
 
 public enum QuantizationType {
+	TwoWholeNotes(0.5f),
 	OneWholeNote(1.0f),
 	OneHalfNote(2.0f),
 	OneHalfNoteTriplet(3.0f),
