@@ -437,24 +437,24 @@ void drawMesh( color colour, WB_Point[] points ) {
 			break;
 		case Faces:
 			noStroke();
-			render.drawMesh( globeMesh );
+			render.drawFaces( globeMesh );
 			break;
 		case EdgesFaces:
 			render.drawEdges( globeMesh );
 			render.drawFaces( globeMesh );
 			break;
 		case Points:
-			render.drawPoints( globeMesh.getPoints(), 2 );
+			render.drawPoint( globeMesh.getPoints(), 2 );
 			break;
 		case EdgesPoints:
 			noFill();
 			render.drawEdges( globeMesh );
-			render.drawPoints( globeMesh.getPoints(), 2 );
+			render.drawPoint( globeMesh.getPoints(), 2 );
 			break;
 		case EdgesFacesPoints:
 			stroke(colour+2, 70);
 			render.drawEdges( globeMesh );
-			render.drawPoints( globeMesh.getPoints(), 4 );
+			render.drawPoint( globeMesh.getPoints(), 4 );
 			noStroke();
 			render.drawFaces( globeMesh );
 			break;
