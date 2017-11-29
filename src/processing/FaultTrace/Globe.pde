@@ -162,12 +162,12 @@ public class GlobePoint {
 	}
 
 	public void addAnimation( float scale, float distance, float animationTime ) {
-	 	animation = new Ani( this, animationTime, "scale", scale, Ani.QUAD_OUT, "onEnd:onScaleEnd" );
+	 	animation = new Ani( this, animationTime, "scale", scale, Configuration.Mesh.Easings.In, "onEnd:onScaleEnd" );
 		animation.pause();
 
 		this.animations.add( animation );
 
-		animation = new Ani( this, animationTime, "distance", distance, Ani.QUAD_OUT, "onEnd:onDistanceEnd" );
+		animation = new Ani( this, animationTime, "distance", distance, Configuration.Mesh.Easings.In, "onEnd:onDistanceEnd" );
 		animation.pause();
 
 		this.animations.add( animation );
@@ -178,10 +178,10 @@ public class GlobePoint {
 	public void remove() {
 		this.isFinishing = true;
 		this.isFinished = false;
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", this.defaultScale, Ani.QUAD_OUT, "onEnd:onEnd" );
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", this.defaultScale, Configuration.Mesh.Easings.Out, "onEnd:onEnd" );
 		animation.start();
 
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Ani.QUAD_OUT, "onEnd:onEnd" );
+		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Configuration.Mesh.Easings.Out, "onEnd:onEnd" );
 		animation.start();
 	}
 

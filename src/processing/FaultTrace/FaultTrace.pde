@@ -166,8 +166,8 @@ void draw() {
 	noCursor();
 	drawBackground();
 	drawGlobe();
-	//drawHUD();
-	//drawGraph();
+	drawHUD();
+	drawGraph();
 	saveFrames();
 }
 
@@ -412,7 +412,8 @@ void setupSong() {
 			int duration = quantize_duration( channel ); //mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
 			//float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
-			float scale = Configuration.Animation.Scale.Max;
+			//float scale = Configuration.Animation.Scale.Max;
+			float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float distance = mapexp( depth, 0, Configuration.Data.Depth.Max, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			float mag = mapMagnitude( magnitude, Configuration.Mesh.Spikes.Radius.Min, Configuration.Mesh.Spikes.Radius.Max );
 			color colour = getColourFromMonth( d2 );
@@ -465,9 +466,14 @@ void setupSong() {
 			x++;
 		}
 
-		// Timpani
-		if ( magnitude > 5.5 ) {
-			setNote( 10, 80, 60, 3000, quantized_delay );
+		// Conditional based
+		if ( magnitude > 6.5 ) {
+			setNote( 9, 80, 60, 9000, quantized_delay );
+		}
+
+		// Conditional based
+		if ( magnitude > 7.25 ) {
+			setNote( 10, 80, 60, 9000, quantized_delay );
 		}
 
 		// Update the previous date to the current date for the next iteration
@@ -881,11 +887,13 @@ void renderPulsarSignal( WB_Point5D[] points ) {
 }
 
 void renderPoints( WB_Point5D[] points ) {
-	strokeWeight(4.5);
-	stroke(Configuration.Palette.Mesh.Line);
+	blendMode(ADD);
+	strokeWeight(3.5);
+	stroke(Configuration.Palette.Mesh.Line, 100);
 	for ( WB_Point5D point : points ) {
 		point(point.xf(), point.yf(), point.zf());
 	}
+	blendMode(NORMAL);
 }
 
 void renderSpikes( WB_Point5D[] points ) {

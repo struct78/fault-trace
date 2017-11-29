@@ -2,7 +2,7 @@ public enum RenderType {
 	Edges(true),
 	Faces(true),
 	EdgesFaces(true),
-	Points(true),
+	Points(false),
 	FacesPoints(true),
 	EdgesPoints(true),
 	EdgesFacesPoints(true),
