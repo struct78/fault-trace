@@ -37,7 +37,7 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 20;
+			public static final int Min = 40;
 
 			// Maximum velocity (0 - 127)
 			public static final int Max = 90;
