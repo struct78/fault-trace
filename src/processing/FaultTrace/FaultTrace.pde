@@ -123,6 +123,11 @@ float distance;
 float azimuth;
 float elevation;
 
+//renderPetals
+PVector[] controlPoints;
+PVector a, b;
+BezierCurve curve;
+
 //quantize()
 int type;
 float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
@@ -411,9 +416,9 @@ void setupSong() {
 			int pitch = mapDepth( depth );
 			int duration = quantize_duration( channel ); //mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
-			//float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			//float scale = Configuration.Animation.Scale.Max;
-			float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			//float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float distance = mapexp( depth, 0, Configuration.Data.Depth.Max, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			float mag = mapMagnitude( magnitude, Configuration.Mesh.Spikes.Radius.Min, Configuration.Mesh.Spikes.Radius.Max );
 			color colour = getColourFromMonth( d2 );
@@ -496,26 +501,28 @@ boolean isDuplicateNote( long delay, int channel ) {
 }
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
-	// Create the note
-	note = new Note( bus );
+	if (!Configuration.MIDI.SilentRunning) {
+		// Create the note
+		note = new Note( bus );
 
-	// Each instrument/section represents 1/8th of the globe
-	note.channel = channel;
+		// Each instrument/section represents 1/8th of the globe
+		note.channel = channel;
 
-	// How hard the note is hit
-	note.velocity = velocity;
+		// How hard the note is hit
+		note.velocity = velocity;
 
-	// Pitch of the note
-	note.pitch = pitch;
+		// Pitch of the note
+		note.pitch = pitch;
 
-	// How long the note is played for, on some instruments this makes no difference
-	note.duration = duration;
+		// How long the note is played for, on some instruments this makes no difference
+		note.duration = duration;
 
-	// Time until note is played, this is to prevent duplicate notes playing at the same time causing out of phase weirdness
-	note.delay = delay;
+		// Time until note is played, this is to prevent duplicate notes playing at the same time causing out of phase weirdness
+		note.delay = delay;
 
-	// Add the note to task schedule
-	timer.schedule( new ThreadTask(note), delay );
+		// Add the note to task schedule
+		timer.schedule( new ThreadTask(note), delay );
+	}
 }
 
 void setupData() {
@@ -714,6 +721,9 @@ void drawMesh( color colour, WB_Point5D[] points ) {
 		case Spikes:
 			renderSpikes( points );
 			break;
+		case Petals:
+			renderPetals( points );
+			break;
 		default:
 			break;
 	}
@@ -893,6 +903,49 @@ void renderPoints( WB_Point5D[] points ) {
 	for ( WB_Point5D point : points ) {
 		point(point.xf(), point.yf(), point.zf());
 	}
+	blendMode(NORMAL);
+}
+
+void renderPetals( WB_Point5D[] points ) {
+	blendMode(ADD);
+	noStroke();
+	b = new PVector(0, 0, 0);
+	x = 0;
+
+	fill(0);
+	sphere(50);
+
+	for ( WB_Point5D point : points ) {
+		fill(Configuration.Palette.Mesh.Petals[ x ], 80);
+		a = new PVector(point.xf(), point.yf(), point.zf());
+		curve = new BezierCurve(a, b);
+		controlPoints = curve.getControlPoints();
+
+		pushMatrix();
+
+		azimuth = atan2(point.yf(), point.xf());
+		elevation = atan2(sqrt(sq(point.xf()) + sq(point.yf())), point.zf());
+
+		rotateZ(azimuth);
+		rotateY(elevation);
+		rotateX(radians(x));
+
+		//rotateZ(radians(x));
+		//println(controlPoints[0].x + ":" + controlPoints[0].y + ":" + controlPoints[0].z + "-" + controlPoints[1].x + ":" + controlPoints[1].y + ":" + controlPoints[1].z + "-" + controlPoints[2].x + ":" + controlPoints[2].y + ":" + controlPoints[2].z + "-" + controlPoints[3].x + ":" + controlPoints[3].y + ":" + controlPoints[3].z);
+		bezier(controlPoints[0].x, controlPoints[0].y, controlPoints[0].z, controlPoints[1].x, controlPoints[1].y, controlPoints[1].z, controlPoints[2].x, controlPoints[2].y, controlPoints[2].z, controlPoints[3].x, controlPoints[3].y, controlPoints[3].z);
+
+		curve = new BezierCurve(b, a);
+		controlPoints = curve.getControlPoints();
+		bezier(controlPoints[0].x, controlPoints[0].y, controlPoints[0].z, controlPoints[1].x, controlPoints[1].y, controlPoints[1].z, controlPoints[2].x, controlPoints[2].y, controlPoints[2].z, controlPoints[3].x, controlPoints[3].y, controlPoints[3].z);
+
+		popMatrix();
+		x++;
+
+		if (x == Configuration.Palette.Mesh.Petals.length) {
+			x = 0;
+		}
+	}
+
 	blendMode(NORMAL);
 }
 

@@ -2,9 +2,9 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff227066;
+			public static final int Start = 0xff121212;
 
-			public static final int End = 0xff227066;
+			public static final int End = 0xff121212;
 		}
 
 		public static final class UI {
@@ -67,12 +67,23 @@ public static final class Configuration {
 				0xff0E5159,
 				0xff28E8FF
 			};
+
+			public static final int[] Petals = {
+				0xff2E112D,
+				0xffF0433A,
+				0xff3E606F,
+				0xff56B9D0,
+				0xffF24C27,
+				0xffFBBA42,
+				0xffE8476D,
+				0xffF2EBBF
+			};
 		}
 	}
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 2600;
+		public static final long StartOffset = 3000;
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
@@ -145,6 +156,8 @@ public static final class Configuration {
 		// Number of MIDI channels to use
 		public static final int Channels = 8;
 
+		// Set this to true if you want to supress audio, useful for debugging or working next to your sleeping wife
+		public static final boolean SilentRunning = true;
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
@@ -177,7 +190,7 @@ public static final class Configuration {
 		public static final int FPS = 60;
 
 		// Processing rendering mode
-		public static final String Mode = P3D;
+		public static final String Mode = OPENGL;
 
 		public static final class HUD {
 			// Size of the HUD font
@@ -203,10 +216,10 @@ public static final class Configuration {
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 0.1;
+			public static final float Min = 0.8;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.0;
+			public static final float Max = 1.8;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
 			public static final float Default = 0.001;
@@ -215,7 +228,7 @@ public static final class Configuration {
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.002;
+		public static final float Speed = 0.02;
 
 
 		public static final class Zoom {
@@ -270,8 +283,9 @@ public static final class Configuration {
 		// - PulsarSignal
 		// - Waves
 		// - Spikes
+		// - Petals
 
-		public static final RenderType Renderer = RenderType.Points;
+		public static final RenderType Renderer = RenderType.Petals;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -349,7 +363,7 @@ public static final class Configuration {
 		}
 
 		public static final class Easings {
-			public static final Easing In = Ani.BOUNCE_OUT;
+			public static final Easing In = Ani.ELASTIC_OUT;
 
 			public static final Easing Out = Ani.QUAD_IN;
 		}
@@ -373,7 +387,7 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-11-12T10:00:00.000Z";
+		public static final String StartDate = "2017-11-01T10:00:00.000Z";
 
 		// End date
 		public static final String EndDate = "2017-11-30T23:59:59.999Z";

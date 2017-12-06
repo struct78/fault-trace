@@ -14,7 +14,8 @@ public enum RenderType {
 	Plasma(false),
 	PulsarSignal(false),
 	Waves(false),
-	Spikes(false);
+	Spikes(false),
+	Petals(false);
 
 	private boolean value;
 
