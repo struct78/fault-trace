@@ -11,7 +11,7 @@ public class Globe {
 		this.creator = new HEC_Geodesic();
 		this.creator.setRadius( Configuration.Mesh.GlobeSize );
 		this.creator.setB( 1 );
-		this.creator.setC( 1 );
+		this.creator.setC( 2 );
 		this.creator.setType( HEC_Geodesic.ICOSAHEDRON );
 		this.icosahedron = new HE_Mesh( creator );
 		this.icosahedronPoints = icosahedron.getPoints();

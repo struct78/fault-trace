@@ -401,6 +401,7 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
+	rotateX( radians(-23.5) );
 }
 
 void drawMesh( color colour, WB_Point[] points ) {
