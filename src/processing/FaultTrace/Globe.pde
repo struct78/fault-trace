@@ -115,6 +115,8 @@ public class GlobePoint {
 	boolean isFinished;
 	boolean isFinishing;
 	boolean isScaling;
+	boolean tweenDistance;
+	boolean tweenScale;
 	int index;
 	WB_Point point;
 	Ani animation;
@@ -134,6 +136,8 @@ public class GlobePoint {
 		this.isFinished = false;
 		this.isFinishing = false;
 		this.isScaling = true;
+		this.tweenDistance = true;
+		this.tweenScale = true;
 	}
 
 	public void addDefaultScale( float scale ) {
@@ -162,27 +166,44 @@ public class GlobePoint {
 	}
 
 	public void addAnimation( float scale, float distance, float animationTime ) {
-	 	animation = new Ani( this, animationTime, "scale", scale, Configuration.Mesh.Easings.In, "onEnd:onScaleEnd" );
-		animation.pause();
+		if (this.tweenScale) {
+		 	animation = new Ani( this, animationTime, "scale", scale, Configuration.Mesh.Easings.In, "onEnd:onScaleEnd" );
+			animation.pause();
 
-		this.animations.add( animation );
+			this.animations.add( animation );
+		}
 
-		animation = new Ani( this, animationTime, "distance", distance, Configuration.Mesh.Easings.In, "onEnd:onDistanceEnd" );
-		animation.pause();
+		if (this.tweenDistance) {
+			animation = new Ani( this, animationTime, "distance", distance, Configuration.Mesh.Easings.In, "onEnd:onDistanceEnd" );
+			animation.pause();
 
-		this.animations.add( animation );
+			this.animations.add( animation );
+		}
 
 		animation = null;
+	}
+
+	public void setTweenDistance( boolean t ) {
+		this.tweenDistance = t;
+	}
+
+	public void setTweenScale( boolean t ) {
+		this.tweenScale = t;
 	}
 
 	public void remove() {
 		this.isFinishing = true;
 		this.isFinished = false;
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", this.defaultScale, Configuration.Mesh.Easings.Out, "onEnd:onEnd" );
-		animation.start();
 
-		animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Configuration.Mesh.Easings.Out, "onEnd:onEnd" );
-		animation.start();
+		if (this.tweenScale) {
+			animation = new Ani( this, Configuration.Animation.Duration.Max, "scale", this.defaultScale, Configuration.Mesh.Easings.Out, "onEnd:onEnd" );
+			animation.start();
+		}
+
+		if (this.tweenDistance) {
+			animation = new Ani( this, Configuration.Animation.Duration.Max, "distance", 0.0, Configuration.Mesh.Easings.Out, "onEnd:onEnd" );
+			animation.start();
+		}
 	}
 
 	public void onEnd() {
@@ -195,8 +216,8 @@ public class GlobePoint {
 	}
 
 	public void onDistanceEnd() {
-		//animation = new Ani( this, animationTime, "distance", 0.0, Ani.QUAD_IN );
-		//animation.start();
+		animation = new Ani( this, animationTime, "distance", 0.0, Ani.QUAD_IN );
+		animation.start();
 	}
 
 	public boolean canDisplay() {
@@ -220,7 +241,7 @@ public class GlobePoint {
 
 		for ( int x = 0 ; x < this.animations.size(); x++ ) {
 			animation = this.animations.get( this.index+x );
-
+			
 			if ( animation != null ) {
 				if ( !animation.isPlaying() && !animation.isEnded() ) {
 					animation.resume();
@@ -232,7 +253,7 @@ public class GlobePoint {
 	public WB_Point5D getPoint() {
 		WB_Point5D point = new WB_Point5D( this.point.mul( this.scale ) );
 
-		if ( Configuration.Animation.Scale.UseTicks  ) {
+		if ( Configuration.Animation.Scale.UseTicks ) {
 			point.setW( this.ticks );
 		} else {
 			point.setW( this.distance );

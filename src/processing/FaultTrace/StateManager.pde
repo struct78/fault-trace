@@ -16,7 +16,7 @@ public class StateManagerThread extends Thread {
 	 Calendar date;
 	 ArrayList<StateManager> states;
 	 color colour;
-	 color background;
+	 color background = Configuration.Palette.Background.Start;
 
 	 StateManagerThread(ArrayList<StateManager> states) {
 		 this.states = states;

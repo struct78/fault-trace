@@ -170,9 +170,9 @@ void setup() {
 void draw() {
 	noCursor();
 	drawBackground();
-	drawGlobe();
 	drawHUD();
 	drawGraph();
+	drawGlobe();
 	saveFrames();
 }
 
@@ -367,7 +367,7 @@ void setupSong() {
 
 	// CSV
 	double latitude, longitude;
-	float depth, magnitude, rms;
+	float depth, magnitude, rms, dmin;
 
 	String date;
 	String previousDate = null;
@@ -390,6 +390,7 @@ void setupSong() {
 		depth = row.getFloat("depth");
 		magnitude = row.getFloat("mag");
 		rms = row.getFloat("rms");
+		dmin = row.getFloat("dmin");
 		loopTime = millis() - loopDuration;
 
 		try {
@@ -420,7 +421,8 @@ void setupSong() {
 			//float scale = Configuration.Animation.Scale.Max;
 			//float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float distance = mapexp( depth, 0, Configuration.Data.Depth.Max, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
-			float mag = mapMagnitude( magnitude, Configuration.Mesh.Spikes.Radius.Min, Configuration.Mesh.Spikes.Radius.Max );
+			//float distance = map(rms, 0.0, 2.5, 0, (Configuration.Palette.Mesh.Petals.length - 1));
+			float mag = map( rms, 0.0, 2.5, 0, (Configuration.Palette.Mesh.Petals.length - 1) );
 			color colour = getColourFromMonth( d2 );
 			color background = getBackgroundFromMonth( d2 );
 
@@ -444,6 +446,10 @@ void setupSong() {
 				existingPoint.addAnimation( scale, distance, animationTime );
 				existingPoint.addDistance( distance );
 				existingPoint.addMagnitude( mag );
+
+				// If you do not want to tween distance or scale, call these methods
+				// existingPoint.setTweenScale( false );
+				existingPoint.setTweenDistance( false );
 			}
 			else {
 				newPoint.addDelay( quantized_delay + millis() - Configuration.MIDI.AnimationOffset);
@@ -453,6 +459,9 @@ void setupSong() {
 				newPoint.addAnimation( scale, distance, animationTime );
 				newPoint.addDistance( distance );
 				newPoint.addMagnitude( mag );
+				// If you do not want to tween distance or scale, call these methods
+				// newPoint.setTweenScale( false );
+				newPoint.setTweenDistance( false );
 				points.add( newPoint );
 			}
 
@@ -597,9 +606,9 @@ void drawBackground() {
 }
 
 void drawLights( color colour ) {
-	ambient( Configuration.Palette.Lights.Centre );
+	//ambient( Configuration.Palette.Lights.Centre );
 	//pointLight( red(colour), green(colour), blue(colour), width, 400, width/2 );
-	//directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
+	directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
 }
 
 void drawRotation() {
@@ -907,29 +916,32 @@ void renderPoints( WB_Point5D[] points ) {
 }
 
 void renderPetals( WB_Point5D[] points ) {
-	blendMode(ADD);
 	noStroke();
 	b = new PVector(0, 0, 0);
 	x = 0;
 
-	fill(0);
-	sphere(50);
+	fill( Configuration.Mesh.Petals.Sphere );
+	sphere( 140 );
+	//blendMode( ADD );
 
 	for ( WB_Point5D point : points ) {
-		fill(Configuration.Palette.Mesh.Petals[ x ], 80);
+		fill(Configuration.Palette.Mesh.Petals[ floor(point.mf()) ], 110);
 		a = new PVector(point.xf(), point.yf(), point.zf());
 		curve = new BezierCurve(a, b);
 		controlPoints = curve.getControlPoints();
-
 		pushMatrix();
 
-		azimuth = atan2(point.yf(), point.xf());
-		elevation = atan2(sqrt(sq(point.xf()) + sq(point.yf())), point.zf());
+		//azimuth = atan2(point.yf(), point.xf());
+		//elevation = atan2(sqrt(sq(point.xf()) + sq(point.yf())), point.zf());
 
-		rotateZ(azimuth);
-		rotateY(elevation);
-		rotateX(radians(x));
+		//rotateZ(azimuth);
+		//rotateY(elevation);
+		//rotateX(radians(point.wf()));
+		//rotateY(point.wf());
 
+
+		//rotateY(radians(point.mf()));
+		//rotate(point.mf());
 		//rotateZ(radians(x));
 		//println(controlPoints[0].x + ":" + controlPoints[0].y + ":" + controlPoints[0].z + "-" + controlPoints[1].x + ":" + controlPoints[1].y + ":" + controlPoints[1].z + "-" + controlPoints[2].x + ":" + controlPoints[2].y + ":" + controlPoints[2].z + "-" + controlPoints[3].x + ":" + controlPoints[3].y + ":" + controlPoints[3].z);
 		bezier(controlPoints[0].x, controlPoints[0].y, controlPoints[0].z, controlPoints[1].x, controlPoints[1].y, controlPoints[1].z, controlPoints[2].x, controlPoints[2].y, controlPoints[2].z, controlPoints[3].x, controlPoints[3].y, controlPoints[3].z);
@@ -937,7 +949,6 @@ void renderPetals( WB_Point5D[] points ) {
 		curve = new BezierCurve(b, a);
 		controlPoints = curve.getControlPoints();
 		bezier(controlPoints[0].x, controlPoints[0].y, controlPoints[0].z, controlPoints[1].x, controlPoints[1].y, controlPoints[1].z, controlPoints[2].x, controlPoints[2].y, controlPoints[2].z, controlPoints[3].x, controlPoints[3].y, controlPoints[3].z);
-
 		popMatrix();
 		x++;
 
@@ -1361,7 +1372,7 @@ void drawGlobe() {
 	colour = stateThread.getColour();
 
 	if ( currentDate != null && ((meshPoints != null && (meshPoints.length > 4 || !isHeMeshRenderer)))) {
-		drawLights( colour );
+		//drawLights( colour );
 		pushMatrix();
 		drawRotation();
 		drawMesh( colour, meshPoints );

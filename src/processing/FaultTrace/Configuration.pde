@@ -2,9 +2,9 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff121212;
+			public static final int Start = 0xffFFFEFA;
 
-			public static final int End = 0xff121212;
+			public static final int End = 0xffFFFEFA;
 		}
 
 		public static final class UI {
@@ -13,12 +13,12 @@ public static final class Configuration {
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xff29877B;
+				public static final int Background = 0xffFF948F;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xff29877B;
+				public static final int Background = 0xffFF948F;
 			}
 		}
 
@@ -33,7 +33,7 @@ public static final class Configuration {
 			public static final int Right = 0xff16B3BA;
 
 			// Right Light
-			public static final int Outside = 0xff9D31AE;
+			public static final int Outside = 0xffffffff;
 
 			// Bottom light
 			public static final int Bottom = 0xff0688D9;
@@ -69,14 +69,16 @@ public static final class Configuration {
 			};
 
 			public static final int[] Petals = {
-				0xff2E112D,
-				0xffF0433A,
 				0xff3E606F,
-				0xff56B9D0,
-				0xffF24C27,
-				0xffFBBA42,
+				0xff00A388,
+				0xff79BD8F,
+				0xff88A34F,
+				0xffBEEB9F,
+				0xffF2EBBF,
 				0xffE8476D,
-				0xffF2EBBF
+				0xffF0433A,
+				0xffF24C27,
+				0xffFF6138
 			};
 		}
 	}
@@ -157,7 +159,7 @@ public static final class Configuration {
 		public static final int Channels = 8;
 
 		// Set this to true if you want to supress audio, useful for debugging or working next to your sleeping wife
-		public static final boolean SilentRunning = true;
+		public static final boolean SilentRunning = false;
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
@@ -219,7 +221,7 @@ public static final class Configuration {
 			public static final float Min = 0.8;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.8;
+			public static final float Max = 1.2;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
 			public static final float Default = 0.001;
@@ -228,7 +230,7 @@ public static final class Configuration {
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.02;
+		public static final float Speed = 0.002;
 
 
 		public static final class Zoom {
@@ -250,7 +252,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 10000;
+		public static final int MaxPoints = 100;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -362,6 +364,10 @@ public static final class Configuration {
 			}
 		}
 
+		public static final class Petals {
+			public static final int Sphere = 0xffF7F6F2;
+		}
+
 		public static final class Easings {
 			public static final Easing In = Ani.ELASTIC_OUT;
 
@@ -377,9 +383,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 3.0;
+			public static final float Min = 0.0;
 
-			public static final float Max = 8.0;
+			public static final float Max = 4.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
