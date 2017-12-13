@@ -2,9 +2,9 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xffFFFEFA;
+			public static final int Start = 0xff000000;
 
-			public static final int End = 0xffFFFEFA;
+			public static final int End = 0xff000000;
 		}
 
 		public static final class UI {
@@ -92,86 +92,127 @@ public static final class Configuration {
 		public static final long AnimationOffset = 0;
 
 		// Time compression
-		public static final long TimeCompression = 6000;
+		public static final long TimeCompression = 4000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 140;
+		public static final int BeatsPerMinute = 180;
 
 		// Beats per bar X/4
 		public static final float BeatsPerBar = 16;
 
 		// 4/X
-		public static final float BeatNoteValue = 4;
+		public static final float BeatNoteValue = 8;
 
 		// Bar structure
 		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
+			// 2
 			new QuantizationType[] {
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
 				QuantizationType.OneHalfNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote
+				QuantizationType.OneHalfNote,
+				QuantizationType.OneHalfNote,
+				QuantizationType.OneHalfNote,
 			},
+
+			// 3
 			new QuantizationType[] {
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneHalfNote,
-				QuantizationType.OneHalfNote,
-				QuantizationType.OneHalfNote,
-				QuantizationType.OneHalfNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneEighthNoteDotted,
+				QuantizationType.OneEighthNoteDotted,
+				QuantizationType.OneEighthNoteDotted,
+				QuantizationType.OneEighthNoteDotted,
 				QuantizationType.OneEighthNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote
+				QuantizationType.OneEighthNoteDotted,
+				QuantizationType.OneEighthNoteDotted,
+				QuantizationType.OneEighthNoteDotted,
+				QuantizationType.OneEighthNote
 			},
+
+			// 4
 			new QuantizationType[] {
-				QuantizationType.TwoWholeNotes,
-				QuantizationType.TwoWholeNotes,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNoteTriplet,
+				QuantizationType.OneEighthNoteTriplet,
+				QuantizationType.OneEighthNoteTriplet,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote
+			},
+
+			// 5
+			new QuantizationType[] {
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNoteTriplet,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNoteTriplet,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneSixteenthNoteTriplet
 			}
 		};
 
 		// Bar to channel
 		public static final int[][] BarToChannel = new int[][] {
-			new int[] { 1, 2, 3, 4, 8 },
-			new int[] { 5 },
-			new int[] { 6, 7 }
+			new int[] { 7, 8 },
+			new int[] { 9, 5, 3 },
+			new int[] { 10 },
+			new int[] { 1, 2, 4, 6 }
 		};
 
 		// Stitch notes
-		public static final boolean ModuloNotes = true;
+		public static final boolean ModuloNotes = false;
 
 		// Number of MIDI channels to use
-		public static final int Channels = 8;
+		public static final int Channels = 10;
 
 		// Set this to true if you want to supress audio, useful for debugging or working next to your sleeping wife
 		public static final boolean SilentRunning = false;
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
-			public static final int Min = 0;
+			public static final int Min = 20;
 
 			// Maximum pitch (0 - 127)
-			public static final int Max = 127;
+			public static final int Max = 80;
 		}
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 127;
+			public static final int Min = 110;
 
 			// Maximum velocity (0 - 127)
 			public static final int Max = 127;
@@ -226,7 +267,7 @@ public static final class Configuration {
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
 			public static final float Default = 0.001;
 
-			public static boolean UseTicks = false;
+			public static boolean UseTicks = true;
 		}
 
 		// Rotation speed
@@ -287,7 +328,7 @@ public static final class Configuration {
 		// - Spikes
 		// - Petals
 
-		public static final RenderType Renderer = RenderType.Petals;
+		public static final RenderType Renderer = RenderType.Explosions;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -393,10 +434,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-11-01T10:00:00.000Z";
+		public static final String StartDate = "2017-12-01T10:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-11-30T23:59:59.999Z";
+		public static final String EndDate = "2017-12-30T23:59:59.999Z";
 	}
 
 	public static final class IO {
