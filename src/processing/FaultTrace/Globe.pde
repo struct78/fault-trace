@@ -112,6 +112,7 @@ public class GlobePoint {
 	float distance;
 	float ticks;
 	float magnitude;
+	String uuid;
 	boolean isFinished;
 	boolean isFinishing;
 	boolean isScaling;
@@ -138,6 +139,7 @@ public class GlobePoint {
 		this.isScaling = true;
 		this.tweenDistance = true;
 		this.tweenScale = true;
+		this.uuid = UUID.randomUUID().toString();
 	}
 
 	public void addDefaultScale( float scale ) {
@@ -241,7 +243,7 @@ public class GlobePoint {
 
 		for ( int x = 0 ; x < this.animations.size(); x++ ) {
 			animation = this.animations.get( this.index+x );
-			
+
 			if ( animation != null ) {
 				if ( !animation.isPlaying() && !animation.isEnded() ) {
 					animation.resume();
@@ -260,6 +262,7 @@ public class GlobePoint {
 		}
 
 		point.setM( this.magnitude );
+		point.setUUID( this.uuid );
 
 		return point;
 	}

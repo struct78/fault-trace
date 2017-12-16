@@ -1,5 +1,6 @@
 public class WB_Point5D extends WB_Vector4D {
   private float _mf;
+  private String _uuid;
 
   public WB_Point5D( double x, double y, double z ) {
     super(x, y, z);
@@ -23,5 +24,13 @@ public class WB_Point5D extends WB_Vector4D {
 
   public void setM(float m) {
     _mf = m;
+  }
+
+  public void setUUID( String uuid ) {
+    _uuid = uuid;
+  }
+
+  public String getUUID() {
+    return _uuid;
   }
 }

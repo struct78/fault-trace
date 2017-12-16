@@ -95,13 +95,13 @@ public static final class Configuration {
 		public static final long TimeCompression = 4000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 180;
+		public static final int BeatsPerMinute = 140;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 16;
+		public static final float BeatsPerBar = 7;
 
 		// 4/X
-		public static final float BeatNoteValue = 8;
+		public static final float BeatNoteValue = 4;
 
 		// Bar structure
 		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
@@ -194,7 +194,7 @@ public static final class Configuration {
 		};
 
 		// Stitch notes
-		public static final boolean ModuloNotes = false;
+		public static final boolean ModuloNotes = true;
 
 		// Number of MIDI channels to use
 		public static final int Channels = 10;
@@ -259,15 +259,15 @@ public static final class Configuration {
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 0.8;
+			public static final float Min = 1.0;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.2;
+			public static final float Max = 1.0;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
 			public static final float Default = 0.001;
 
-			public static boolean UseTicks = true;
+			public static boolean UseTicks = false;
 		}
 
 		// Rotation speed
@@ -293,7 +293,7 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 100;
+		public static final int MaxPoints = 20;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
@@ -424,9 +424,9 @@ public static final class Configuration {
 		}
 
 		public static final class Distance {
-			public static final float Min = 0.0;
+			public static final float Min = 1.0;
 
-			public static final float Max = 4.0;
+			public static final float Max = 1.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";

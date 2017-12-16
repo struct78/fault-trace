@@ -16,7 +16,9 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.Point;
 import javax.sound.midi.*;
+import java.util.*;
 import themidibus.*;
+import toxi.geom.*;
 import wblut.geom.*;
 import wblut.hemesh.*;
 import wblut.math.*;
@@ -55,6 +57,7 @@ ArrayList<ArrayList<WB_Point5D>> segments5D = new ArrayList<ArrayList<WB_Point5D
 ArrayList<Float> amplitudes = new ArrayList<Float>();
 ArrayList<Float> amplitudesSmoothed = new ArrayList<Float>();
 ArrayList<NoteStub> stubs = new ArrayList<NoteStub>();
+ArrayList<String> uuids = new ArrayList<String>();
 
 PFont font;
 HE_Mesh globeMesh;
@@ -127,6 +130,16 @@ float elevation;
 PVector[] controlPoints;
 PVector a, b;
 BezierCurve curve;
+
+//renderExplosions
+PGL pgl;
+Images images;
+Emitter emitter;
+ArrayList<Emitter> emitters;
+float floorLevel;
+Vec3D gravity;
+boolean ALLOWGRAVITY = true; // TODO move
+int counter;
 
 //quantize()
 int type;
@@ -220,6 +233,14 @@ void setup3D() {
 	sphere.setRadius( Configuration.Mesh.GlobeSize );
 	sphere.setUFacets( 40 );
 	sphere.setVFacets( 40 );
+
+
+	images = new Images();
+	gravity = new Vec3D( 0, .5, 0 );
+	emitter = new Emitter();
+	floorLevel = 0;
+	emitters = new ArrayList<Emitter>();
+	pgl = ((PGraphicsOpenGL) g).pgl;
 }
 
 void setupTimezone() {
@@ -1033,31 +1054,23 @@ void drawSpike( int sides, float r1, float r2, float h )
 }
 
 void renderExplosions( WB_Point5D[] points ) {
+  pgl.depthMask( false );
+  pgl.enable( PGL.BLEND );
+	pgl.blendFunc( PGL.SRC_ALPHA, PGL.ONE );
+	emitter.exist();
+
 	for ( WB_Point5D point : points ) {
-		float distance = point.wf();
-		if ( distance > 100 ) {
-			continue;
+		fill(255);
+		point(point.xf(), point.yf(), point.zf());
+
+		if (point.wf() >= 1.0) {
+			if (!uuids.contains(point.getUUID())) {
+				uuids.add(point.getUUID());
+				emitter.addParticles(1, point);
+			}
 		}
-
-		float flareAmount = ceil(random(30)) + 20;
-		float a = 360/flareAmount;
-
-		noStroke();
-		strokeWeight(2);
-		stroke(colour, 1000/distance);
-
-		for (int i = 0; i < flareAmount + 1; i++){
-			pushMatrix();
-			translate(point.xf(), point.yf(), point.zf());
-
-			float x2 = sin(radians(i*a))*distance * cos(radians(i*a))*distance;
-			float y2 = cos(radians(i*a))*distance * cos(radians(i*a))*distance;
-			float z2 = sin(radians(i*a))*distance;
-
-			point(x2, y2, z2);
-			popMatrix();
-		 }
-	 }
+	}
+	counter++;
 }
 
 void renderEdgesFaces( HE_Mesh globeMesh, HE_MeshCollection meshCollection ) {
