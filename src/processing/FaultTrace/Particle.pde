@@ -93,6 +93,10 @@ public class Particle {
 	void render(){
 		color c = color( agePer - .5, agePer*.25, 1.5 - agePer );
 		renderImage(images.particle, loc[0], radius * agePer, c, 1.0 );
+		stroke(2);
+		fill(213);
+		point(loc[0].x, loc[0].y, loc[0].z);
+
 
 		// Rendering two graphics here. Makes the particles more vivid,
 		// but will hinder the performance.

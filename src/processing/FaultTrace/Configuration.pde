@@ -92,42 +92,36 @@ public static final class Configuration {
 		public static final long AnimationOffset = 0;
 
 		// Time compression
-		public static final long TimeCompression = 4000;
+		public static final long TimeCompression = 8700;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 140;
+		public static final int BeatsPerMinute = 117;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 7;
+		public static final float BeatsPerBar = 9;
 
 		// 4/X
 		public static final float BeatNoteValue = 4;
 
 		// Bar structure
 		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
+			// 1
+			new QuantizationType[] {
+				QuantizationType.OneHalfNote
+			},
+
 			// 2
 			new QuantizationType[] {
-				QuantizationType.OneHalfNote,
-				QuantizationType.OneHalfNote,
-				QuantizationType.OneHalfNote,
-				QuantizationType.OneHalfNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneWholeNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneQuarterNoteDotted
 			},
+
 
 			// 3
 			new QuantizationType[] {
-				QuantizationType.OneEighthNoteDotted,
-				QuantizationType.OneEighthNoteDotted,
-				QuantizationType.OneEighthNoteDotted,
-				QuantizationType.OneEighthNoteDotted,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNoteDotted,
-				QuantizationType.OneEighthNoteDotted,
-				QuantizationType.OneEighthNoteDotted,
-				QuantizationType.OneEighthNote
-			},
-
-			// 4
-			new QuantizationType[] {
 				QuantizationType.OneEighthNote,
 				QuantizationType.OneEighthNote,
 				QuantizationType.OneEighthNote,
@@ -138,7 +132,6 @@ public static final class Configuration {
 				QuantizationType.OneEighthNoteTriplet,
 				QuantizationType.OneEighthNoteTriplet,
 				QuantizationType.OneEighthNoteTriplet,
-				QuantizationType.OneEighthNote,
 				QuantizationType.OneEighthNote,
 				QuantizationType.OneEighthNote,
 				QuantizationType.OneEighthNote,
@@ -149,52 +142,44 @@ public static final class Configuration {
 
 			// 5
 			new QuantizationType[] {
+				QuantizationType.OneEighthNote
+			},
+
+			// 6
+			new QuantizationType[] {
 				QuantizationType.OneSixteenthNote,
 				QuantizationType.OneSixteenthNote,
 				QuantizationType.OneSixteenthNote,
 				QuantizationType.OneSixteenthNote,
 				QuantizationType.OneSixteenthNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
 				QuantizationType.OneSixteenthNote,
 				QuantizationType.OneSixteenthNote,
 				QuantizationType.OneSixteenthNote,
 				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNoteTriplet,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNoteTriplet,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNoteTriplet
+				QuantizationType.OneSixteenthNote
+			},
+
+			new QuantizationType[] {
+				QuantizationType.OneSixteenthNoteDotted
 			}
 		};
 
 		// Bar to channel
 		public static final int[][] BarToChannel = new int[][] {
-			new int[] { 7, 8 },
-			new int[] { 9, 5, 3 },
+			new int[] { 8 },
+			new int[] { 3, 5, 7 },
 			new int[] { 10 },
-			new int[] { 1, 2, 4, 6 }
+			new int[] { 1, 2, 4 },
+			new int[] { 6 },
+			new int[] { 9 }
 		};
 
 		// Stitch notes
-		public static final boolean ModuloNotes = true;
+		public static final boolean ModuloNotes = false;
 
 		// Number of MIDI channels to use
 		public static final int Channels = 10;
@@ -212,7 +197,7 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 110;
+			public static final int Min = 75;
 
 			// Maximum velocity (0 - 127)
 			public static final int Max = 127;
