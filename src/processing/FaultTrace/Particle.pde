@@ -6,19 +6,19 @@ public class Particle {
 	Vec3D perlin;       // perlin noise vector
 	float radius;       // particle's size
 	float age;          // current age of particle
+	Vec3D grav;
 	int lifeSpan;       // max allowed age of particle
 	float agePer;       // range from 1.0 (birth) to 0.0 (death)
 	int gen;            // number of times particle has been involved in a SPLIT
 	float bounceAge;    // amount to age particle when it bounces off floor
 	float bounceVel;    // speed at impact
+	color tint;
 	boolean ISDEAD;     // if age == lifeSpan, make particle die
-	boolean ISBOUNCING; // if particle hits the floor...
-	boolean ISSPLIT;    // if particle hits the floor with enough speed...
 
 
 	Particle( int _gen, Vec3D _loc, Vec3D _vel ){
 		gen         = _gen;
-		radius      = random( 10 - gen, 50 - ( gen-1)*10 );
+		radius      = random( 5 - gen, 30 - ( gen-1 )*10 );
 
 		len         = (int)( radius*.5 );
 		loc         = new Vec3D[ len ];
@@ -29,10 +29,11 @@ public class Particle {
 		}
 
 		vel         = new Vec3D( _vel );
-		if( gen > 1 ){
-			vel.addSelf( new Vec3D().randomVector().scaleSelf( random( 7.0 ) ) );
+
+		if ( gen > 1 ) {
+			vel.addSelf( new Vec3D().randomVector().scaleSelf( random( 1.0 ) ) );
 		} else {
-			vel.addSelf( new Vec3D().randomVector().scaleSelf( random( 10.0 ) ) );
+			vel.addSelf( new Vec3D().randomVector().scaleSelf( random( 2.0 ) ) );
 		}
 
 		perlin      = new Vec3D();
@@ -40,6 +41,9 @@ public class Particle {
 		age         = 0;
 		bounceAge   = 2;
 		lifeSpan    = (int)( radius );
+
+		tint        = Configuration.Palette.Mesh.Explosions[ (int)random(Configuration.Palette.Mesh.Explosions.length) ];
+		grav        = vel.scale( -Configuration.Mesh.Explosions.Gravity );
 	}
 
 	void exist(){
@@ -56,30 +60,9 @@ public class Particle {
 		perlin.scaleSelf( .5 );
 	}
 
-	void findVelocity(){
-		if( ALLOWGRAVITY )
-			vel.addSelf( gravity );
-
-		if( loc[0].y + vel.y > floorLevel ){
-			ISBOUNCING = true;
-		} else {
-			ISBOUNCING = false;
-		}
-
-		// if the particle is moving fast enough, when it hits the ground it can
-		// split into a bunch of smaller particles.
-		if( ISBOUNCING ){
-			bounceVel = vel.magnitude();
-
-			vel.scaleSelf( .7 );
-			vel.y *= -( ( radius/40.0 ) * .5 );
-
-			if( bounceVel > 15.0 && gen < 4 )
-				ISSPLIT  = true;
-
-		} else {
-			ISSPLIT = false;
-		}
+	void findVelocity() {
+		if( Configuration.Mesh.Explosions.AllowGravity )
+			vel.addSelf( grav );
 	}
 
 	void setPosition(){
@@ -90,71 +73,15 @@ public class Particle {
 		loc[0].addSelf( vel );
 	}
 
-	void render(){
-		color c = color( agePer - .5, agePer*.25, 1.5 - agePer );
-		renderImage(images.particle, loc[0], radius * agePer, c, 1.0 );
-		stroke(2);
-		fill(213);
-		point(loc[0].x, loc[0].y, loc[0].z);
-
-
-		// Rendering two graphics here. Makes the particles more vivid,
-		// but will hinder the performance.
-		//c = color( 1, agePer, agePer );
-		//renderImage(images.particle, loc[0], radius * agePer * .5, c, agePer );
+	void render() {
+		renderImage(images.particle, loc[0], radius * agePer, tint, 1.0 );
+		renderImage(images.particle, loc[0], radius * agePer * .5, tint, agePer );
 	}
 
-	void renderReflection(){
-		float altitude           = floorLevel - loc[0].y;
-		float reflectMaxAltitude = 25.0;
-		float yPer               = ( 1.0 - ( altitude/reflectMaxAltitude ) ) * .5;
+	void setAge() {
+		age += Configuration.Mesh.Explosions.Age;
 
-		if( yPer > .05 )
-			renderImageOnFloor(images.particle, new Vec3D( loc[0].x, floorLevel, loc[0].z ), radius * agePer * 8.0 * yPer, color( agePer, agePer*.25, 0 ), yPer + random( .2 ) );
-	}
-
-	void renderTrails(){
-		float xp, yp, zp;
-		float xOff, yOff, zOff;
-
-		beginShape(QUAD_STRIP);
-
-		for ( int i=0; i<len - 1; i++ ){
-			float per     = 1.0 - (float)i/(float)(len-1);
-			xp            = loc[i].x;
-			yp            = loc[i].y;
-			zp            = loc[i].z;
-
-			if ( i < len - 2 ){
-				Vec3D perp0 = loc[i].sub( loc[i+1] );
-				Vec3D perp1 = perp0.cross( new Vec3D( 0, 1, 0 ) ).normalize();
-				Vec3D perp2 = perp0.cross( perp1 ).normalize();
-							perp1 = perp0.cross( perp2 ).normalize();
-
-				xOff        = perp1.x * radius * agePer * per * .05;
-				yOff        = perp1.y * radius * agePer * per * .05;
-				zOff        = perp1.z * radius * agePer * per * .05;
-
-				fill( per, per*.5, 1.5 - per, per);
-				noStroke();
-				vertex( xp - xOff, yp - yOff, zp - zOff );
-				vertex( xp + xOff, yp + yOff, zp + zOff );
-			}
-		}
-
-		endShape();
-	}
-
-	void setAge(){
-
-		if( ISBOUNCING ){
-			age += bounceAge;
-			bounceAge ++;
-		} else {
-			age += .025;
-		}
-
-		if( age > lifeSpan ){
+		if ( age > lifeSpan ) {
 			ISDEAD = true;
 		} else {
 			agePer = 1.0 - age/(float)lifeSpan;
@@ -162,8 +89,8 @@ public class Particle {
 	}
 }
 
-float minNoise = 0.499;
-float maxNoise = 0.501;
+float minNoise = 0.799;
+float maxNoise = 0.801;
 float getRads(float val1, float val2, float mult, float div) {
 	float rads = noise(val1/div, val2/div, counter/div);
 

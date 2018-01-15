@@ -138,7 +138,6 @@ Emitter emitter;
 ArrayList<Emitter> emitters;
 float floorLevel;
 Vec3D gravity;
-boolean ALLOWGRAVITY = true; // TODO move
 int counter;
 
 //quantize()
@@ -236,11 +235,15 @@ void setup3D() {
 
 
 	images = new Images();
-	gravity = new Vec3D( 0, .5, 0 );
+	gravity = new Vec3D( 0, .7, 0 );
 	emitter = new Emitter();
-	floorLevel = 0;
+	floorLevel = 400;
 	emitters = new ArrayList<Emitter>();
 	pgl = ((PGraphicsOpenGL) g).pgl;
+
+	if (Configuration.Mesh.Renderer == RenderType.Explosions) {
+		colorMode( RGB, 1.0 );
+	}
 }
 
 void setupTimezone() {
@@ -443,7 +446,7 @@ void setupSong() {
 			//float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float distance = mapexp( depth, 0, Configuration.Data.Depth.Max, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			//float distance = map(rms, 0.0, 2.5, 0, (Configuration.Palette.Mesh.Petals.length - 1));
-			float mag = map( rms, 0.0, 2.5, 0, (Configuration.Palette.Mesh.Petals.length - 1) );
+			float mag = map( magnitude, 0.0, 10.0, 1.00, 1.05 );
 			color colour = getColourFromMonth( d2 );
 			color background = getBackgroundFromMonth( d2 );
 
@@ -627,8 +630,6 @@ void drawBackground() {
 }
 
 void drawLights( color colour ) {
-	//ambient( Configuration.Palette.Lights.Centre );
-	//pointLight( red(colour), green(colour), blue(colour), width, 400, width/2 );
 	directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
 }
 
@@ -638,8 +639,8 @@ void drawRotation() {
 
 	if (!is2D) {
 		translate( width / 2, ( height / 2 ), 0 );
-		rotateY( theta );
-		rotateX( radians(-23.5) );
+		//rotateY( theta );
+		//rotateX( radians(-23.5) );
 	}
 }
 
@@ -1054,23 +1055,32 @@ void drawSpike( int sides, float r1, float r2, float h )
 }
 
 void renderExplosions( WB_Point5D[] points ) {
-  pgl.depthMask( false );
-  pgl.enable( PGL.BLEND );
+	noStroke();
+	fill( Configuration.Palette.Mesh.Faces, 0.085 );
+	sphereDetail( 60 );
+	sphere( Configuration.Mesh.GlobeSize );
+
+	stroke( Configuration.Palette.Mesh.Line, 0.085 );
+	strokeWeight(2.4);
+
+	pgl.depthMask( false );
+	pgl.enable( PGL.BLEND );
 	pgl.blendFunc( PGL.SRC_ALPHA, PGL.ONE );
-	emitter.exist();
 
 	for ( WB_Point5D point : points ) {
-		fill(255);
-		point(point.xf(), point.yf(), point.zf());
+		WB_Point4D endpoint = point.mul(point.mf());
+		line(point.xf(), point.yf(), point.zf(), endpoint.xf(), endpoint.yf(), endpoint.zf());
 
 		if (point.wf() >= 1.0) {
 			if (!uuids.contains(point.getUUID())) {
 				uuids.add(point.getUUID());
-				emitter.addParticles(1, point);
+				emitter.addParticles( int(20 * point.wf()), point);
+				counter++;
 			}
 		}
 	}
-	counter++;
+
+	emitter.exist();
 }
 
 void renderEdgesFaces( HE_Mesh globeMesh, HE_MeshCollection meshCollection ) {

@@ -2,23 +2,23 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff000000;
+			public static final int Start = 0xff1C0B1C;
 
-			public static final int End = 0xff000000;
+			public static final int End = 0xff1C0B1C;
 		}
 
 		public static final class UI {
 
-			public static final int Foreground = 0xffFAFAFA;
+			public static final int Foreground = 0xffE8AEAF;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xffFF948F;
+				public static final int Background = 0x35A6333D;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xffFF948F;
+				public static final int Background = 0x35A6333D;
 			}
 		}
 
@@ -47,10 +47,10 @@ public static final class Configuration {
 			public static final int Wireframe = 0xff808080;
 
 			// Face colour
-			public static final int Faces = 0xff404040;
+			public static final int Faces = 0xffA6333D;
 
 			// Line colour
-			public static final int Line = 0xff29877B;
+			public static final int Line =  0xffA6333D;
 
 			public static final int[] Plasma = {
 				0xffED049C,
@@ -80,6 +80,18 @@ public static final class Configuration {
 				0xffF24C27,
 				0xffFF6138
 			};
+
+			public static final int[] Explosions = {
+				0xff400822,
+				0xff770000,
+				0xff9F276C,
+				0xffD43170,
+				0xffE8476D,
+				0xffFF6138,
+				0xffFD8209,
+				0xffFD8291,
+				0xffFDFAFB
+			};
 		}
 	}
 
@@ -89,16 +101,16 @@ public static final class Configuration {
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
-		public static final long AnimationOffset = 0;
+		public static final long AnimationOffset = 2000;
 
 		// Time compression
-		public static final long TimeCompression = 8700;
+		public static final long TimeCompression = 7300;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 117;
+		public static final int BeatsPerMinute = 120;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 9;
+		public static final float BeatsPerBar = 4;
 
 		// 4/X
 		public static final float BeatNoteValue = 4;
@@ -107,7 +119,11 @@ public static final class Configuration {
 		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
 			// 1
 			new QuantizationType[] {
-				QuantizationType.OneHalfNote
+				QuantizationType.OneWholeNote
+			},
+
+			new QuantizationType[] {
+				QuantizationType.ThreeWholeNotes
 			},
 
 			// 2
@@ -117,65 +133,14 @@ public static final class Configuration {
 				QuantizationType.OneWholeNote,
 				QuantizationType.OneEighthNote,
 				QuantizationType.OneQuarterNoteDotted
-			},
-
-
-			// 3
-			new QuantizationType[] {
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNoteTriplet,
-				QuantizationType.OneEighthNoteTriplet,
-				QuantizationType.OneEighthNoteTriplet,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneEighthNote
-			},
-
-			// 5
-			new QuantizationType[] {
-				QuantizationType.OneEighthNote
-			},
-
-			// 6
-			new QuantizationType[] {
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote,
-				QuantizationType.OneSixteenthNote
-			},
-
-			new QuantizationType[] {
-				QuantizationType.OneSixteenthNoteDotted
 			}
 		};
 
 		// Bar to channel
 		public static final int[][] BarToChannel = new int[][] {
-			new int[] { 8 },
-			new int[] { 3, 5, 7 },
-			new int[] { 10 },
-			new int[] { 1, 2, 4 },
-			new int[] { 6 },
-			new int[] { 9 }
+			new int[] { 7, 9 },
+			new int[] { 3, 4 },
+			new int[] { 1, 2, 5, 6, 8, 10 }
 		};
 
 		// Stitch notes
@@ -239,7 +204,7 @@ public static final class Configuration {
 			public static final float Min = 2.0;
 
 			// Maximum tween time
-			public static final float Max = 5.0;
+			public static final float Max = 2.0;
 		}
 
 		public static final class Scale {
@@ -278,13 +243,20 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 20;
+		public static final int MaxPoints = 10000;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
 
 		// Opacity of globe ( 0 - 255 )
 		public static final int FillOpacity = 200;
+
+		// Rotate mesh points
+		public static final class Rotation {
+			public static final float X = -45.0;
+			public static final float Y = -210.0;
+			public static final float Z = -15.0;
+		}
 
 		// Available types:
 		// - Normal
@@ -394,8 +366,18 @@ public static final class Configuration {
 			public static final int Sphere = 0xffF7F6F2;
 		}
 
+		public static final class Explosions {
+			public static final float Velocity = 0.00275;
+
+			public static final boolean AllowGravity = true;
+
+			public static final float Age = .0895;
+
+			public static final float Gravity = .005;
+		}
+
 		public static final class Easings {
-			public static final Easing In = Ani.ELASTIC_OUT;
+			public static final Easing In = Ani.QUAD_IN;
 
 			public static final Easing Out = Ani.QUAD_IN;
 		}
@@ -411,7 +393,7 @@ public static final class Configuration {
 		public static final class Distance {
 			public static final float Min = 1.0;
 
-			public static final float Max = 1.0;
+			public static final float Max = 20.0;
 		}
 
 		public static final String TimeZone = "Australia/Melbourne";
