@@ -1,24 +1,28 @@
 # Fault Trace
 
-Fault Trace is a 12-month-long project exploring data sonification and visualisation.
+Fault Trace is an experiment in data sonification, visualisation, and the creative process of song writing.
 
-Each month a new song will be released based on earthquake data for that month. Each song will be unique in style, time signature, tempo, and time acceleration.
+Each month a new song will be released based on earthquake data for that month. Each song will be unique in style, time signature, tempo, and time compression.
 
 Fault Trace is an open source project built with Processing, Python, and Ableton Live.
 
-This song was inspired by artists such as Brian Eno, Rae Howell, and Fabrizio Patterlini.
+This song was inspired by artists such as Altitude, Qpod, Bulb, and 5000 Fingers of Dr. T.
 
 ## SONG INFORMATION
 
-Track: July
+Track: August
 
 Time Signature: 4/4
 
-Time Compression: 8200x
+Time Compression: 2790x
 
-Tempo: 124 BPM
+Time Period: 1–31 August, 2017
 
-Earthquakes 12,024
+Tempo: 50 BPM
+
+Genre: Ambient Soundscape
+
+Earthquakes: 11,465
 
 ## Video
 
