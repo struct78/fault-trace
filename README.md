@@ -14,9 +14,13 @@ Time Signature: 4/4
 
 Time Compression: 8200x
 
+Time Period: 1–31 July, 2017
+
 Tempo: 124 BPM
 
-Earthquakes 12,024
+Genre: Deep House
+
+Earthquakes: 12, 024 
 
 ## Video
 
