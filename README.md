@@ -26,4 +26,4 @@ Earthquakes: 11,465
 
 ## Video
 
-[![Fault Trace](https://img.youtube.com/vi/2bYOFinQsQo/maxresdefault.jpg)](https://www.youtube.com/watch?v=2bYOFinQsQo)
+[![Fault Trace](https://img.youtube.com/vi/deyVWEVh-lU/maxresdefault.jpg)](https://www.youtube.com/watch?v=deyVWEVh-lU)
