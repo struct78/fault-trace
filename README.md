@@ -1,8 +1,8 @@
 # Fault Trace
 
-Fault Trace is a 12-month-long project exploring data sonification and visualisation.
+Fault Trace is an experiment in data sonification, visualisation, and the creative process of song writing.
 
-Each month a new song will be released based on earthquake data for that month. Each song is unique in style, time signature, tempo, and time compression.
+Each month a new song will be released based on earthquake data for that month. Each song will be unique in style, time signature, tempo, and time compression.
 
 Fault Trace is an open source project built with Processing, Python, and Ableton Live.
 
