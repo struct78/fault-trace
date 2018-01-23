@@ -9,7 +9,9 @@ Fault Trace is an open source project built with Processing, Python, and Ableton
 This month's song was created by Melbourne-based artist Jay Curtis/lysdexic. Thank you to Jay for all your hard work and awesome track, it was a great collaboration.
 
 www.soundcloud.com/lysdexic
+
 www.facebook.com/lysdex
+
 www.jcurtis.cc
 
 ## SONG INFORMATION
