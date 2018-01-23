@@ -6,6 +6,8 @@ Each month a new song will be released based on earthquake data for that month. 
 
 Fault Trace is an open source project built with Processing, Python, and Ableton Live.
 
+This song was inspired by artists such as Front Line Assembly, Icon of Coil, Spahn Ranch, Cubanate, Skinny Puppy, Covenant and Front 242. 
+
 ## SONG INFORMATION
 
 Track: October
