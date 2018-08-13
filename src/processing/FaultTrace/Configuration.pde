@@ -2,23 +2,23 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff1C0B1C;
+			public static final int Start = 0xffffffff;
 
-			public static final int End = 0xff1C0B1C;
+			public static final int End = 0xffffffff;
 		}
 
 		public static final class UI {
 
-			public static final int Foreground = 0xffE8AEAF;
+			public static final int Foreground = 0xffffffff;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0x35A6333D;
+				public static final int Background = 0xff9F276C;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0x35A6333D;
+				public static final int Background = 0xff9F276C;
 			}
 		}
 
@@ -47,10 +47,10 @@ public static final class Configuration {
 			public static final int Wireframe = 0xff808080;
 
 			// Face colour
-			public static final int Faces = 0xffA6333D;
+			public static final int Faces = 0xff9F276C;
 
 			// Line colour
-			public static final int Line =  0xffA6333D;
+			public static final int Line =  0xff9F276C;
 
 			public static final int[] Plasma = {
 				0xffED049C,
@@ -104,10 +104,10 @@ public static final class Configuration {
 		public static final long AnimationOffset = 2000;
 
 		// Time compression
-		public static final long TimeCompression = 7300;
+		public static final long TimeCompression = 1000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 120;
+		public static final int BeatsPerMinute = 90;
 
 		// Beats per bar X/4
 		public static final float BeatsPerBar = 4;
@@ -119,53 +119,50 @@ public static final class Configuration {
 		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
 			// 1
 			new QuantizationType[] {
-				QuantizationType.OneWholeNote
-			},
-
-			new QuantizationType[] {
-				QuantizationType.ThreeWholeNotes
+				QuantizationType.OneQuarterNote
 			},
 
 			// 2
 			new QuantizationType[] {
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneWholeNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneQuarterNoteDotted
+				QuantizationType.OneHalfNote
+			},
+
+			// 3
+			new QuantizationType[] {
+				QuantizationType.OneThirtySecondNote
 			}
 		};
 
 		// Bar to channel
 		public static final int[][] BarToChannel = new int[][] {
-			new int[] { 7, 9 },
-			new int[] { 3, 4 },
-			new int[] { 1, 2, 5, 6, 8, 10 }
+			new int[] { 1 },
+			new int[] { 3, 4, 6 },
+			new int[] { 2, 5 }
 		};
 
 		// Stitch notes
 		public static final boolean ModuloNotes = false;
 
 		// Number of MIDI channels to use
-		public static final int Channels = 10;
+		public static final int Channels = 6;
 
 		// Set this to true if you want to supress audio, useful for debugging or working next to your sleeping wife
 		public static final boolean SilentRunning = false;
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
-			public static final int Min = 20;
+			public static final int Min = 10;
 
 			// Maximum pitch (0 - 127)
-			public static final int Max = 80;
+			public static final int Max = 90;
 		}
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 75;
+			public static final int Min = 20;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 127;
+			public static final int Max = 100;
 		}
 
 
@@ -201,21 +198,21 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 2.0;
+			public static final float Min = 0.1;
 
 			// Maximum tween time
-			public static final float Max = 2.0;
+			public static final float Max = 0.4;
 		}
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 1.0;
+			public static final float Min = 1.01;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.0;
+			public static final float Max = 1.2;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
-			public static final float Default = 0.001;
+			public static final float Default = 0.5;
 
 			public static boolean UseTicks = false;
 		}
@@ -243,13 +240,13 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 10000;
+		public static final int MaxPoints = 1000;
 
 		// Show bounding wireframe
 		public static final boolean ShowWireframe = false;
 
 		// Opacity of globe ( 0 - 255 )
-		public static final int FillOpacity = 200;
+		public static final int FillOpacity = 255;
 
 		// Rotate mesh points
 		public static final class Rotation {
@@ -285,7 +282,7 @@ public static final class Configuration {
 		// - Spikes
 		// - Petals
 
-		public static final RenderType Renderer = RenderType.Explosions;
+		public static final RenderType Renderer = RenderType.Faces;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -377,9 +374,9 @@ public static final class Configuration {
 		}
 
 		public static final class Easings {
-			public static final Easing In = Ani.QUAD_IN;
+			public static final Easing In = Ani.ELASTIC_OUT;
 
-			public static final Easing Out = Ani.QUAD_IN;
+			public static final Easing Out = Ani.ELASTIC_OUT;
 		}
 	}
 
@@ -401,10 +398,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-12-01T10:00:00.000Z";
+		public static final String StartDate = "2018-01-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-12-30T23:59:59.999Z";
+		public static final String EndDate = "2018-3-30T23:59:59.999Z";
 	}
 
 	public static final class IO {
@@ -412,6 +409,6 @@ public static final class Configuration {
 		public static final boolean SaveFrames = false;
 
 		// CSV File
-		public static final String CSV = "quakes.csv";
+		public static final String CSV = "quakes-2018.csv";
 	}
 }

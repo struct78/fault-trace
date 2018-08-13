@@ -354,10 +354,6 @@ long quantize( long delay, int channel ) {
 	return (long)(Math.round( delay / milliseconds_per_note ) * milliseconds_per_note);
 }
 
-// TODO
-// - Duration to come from quantization
-// - quantize() to come from BeatNoteValue
-
 int quantize_duration( long channel ) {
 	int barType = 0;
 
@@ -639,8 +635,8 @@ void drawRotation() {
 
 	if (!is2D) {
 		translate( width / 2, ( height / 2 ), 0 );
-		//rotateY( theta );
-		//rotateX( radians(-23.5) );
+		rotateY( theta );
+		rotateX( radians(-23.5) );
 	}
 }
 
@@ -659,11 +655,7 @@ void drawMesh( color colour, WB_Point5D[] points ) {
 		render.drawFaces( wireframeMesh );
 
 		noStroke();
-		fill( 225, 225, 230, 110 );
 	}
-
-	strokeWeight( 0.66 );
-	stroke( colour+3 );
 
 	switch( Configuration.Mesh.Type ) {
 		case Dual:
@@ -691,6 +683,10 @@ void drawMesh( color colour, WB_Point5D[] points ) {
 			break;
 	}
 
+	fill( Configuration.Palette.Mesh.Faces );
+
+	strokeWeight( 0.66 );
+	stroke( Configuration.Palette.Mesh.Line );
 
 
 	switch ( Configuration.Mesh.Renderer ) {
@@ -1395,7 +1391,7 @@ void drawGlobe() {
 	colour = stateThread.getColour();
 
 	if ( currentDate != null && ((meshPoints != null && (meshPoints.length > 4 || !isHeMeshRenderer)))) {
-		//drawLights( colour );
+		drawLights( colour );
 		pushMatrix();
 		drawRotation();
 		drawMesh( colour, meshPoints );
