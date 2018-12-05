@@ -104,10 +104,10 @@ public static final class Configuration {
 		public static final long AnimationOffset = 2000;
 
 		// Time compression
-		public static final long TimeCompression = 1000;
+		public static final long TimeCompression = 2000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 90;
+		public static final int BeatsPerMinute = 155;
 
 		// Beats per bar X/4
 		public static final float BeatsPerBar = 4;
@@ -119,7 +119,7 @@ public static final class Configuration {
 		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
 			// 1
 			new QuantizationType[] {
-				QuantizationType.OneQuarterNote
+				QuantizationType.OneWholeNote
 			},
 
 			// 2
@@ -129,32 +129,57 @@ public static final class Configuration {
 
 			// 3
 			new QuantizationType[] {
-				QuantizationType.OneThirtySecondNote
+				QuantizationType.OneHundredTwentyEighthNote
+			},
+
+			// 4
+			new QuantizationType[] {
+				QuantizationType.OneEighthNoteDotted,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneQuarterNote
+			},
+
+			new QuantizationType[] {
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneHalfNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneHalfNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote,
+				QuantizationType.OneQuarterNote
 			}
 		};
 
 		// Bar to channel
 		public static final int[][] BarToChannel = new int[][] {
+			new int[] { 5 },
 			new int[] { 1 },
-			new int[] { 3, 4, 6 },
-			new int[] { 2, 5 }
+			new int[] { 2, 3, 4, 7, 9, 11 },
+			new int[] { 10 },
+			new int[] { 6, 13 }
 		};
 
 		// Stitch notes
 		public static final boolean ModuloNotes = false;
 
 		// Number of MIDI channels to use
-		public static final int Channels = 6;
+		public static final int Channels = 14;
 
 		// Set this to true if you want to supress audio, useful for debugging or working next to your sleeping wife
 		public static final boolean SilentRunning = false;
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
-			public static final int Min = 10;
+			public static final int Min = 2;
 
 			// Maximum pitch (0 - 127)
-			public static final int Max = 90;
+			public static final int Max = 125;
 		}
 
 		public static final class Velocity {
@@ -398,10 +423,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2018-01-01T00:00:00.000Z";
+		public static final String StartDate = "2018-01-05T04:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2018-3-30T23:59:59.999Z";
+		public static final String EndDate = "2018-12-30T23:59:59.999Z";
 	}
 
 	public static final class IO {

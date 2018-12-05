@@ -184,7 +184,7 @@ void draw() {
 	drawBackground();
 	drawHUD();
 	drawGraph();
-	drawGlobe();
+	//drawGlobe();
 	saveFrames();
 }
 
