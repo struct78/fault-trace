@@ -23,7 +23,7 @@ def daterange(start, stop, step_days=1):
 date_format = '%Y-%m-%d'
 step = 1
 DOWNLOADS_DIR = './cache'
-year = 2017
+year = 2020
 url = "http://earthquake.usgs.gov/fdsnws/event/1/query?format=csv&starttime={0}T00:00:00&minmagnitude=0.1&format=csv&endtime={1}T23:59:59&maxmagnitude=10&orderby=time-asc"
 
 startRange = datetime.date(year, 1, 1)
@@ -50,7 +50,7 @@ for i in daterange(startRange, endRange, step):
 with open('../processing/FaultTrace/data/quakes-' + str(year) + '.csv', 'wb') as result:
 	a = unicodecsv.writer(result, encoding='utf-8')
 	i = 0
-	result.write("time,latitude,longitude,depth,mag,dmin,rms\r\n")
+	result.write("time,latitude,longitude,depth,mag\r\n")
 
 	for i in daterange(startRange, endRange, step):
 		start = i.strftime(date_format)
@@ -65,4 +65,4 @@ with open('../processing/FaultTrace/data/quakes-' + str(year) + '.csv', 'wb') as
 				next(rdr)
 				print(query)
 				for row in rdr:
-					wtr.writerow( (row[0], row[1], row[2], row[3], row[4], row[8], row[9]) )
+					wtr.writerow( (row[0], row[1], row[2], row[3], row[4]) )

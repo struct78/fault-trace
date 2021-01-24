@@ -44,6 +44,7 @@ ArrayList<Integer> lightColours = new ArrayList();
 ArrayList<StateManager> states = new ArrayList();
 ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
 ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
+ArrayList<NoteLogEntry> noteLog = new ArrayList<NoteLogEntry>();
 
 PFont font;
 HE_Mesh globeMesh;
@@ -80,6 +81,7 @@ HUD hud;
 Point2D.Double rectanglePoint;
 int uiGridWidth;
 int uiMargin;
+int rowCount;
 
 public void settings() {
 	size(1920, 1080, P3D);
@@ -94,6 +96,7 @@ void setup() {
 	setupUI();
 	setupFonts();
 	setupAnimation();
+  setupDebug();
 	setupGrid();
 	setupTimer();
 	setupMIDI();
@@ -105,16 +108,16 @@ void setup() {
 	setupShutdownHook();
 	setupFrameRate();
 	setupTime = millis();
-	setupDebug();
 }
 
 void draw() {
 	noCursor();
+
 	drawBackground();
 	drawHUD();
 	drawGraph();
 	drawGlobe();
-	saveFrames();
+	//saveFrames();
 }
 
 void setupGlobe() {
@@ -125,7 +128,7 @@ void setupTiming() {
 	start_ms = startDate.getTimeInMillis();
 	end_ms = endDate.getTimeInMillis();
 	diff_accelerated_ms = Configuration.MIDI.StartOffset + ( ( ( end_ms-start_ms )/Configuration.MIDI.Acceleration ) );
-	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize( ( ( end_ms-start_ms ) / Configuration.MIDI.Acceleration ) );
+	diff_quantized_ms = Configuration.MIDI.StartOffset + quantize( ( ( end_ms-start_ms ) / Configuration.MIDI.Acceleration ), 0 );
 }
 
 void setup3D() {
@@ -143,7 +146,7 @@ void setup3D() {
 	voronoi = new HEMC_VoronoiCells();
 
 	// Spikes
-	 extrude = new HEM_Extrude().setChamfer( 1 ).setDistance( 10 );
+	extrude = new HEM_Extrude().setChamfer( 1 ).setDistance( 10 );
 	// Extrude
 	//extrude = new HEM_Extrude().setHardEdgeChamfer( 1 ).setDistance( 30 );
 
@@ -222,11 +225,10 @@ void setupMIDI() {
 	bus = new MidiBus( this, -1, "FaultTrace" );
 }
 
-long quantize( long delay ) {
-	int type = ( int ) ( ( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType.length );
+long quantize( long delay, int x ) {
+	int type = ( int )( x % Configuration.MIDI.BeatsPerBar );
 	float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
-	float milliseconds_per_measure = milliseconds_per_beat * Configuration.MIDI.BeatsPerBar;
-	float milliseconds_per_note = milliseconds_per_beat * ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType[ type ]);
+	float milliseconds_per_note = milliseconds_per_beat / ( Configuration.MIDI.BeatDivision / Configuration.MIDI.NoteType[ type ]);
 
 	return (long)(Math.round( delay / milliseconds_per_note ) * milliseconds_per_note);
 }
@@ -238,7 +240,7 @@ void setupSong() {
 
 	// CSV
 	double latitude, longitude;
-	float depth, magnitude, rms;
+	float depth, magnitude;
 
 	String date;
 	String previousDate = null;
@@ -250,15 +252,13 @@ void setupSong() {
 
 	int x = 0;
 
-	for (TableRow row : rows ) {
+	for (TableRow row : rows) {
 		// Extract the data
 		date = row.getString("time");
 		latitude = row.getDouble("latitude");
 		longitude = row.getDouble("longitude");
 		depth = row.getFloat("depth");
 		magnitude = row.getFloat("mag");
-		rms = row.getFloat("rms");
-
 
 		try {
 			if (previousDate != null) {
@@ -278,14 +278,14 @@ void setupSong() {
 
 			// Increase the delay
 			delay += (diff/Configuration.MIDI.Acceleration);
-			quantized_delay = quantize(delay);
+			quantized_delay = quantize(delay, x);
 
 			int channel = getChannelFromCoordinates( latitude, longitude );
 			int velocity = mapMagnitude( magnitude );
 			int pitch = mapDepth( depth );
 			int duration = mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
-			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max ); //mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			float scale = map( depth, 0, Configuration.Data.Depth.Max, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			color colour = getColourFromMonth( d2 );
 
 			WB_Point wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, Configuration.Mesh.GlobeSize );
@@ -313,18 +313,16 @@ void setupSong() {
 			setNote( channel, velocity, pitch, duration, quantized_delay );
 
 			// Violin
-			if ( depth >= 500 ) {
-				setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
-			}
+			if ( depth >= 250 && depth <= 300 ) {
+				setNote( 8, velocity, pitch, 100, quantized_delay );
+			} 
 
-			// Cello
-			if ( depth >= 750 ) {
-				setNote( 9, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
-			}
+      if ( depth >= 300 && depth <= 400 ) {
+				setNote( 9, velocity, pitch, 100, quantized_delay );
+			}  
 
-			// Double Bass
-			if ( depth >= 1000 ) {
-				setNote( 10, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+      if ( depth >= 400 ) {
+				setNote( 10, velocity, pitch, 100, quantized_delay );
 			}
 
 			x++;
@@ -332,10 +330,27 @@ void setupSong() {
 
 		// Update the previous date to the current date for the next iteration
 		previousDate = date;
+
+    if (x == rowCount-1) {
+      println("Finished");
+    }
 	}
 }
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
+  // Deduplicates multiple notes from being sent at the same time
+  for (NoteLogEntry entry : noteLog) {
+    if (entry.delay != delay) {
+      continue;
+    }
+    
+    if (entry.note.channel != channel) {
+      continue;
+    }
+    
+    return;
+  }
+  
 	// Create the note
 	note = new Note( bus );
 
@@ -353,12 +368,15 @@ void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
 
 	// Add the note to task schedule
 	timer.schedule( new ThreadTask(note), delay );
+
+  noteLog.add(new NoteLogEntry(delay, note));
 }
 
 void setupData() {
 	// Load the data
 	Table table = loadTable( Configuration.IO.CSV, "header" );
 	rows = table.rows();
+  rowCount = table.getRowCount();
 }
 
 void setupTimer() {
@@ -375,8 +393,11 @@ void setupRenderer() {
 }
 
 void setupDebug() {
+  float milliseconds_per_beat = ( 60 * 1000 ) / (float)Configuration.MIDI.BeatsPerMinute;
+
 	println("Tempo: " + Configuration.MIDI.BeatsPerMinute + " BPM");
-	println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatDivision);
+  println("Time Signature: " + Configuration.MIDI.BeatsPerBar + "/" + Configuration.MIDI.BeatDivision);
+  println("Note Length: " + milliseconds_per_beat);
 	println("Estimated song length: " + (float)diff_accelerated_ms/1000 + " seconds // "+ diff_accelerated_ms/1000/60 + " minutes // " + diff_accelerated_ms/1000/60/60 + " hours // " + diff_accelerated_ms/1000/60/60/24 + " days");
 	println("Total " + diff_accelerated_ms + "ms");
 	println("Quantized " + diff_quantized_ms + "ms");
@@ -428,7 +449,7 @@ void drawRotation() {
 
 	translate( width / 2, ( height / 2 ), 0 );
 	rotateY( theta );
-	//rotateX( sin(theta) );
+	rotateX( sin(theta) );
 }
 
 void drawMesh( color colour, WB_Point[] points ) {
@@ -473,8 +494,6 @@ void drawMesh( color colour, WB_Point[] points ) {
 		default:
 			break;
 	}
-
-
 
 	switch ( Configuration.Mesh.Renderer ) {
 		case Edges:

@@ -6,6 +6,6 @@ application.windows32
 application.windows64
 application.macosx
 renders/*
-quakes-2017.csv
+quakes-2020.csv
 ffmpeg.txt
 audio

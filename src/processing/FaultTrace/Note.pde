@@ -25,3 +25,14 @@ public class Note extends Thread {
 		}
 	}
 }
+
+
+public class NoteLogEntry {
+  long delay;
+  Note note;
+
+  NoteLogEntry(long delay, Note note) {
+    this.delay = delay;
+    this.note = note;
+  }
+}

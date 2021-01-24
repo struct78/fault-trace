@@ -2,29 +2,43 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 3000;
+		public static final long StartOffset = 5000;
 
 		// Time acceleration
-		public static final long Acceleration = 4000;
+		public static final long Acceleration = 2020;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 100;
+		public static final int BeatsPerMinute = 82;
 
 		// Beats per bar X/4
-		public static final float BeatsPerBar = 4;
+		public static final float BeatsPerBar = 17;
 
 		// 4/X
-		public static final float BeatDivision = 4;
+		public static final float BeatDivision = 8;
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
+      QuantizationType.OneQuarterNote.get(),
 			QuantizationType.OneHalfNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-		 	QuantizationType.OneEigthNote.get()
+		 	QuantizationType.OneEighthNote.get(),
+      QuantizationType.OneQuarterNote.get(),
+      QuantizationType.OneEighthNote.get(),
+      QuantizationType.OneThirtySecondNote.get(),
+      QuantizationType.OneThirtySecondNote.get(),
+      QuantizationType.OneSixtyFourthNote.get(),
+      QuantizationType.OneSixtyFourthNote.get(),
+      QuantizationType.OneEighthNote.get(),
+      QuantizationType.OneQuarterNote.get(),
+      QuantizationType.OneHalfNote.get(),
+      QuantizationType.OneQuarterNoteTriplet.get(),
+      QuantizationType.OneQuarterNoteTriplet.get(),
+      QuantizationType.OneQuarterNoteTriplet.get(),
+      QuantizationType.OneHalfNote.get(),
+      QuantizationType.OneEighthNote.get(),
 		};
 
 		// Number of MIDI channels to use
-		public static final int Channels = 13;
+		public static final int Channels = 11;
 
 
 		public static final class Pitch {
@@ -37,10 +51,10 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 40;
+			public static final int Min = 20;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 90;
+			public static final int Max = 127;
 		}
 
 
@@ -111,10 +125,10 @@ public static final class Configuration {
 		public static final int GlobeSize = 400;
 
 		// Maximum amount of points to render
-		public static final int MaxPoints = 100;
+		public static final int MaxPoints = 1000;
 
 		// Show bounding wireframe
-		public static final boolean ShowWireframe = true;
+		public static final boolean ShowWireframe = false;
 
 		// Opacity of globe ( 0 - 255 )
 		public static final int FillOpacity = 200;
@@ -136,7 +150,7 @@ public static final class Configuration {
 		// - EdgesPoints
 		// - EdgesFacesPoints
 		// - Lines
-		public static final RenderType Renderer = RenderType.Faces;
+		public static final RenderType Renderer = RenderType.EdgesPoints;
 
 		public static final boolean UseIcosahedronBase = false;
 	}
@@ -153,10 +167,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-03-01T00:00:00.000Z";
+		public static final String StartDate = "2020-01-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-03-31T23:59:59.999Z";
+		public static final String EndDate = "2020-12-31T23:59:59.999Z";
 	}
 
 	public static final class IO {
