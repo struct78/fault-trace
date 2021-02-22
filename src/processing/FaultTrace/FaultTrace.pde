@@ -202,7 +202,7 @@ void setGlobeScale() {
 void setupUI() {
 	// Colours are seasonal
 	// Left -> Right = January - December
-	colours.addAll( Arrays.asList( 0xffe31826, 0xffFF6138, 0xffFD7400, 0xffBF422B, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
+	colours.addAll( Arrays.asList( 0xffA808D4, 0xffe31826, 0xffFF6138, 0xffFD7400, 0xffBF422B, 0xff942aaf, 0xffce1a9a, 0xffffb93c, 0xff00e0c9, 0xff234baf, 0xff47b1de, 0xffb4ef4f, 0xff26bb12, 0xff3fd492, 0xfff7776d ) );
 	lightColours.addAll( Arrays.asList( 0xFFFFE11A, 0xFF1F8A70 ) );
 	uiGridWidth = Configuration.UI.GridWidth;
 	uiMargin = Configuration.UI.Margin;
@@ -432,7 +432,7 @@ void setupFrameRate() {
 }
 
 void drawBackground() {
-	background( 225, 225, 230 );
+	background( 20, 20, 26 );
 }
 
 void drawLights( color colour ) {

@@ -140,7 +140,7 @@ public static final class Configuration {
 		// - Twisted
 		// - Voronoi
 		// - Extrude
-		public static final MeshType Type = MeshType.Normal;
+		public static final MeshType Type = MeshType.Dual;
 
 		// Available types:
 		// - Edges
@@ -150,7 +150,7 @@ public static final class Configuration {
 		// - EdgesPoints
 		// - EdgesFacesPoints
 		// - Lines
-		public static final RenderType Renderer = RenderType.EdgesPoints;
+		public static final RenderType Renderer = RenderType.EdgesFacesPoints;
 
 		public static final boolean UseIcosahedronBase = false;
 	}
@@ -170,7 +170,7 @@ public static final class Configuration {
 		public static final String StartDate = "2020-01-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2020-12-31T23:59:59.999Z";
+		public static final String EndDate = "2020-01-31T23:59:59.999Z";
 	}
 
 	public static final class IO {
