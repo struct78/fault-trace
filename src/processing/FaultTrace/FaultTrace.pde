@@ -112,11 +112,11 @@ void setup() {
 
 void draw() {
 	noCursor();
-
+/*
 	drawBackground();
 	drawHUD();
 	drawGraph();
-	drawGlobe();
+	drawGlobe();*/
 	//saveFrames();
 }
 

@@ -8,7 +8,7 @@ public static final class Configuration {
 		public static final long Acceleration = 2020;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 82;
+		public static final int BeatsPerMinute = 75;
 
 		// Beats per bar X/4
 		public static final float BeatsPerBar = 17;
@@ -51,10 +51,10 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 20;
+			public static final int Min = 5;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 127;
+			public static final int Max = 80;
 		}
 
 
@@ -170,7 +170,7 @@ public static final class Configuration {
 		public static final String StartDate = "2020-01-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2020-01-31T23:59:59.999Z";
+		public static final String EndDate = "2020-12-31T23:59:59.999Z";
 	}
 
 	public static final class IO {
