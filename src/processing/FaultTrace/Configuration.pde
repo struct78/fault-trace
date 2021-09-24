@@ -123,16 +123,19 @@ public static final class Configuration {
 			},
 
 			new QuantizationType[] {
-				QuantizationType.ThreeWholeNotes
+				QuantizationType.TwoWholeNotes
 			},
 
 			// 2
 			new QuantizationType[] {
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneWholeNote,
 				QuantizationType.OneEighthNote,
-				QuantizationType.OneQuarterNoteDotted
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+				QuantizationType.OneEighthNote,
+        QuantizationType.OneEighthNote,
+        QuantizationType.OneEighthNote,
+        QuantizationType.OneEighthNote,
+        QuantizationType.OneEighthNote,
 			}
 		};
 
