@@ -152,8 +152,8 @@ VideoExport videoExport;
 boolean isExporting = false;
 
 public void settings() {
-	size(1920, 1080, Configuration.UI.Mode);
-	smooth(4);
+	size(1792, 900, Configuration.UI.Mode);
+	smooth(8);
 	pixelDensity(2);
 }
 
@@ -183,9 +183,9 @@ void draw() {
 	noCursor();
 	drawBackground();
 	drawHUD();
-	drawGraph();
-	drawGlobe();
-	saveFrames();
+	//drawGraph();
+	//drawGlobe();
+	//saveFrames();
 }
 
 void setupGlobe() {
@@ -344,7 +344,7 @@ long quantize( long delay, int channel ) {
 	//
 	if (Configuration.MIDI.ModuloNotes) {
 		// This takes a beat from the modulo of the delay and the beats per bar and the note type, using the same notes but not sequentially, giving the song a more varied feel
-		type =  (int)(( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType[ barType ].length );
+		type = (int)(( delay % Configuration.MIDI.BeatsPerBar ) % Configuration.MIDI.NoteType[ barType ].length );
 	} else {
 		// This cycles through each note sequentially
 		type = (int)(delay / milliseconds_per_beat) % Configuration.MIDI.NoteType[ barType ].length;
@@ -391,7 +391,7 @@ void setupSong() {
 
 	// CSV
 	double latitude, longitude;
-	float depth, magnitude, rms, dmin;
+	float depth, magnitude;
 
 	String date;
 	String previousDate = null;
@@ -400,8 +400,6 @@ void setupSong() {
 	Calendar d2 = Calendar.getInstance();
 
 	d1 = (Calendar)startDate.clone();
-
-	int x = 0;
 
 	loopTime = millis();
 	loopDuration = millis();
@@ -413,8 +411,6 @@ void setupSong() {
 		longitude = row.getDouble("longitude");
 		depth = row.getFloat("depth");
 		magnitude = row.getFloat("mag");
-		rms = row.getFloat("rms");
-		dmin = row.getFloat("dmin");
 		loopTime = millis() - loopDuration;
 
 		try {
@@ -441,9 +437,9 @@ void setupSong() {
 			int pitch = mapDepth( depth );
 			int duration = quantize_duration( channel ); //mapMagnitude( magnitude, Configuration.MIDI.Note.Min, Configuration.MIDI.Note.Max );
 			float animationTime = mapMagnitude( magnitude, Configuration.Animation.Duration.Min, Configuration.Animation.Duration.Max );
-			float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			//float scale = mapMagnitude( magnitude, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			//float scale = Configuration.Animation.Scale.Max;
-			//float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
+			float scale = mapDepth( depth, Configuration.Animation.Scale.Min, Configuration.Animation.Scale.Max );
 			float distance = mapexp( depth, 0, Configuration.Data.Depth.Max, Configuration.Data.Distance.Min, Configuration.Data.Distance.Max );
 			//float distance = map(rms, 0.0, 2.5, 0, (Configuration.Palette.Mesh.Petals.length - 1));
 			float mag = map( magnitude, 0.0, 10.0, 1.00, 1.05 );
@@ -453,10 +449,10 @@ void setupSong() {
 			quantized_delay = quantize(delay, channel);
 
 			if ( is2D ) {
-				wbPoint = Geography.CoordinatesTo2DWBPoint( latitude, longitude, Configuration.Mesh.PulsarSignal.Width, Configuration.Mesh.PulsarSignal.Height );
+				wbPoint = Geography.CoordinatesTo2DWBPoint( latitude, longitude );
 			}
 			else {
-				wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, scale, Configuration.Mesh.GlobeSize );
+				wbPoint = Geography.CoordinatesToWBPoint( latitude, longitude, scale );
 			}
 
 			GlobePoint newPoint = new GlobePoint( wbPoint );
@@ -500,18 +496,21 @@ void setupSong() {
 			else {
 				y++;
 			}
-
-			x++;
-		}
-
-		// Conditional based
-		if ( magnitude > 6.5 ) {
-			setNote( 9, 80, 60, 9000, quantized_delay );
-		}
-
-		// Conditional based
-		if ( magnitude > 7.25 ) {
-			setNote( 10, 80, 60, 9000, quantized_delay );
+  
+      // Conditional based
+      if ( magnitude >= 7 ) {
+        setNote( 9, 80, 60, 9000, quantize(delay, 9) );
+      }
+  
+      // Conditional based
+      if ( magnitude >= 7.5 ) {
+        setNote( 10, 80, 60, 9000, quantize(delay, 10) );
+      }
+  
+      // Melbourne earthquake
+      if ( latitude == -37.492D && longitude == 146.3534D) {
+        setNote( 11, 80, 60, 9000, quantize(delay, 11) );
+      }
 		}
 
 		// Update the previous date to the current date for the next iteration
@@ -629,7 +628,7 @@ void drawBackground() {
 	background( background );
 }
 
-void drawLights( color colour ) {
+void drawLights() {
 	directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
 }
 
@@ -639,8 +638,8 @@ void drawRotation() {
 
 	if (!is2D) {
 		translate( width / 2, ( height / 2 ), 0 );
-		//rotateY( theta );
-		//rotateX( radians(-23.5) );
+		rotateY( theta );
+		rotateX( radians(-23.5) );
 	}
 }
 
@@ -664,6 +663,7 @@ void drawMesh( color colour, WB_Point5D[] points ) {
 
 	strokeWeight( 0.66 );
 	stroke( colour+3 );
+  fill( colour );
 
 	switch( Configuration.Mesh.Type ) {
 		case Dual:
@@ -715,6 +715,7 @@ void drawMesh( color colour, WB_Point5D[] points ) {
 
 			break;
 		case EdgesFaces:
+      renderEdgesFaces( globeMesh, meshCollection );
 			break;
 		case FacesPoints:
 			renderFacesPoints( globeMesh, meshCollection );
@@ -804,7 +805,6 @@ void renderWaves( WB_Point5D[] points ) {
 	levels *= Configuration.Mesh.Waves.Density;
 
 	float nextAmplitude;
-	float previousAmplitude;
 
 	for ( x = 0 ; x < levels ; x++ ) {
 		amplitude = amplitudes.get(x);
@@ -842,11 +842,9 @@ void renderWaves( WB_Point5D[] points ) {
 	phi += Configuration.Mesh.Waves.Velocity;
 
 	popMatrix();
-	hint(DISABLE_DEPTH_TEST);
 }
 
 void renderPulsarSignal( WB_Point5D[] points ) {
-	hint(DISABLE_OPTIMIZED_STROKE);
 	int offset = 0;
 	translate( width / 2 - Configuration.Mesh.PulsarSignal.Width / 2, height / 2 - Configuration.Mesh.PulsarSignal.Height / 2 - offset );
 	levels = (Configuration.Mesh.PulsarSignal.Height / Configuration.Mesh.PulsarSignal.Distance);
@@ -1395,7 +1393,7 @@ void drawGlobe() {
 	colour = stateThread.getColour();
 
 	if ( currentDate != null && ((meshPoints != null && (meshPoints.length > 4 || !isHeMeshRenderer)))) {
-		//drawLights( colour );
+		drawLights();
 		pushMatrix();
 		drawRotation();
 		drawMesh( colour, meshPoints );

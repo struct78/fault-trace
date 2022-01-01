@@ -2,23 +2,23 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff1C0B1C;
+			public static final int Start = 0xff929597;
 
-			public static final int End = 0xff1C0B1C;
+			public static final int End = 0xff929597;
 		}
 
 		public static final class UI {
 
-			public static final int Foreground = 0xffE8AEAF;
+			public static final int Foreground = 0xff929597;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0x35A6333D;
+				public static final int Background = 0xffF5DF4C;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0x35A6333D;
+				public static final int Background = 0xffF5DF4C;
 			}
 		}
 
@@ -44,13 +44,13 @@ public static final class Configuration {
 
 		public static final class Mesh {
 			// Wireframe colour
-			public static final int Wireframe = 0xff808080;
+			public static final int Wireframe = 0xffffffff;
 
 			// Face colour
-			public static final int Faces = 0xffA6333D;
+			public static final int Faces = 0xffF5DF4C;
 
 			// Line colour
-			public static final int Line =  0xffA6333D;
+			public static final int Line =  0xffF5DF4C;
 
 			public static final int[] Plasma = {
 				0xffED049C,
@@ -97,7 +97,7 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 3000;
+		public static final long StartOffset = 10000;
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
@@ -118,29 +118,20 @@ public static final class Configuration {
 		// Bar structure
 		public static final QuantizationType[][] NoteType = new QuantizationType[][] {
 			// 1
-			new QuantizationType[] {
-				QuantizationType.OneWholeNote
-			},
+      new QuantizationType[] {
+        QuantizationType.OneWholeNote
+      },
 
+      // 2
 			new QuantizationType[] {
-				QuantizationType.ThreeWholeNotes
+				QuantizationType.TwoWholeNotes
 			},
-
-			// 2
-			new QuantizationType[] {
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneQuarterNote,
-				QuantizationType.OneWholeNote,
-				QuantizationType.OneEighthNote,
-				QuantizationType.OneQuarterNoteDotted
-			}
 		};
 
 		// Bar to channel
 		public static final int[][] BarToChannel = new int[][] {
-			new int[] { 7, 9 },
-			new int[] { 3, 4 },
-			new int[] { 1, 2, 5, 6, 8, 10 }
+			new int[] { 9, 4, 3, 10, 11, 12 },
+			new int[] { 8, 5, 2, 6, 7, 1 },
 		};
 
 		// Stitch notes
@@ -183,7 +174,7 @@ public static final class Configuration {
 		public static final int FPS = 60;
 
 		// Processing rendering mode
-		public static final String Mode = OPENGL;
+		public static final String Mode = P3D;
 
 		public static final class HUD {
 			// Size of the HUD font
@@ -201,27 +192,27 @@ public static final class Configuration {
 	public static final class Animation {
 		public static final class Duration {
 			// Minimum tween time
-			public static final float Min = 2.0;
+			public static final float Min = 1.0;
 
 			// Maximum tween time
-			public static final float Max = 2.0;
+			public static final float Max = 3.0;
 		}
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 1.0;
+			public static final float Min = 10;
 
 			// Maximum tween scale factor
-			public static final float Max = 1.0;
+			public static final float Max = 20;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
-			public static final float Default = 0.001;
+			public static final float Default = 0.5;
 
 			public static boolean UseTicks = false;
 		}
 
 		// Rotation speed
-		public static final float Speed = 0.002;
+		public static final float Speed = 0.007813;
 
 
 		public static final class Zoom {
@@ -232,7 +223,7 @@ public static final class Configuration {
 
 	public static final class Optimisations {
 		// In an effort to keep animation speed consistent, increase this number to group neighbouring points into a single point
-		public static final float PointDistanceTolerance = 1.2;
+		public static final float PointDistanceTolerance = 2;
 
 		// Re-use existing points
 		public static final boolean GroupPoints = false;
@@ -249,7 +240,7 @@ public static final class Configuration {
 		public static final boolean ShowWireframe = false;
 
 		// Opacity of globe ( 0 - 255 )
-		public static final int FillOpacity = 200;
+		public static final int FillOpacity = 255;
 
 		// Rotate mesh points
 		public static final class Rotation {
@@ -285,7 +276,7 @@ public static final class Configuration {
 		// - Spikes
 		// - Petals
 
-		public static final RenderType Renderer = RenderType.Explosions;
+		public static final RenderType Renderer = RenderType.Faces;
 
 		public static final boolean UseIcosahedronBase = false;
 
@@ -396,15 +387,15 @@ public static final class Configuration {
 			public static final float Max = 20.0;
 		}
 
-		public static final String TimeZone = "Australia/Melbourne";
+		public static final String TimeZone = "UTC";
 	}
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-12-01T10:00:00.000Z";
+		public static final String StartDate = "2021-01-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-12-30T23:59:59.999Z";
+		public static final String EndDate = "2021-12-31T09:30:59.999Z";
 	}
 
 	public static final class IO {
@@ -412,6 +403,6 @@ public static final class Configuration {
 		public static final boolean SaveFrames = false;
 
 		// CSV File
-		public static final String CSV = "quakes.csv";
+		public static final String CSV = "quakes-2021.csv";
 	}
 }

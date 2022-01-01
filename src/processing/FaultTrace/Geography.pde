@@ -1,5 +1,5 @@
 public static class Geography {
-	public static WB_Point CoordinatesToWBPoint( double latitude, double longitude, double depth, double radius ) {
+	public static WB_Point CoordinatesToWBPoint( double latitude, double longitude, double radius ) {
 		double phi = (90-latitude)*(Math.PI/180);
 		double theta = (longitude+180)*(Math.PI/180);
 		double x = ((radius) * Math.sin(phi)*Math.cos(theta));
@@ -9,7 +9,7 @@ public static class Geography {
 		return new WB_Point( x, y, z );
 	}
 
-	public static WB_Point CoordinatesTo2DWBPoint( double latitude, double longitude, double width, double height ) {
+	public static WB_Point CoordinatesTo2DWBPoint( double latitude, double longitude ) {
 		double d2r = PI / 180;
 		double scale = 512;
 		double lambda = longitude * d2r;
