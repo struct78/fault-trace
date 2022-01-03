@@ -11,8 +11,8 @@ parser = argparse.ArgumentParser(description='Get Data By Year')
 parser.add_argument('-m', '--month', help='The month');
 args = parser.parse_args()
 
-year = 2017
-month = 1
+year = 2015
+month = 7
 days = monthrange(year, 1)
 
 if args.month is not None:

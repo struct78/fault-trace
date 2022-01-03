@@ -392,10 +392,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2021-01-01T00:00:00.000Z";
+		public static final String StartDate = "2015-07-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2021-12-31T09:30:59.999Z";
+		public static final String EndDate = "2015-07-31T23:59:59.999Z";
 	}
 
 	public static final class IO {
@@ -403,6 +403,6 @@ public static final class Configuration {
 		public static final boolean SaveFrames = false;
 
 		// CSV File
-		public static final String CSV = "quakes-2021.csv";
+		public static final String CSV = "quakes.csv";
 	}
 }

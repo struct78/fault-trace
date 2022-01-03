@@ -23,7 +23,7 @@ def daterange(start, stop, step_days=1):
 date_format = '%Y-%m-%d'
 step = 1
 DOWNLOADS_DIR = './cache'
-year = 2021
+year = 2015
 url = "http://earthquake.usgs.gov/fdsnws/event/1/query?format=csv&starttime={0}T00:00:00&minmagnitude=0.1&format=csv&endtime={1}T23:59:59&maxmagnitude=10&orderby=time-asc"
 
 startRange = datetime.date(year, 1, 1)
