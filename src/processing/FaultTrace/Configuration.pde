@@ -47,7 +47,7 @@ public static final class Configuration {
 			public static final int Wireframe = 0xff808080;
 
 			// Face colour
-			public static final int Faces = 0xffA6333D;
+			public static final int Faces = 0xff5C91E0;
 
 			// Line colour
 			public static final int Line =  0xffA6333D;
@@ -82,15 +82,11 @@ public static final class Configuration {
 			};
 
 			public static final int[] Explosions = {
-				0xff400822,
-				0xff770000,
-				0xff9F276C,
-				0xffD43170,
-				0xffE8476D,
-				0xffFF6138,
-				0xffFD8209,
-				0xffFD8291,
-				0xffFDFAFB
+        0xff6955ED,
+				0xff596FF7,
+				0xff5C91E0,
+				0xff59C2F7,
+				0xff55E2ED,
 			};
 		}
 	}
@@ -107,7 +103,7 @@ public static final class Configuration {
 		public static final long TimeCompression = 7300;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 120;
+		public static final int BeatsPerMinute = 119;
 
 		// Beats per bar X/4
 		public static final float BeatsPerBar = 4;
@@ -141,8 +137,8 @@ public static final class Configuration {
 
 		// Bar to channel
 		public static final int[][] BarToChannel = new int[][] {
-			new int[] { 7, 9 },
 			new int[] { 3, 4 },
+			new int[] { 7, 9 },
 			new int[] { 1, 2, 5, 6, 8, 10 }
 		};
 
@@ -374,9 +370,9 @@ public static final class Configuration {
 
 			public static final boolean AllowGravity = true;
 
-			public static final float Age = .0895;
+			public static final float Age = .1395;
 
-			public static final float Gravity = .005;
+			public static final float Gravity = .0125;
 		}
 
 		public static final class Easings {

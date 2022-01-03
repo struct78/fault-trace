@@ -1056,7 +1056,7 @@ void drawSpike( int sides, float r1, float r2, float h )
 
 void renderExplosions( WB_Point5D[] points ) {
 	noStroke();
-	fill( Configuration.Palette.Mesh.Faces, 0.085 );
+	fill( Configuration.Palette.Mesh.Faces, 0.4 );
 	sphereDetail( 60 );
 	sphere( Configuration.Mesh.GlobeSize );
 
