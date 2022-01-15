@@ -2,38 +2,38 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff929597;
+			public static final int Start = 0xffFFF7F7;
 
-			public static final int End = 0xff929597;
+			public static final int End = 0xffFFF7F7;
 		}
 
 		public static final class UI {
 
-			public static final int Foreground = 0xff929597;
+			public static final int Foreground = 0xffFFF7F7;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xffF5DF4C;
+				public static final int Background = 0xff993C8E;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xffF5DF4C;
+				public static final int Background = 0xff993C8E;
 			}
 		}
 
 		public static final class Lights {
 			// Left Light
-			public static final int Left = 0xffED049C;
+			public static final int Left = 0xffFAE3D9;
 
 			// Inside Light
 			public static final int Inside = 0xff9D31AE;
 
 			// Right Light
-			public static final int Right = 0xff16B3BA;
+			public static final int Right = 0xffEAC8B4;
 
 			// Right Light
-			public static final int Outside = 0xffffffff;
+			public static final int Outside = 0xffF5A291;
 
 			// Bottom light
 			public static final int Bottom = 0xff0688D9;
@@ -47,10 +47,10 @@ public static final class Configuration {
 			public static final int Wireframe = 0xffffffff;
 
 			// Face colour
-			public static final int Faces = 0xffF5DF4C;
+			public static final int Faces = 0xff993C8E;
 
 			// Line colour
-			public static final int Line =  0xffF5DF4C;
+			public static final int Line =  0xff993C8E;
 
 			public static final int[] Plasma = {
 				0xffED049C,
@@ -97,7 +97,7 @@ public static final class Configuration {
 
 	public static final class MIDI {
 		// Approximate time to parse CSV file (milliseconds)
-		public static final long StartOffset = 10000;
+		public static final long StartOffset = 1000;
 
 		// If you're using an easing type such as elastic or bounce, you will need to adjust
 		// this value to sync objects colliding
@@ -141,7 +141,7 @@ public static final class Configuration {
 		public static final int Channels = 10;
 
 		// Set this to true if you want to supress audio, useful for debugging or working next to your sleeping wife
-		public static final boolean SilentRunning = false;
+		public static final boolean SilentRunning = true;
 
 		public static final class Pitch {
 			// Minimum pitch (0 - 127)
@@ -200,10 +200,10 @@ public static final class Configuration {
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 10;
+			public static final float Min = 18.5;
 
 			// Maximum tween scale factor
-			public static final float Max = 20;
+			public static final float Max = 18.75;
 
 			// Starting scale, 0.0 for points that start in the middle, some big number for RenderType.Meteors
 			public static final float Default = 0.5;
@@ -231,7 +231,7 @@ public static final class Configuration {
 
 	public static final class Mesh {
 		// Size of the globe
-		public static final int GlobeSize = 400;
+		public static final int GlobeSize = 350;
 
 		// Maximum amount of points to render
 		public static final int MaxPoints = 10000;
@@ -256,7 +256,7 @@ public static final class Configuration {
 		// - Twisted
 		// - Voronoi
 		// - Extrude
-		public static final MeshType Type = MeshType.Normal;
+		public static final MeshType Type = MeshType.Extrude;
 
 		// Available types:
 		// - Edges
@@ -276,9 +276,9 @@ public static final class Configuration {
 		// - Spikes
 		// - Petals
 
-		public static final RenderType Renderer = RenderType.Faces;
+		public static final RenderType Renderer = RenderType.EdgesFacesPoints;
 
-		public static final boolean UseIcosahedronBase = false;
+		public static final boolean UseIcosahedronBase = true;
 
 		public static final class Rings {
 			// Distance between rings
@@ -403,6 +403,6 @@ public static final class Configuration {
 		public static final boolean SaveFrames = false;
 
 		// CSV File
-		public static final String CSV = "quakes-2021.csv";
+		public static final String CSV = "quakes-jan.csv";
 	}
 }

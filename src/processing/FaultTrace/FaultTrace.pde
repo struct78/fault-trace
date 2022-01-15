@@ -183,9 +183,9 @@ void draw() {
 	noCursor();
 	drawBackground();
 	drawHUD();
-	//drawGraph();
-	//drawGlobe();
-	//saveFrames();
+	drawGraph();
+	drawGlobe();
+	saveFrames();
 }
 
 void setupGlobe() {
@@ -218,7 +218,7 @@ void setup3D() {
 	voronoi = new HEMC_VoronoiCells();
 
 	// Spikes
-	extrude = new HEM_Extrude().setChamfer( 1 ).setDistance( 10 );
+	extrude = new HEM_Extrude().setChamfer( 1 ).setDistance( 3 );
 	// Extrude
 	//extrude = new HEM_Extrude().setHardEdgeChamfer( 1 ).setDistance( 30 );
 
@@ -629,7 +629,11 @@ void drawBackground() {
 }
 
 void drawLights() {
-	directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
+  ambient( Configuration.Palette.Lights.Outside );
+  directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), 0, 0, -1 );
+  pointLight( red( Configuration.Palette.Lights.Left ), green( Configuration.Palette.Lights.Left ), blue( Configuration.Palette.Lights.Left ), 0, 0, 200 );
+  pointLight( red( Configuration.Palette.Lights.Right ), green( Configuration.Palette.Lights.Right ), blue( Configuration.Palette.Lights.Right ), width, height, 400 );
+  shininess( 0.3 );
 }
 
 void drawRotation() {
