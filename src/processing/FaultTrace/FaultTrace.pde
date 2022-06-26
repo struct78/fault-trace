@@ -35,7 +35,7 @@ long diff_quantized_ms;
 long diff_accelerated_ms;
 long startTime;
 
-float theta = radians(180);
+float theta = radians(130);
 float phi = 0.0;
 
 Timer timer;
@@ -152,7 +152,7 @@ VideoExport videoExport;
 boolean isExporting = false;
 
 public void settings() {
-	size(1792, 900, Configuration.UI.Mode);
+	size(1792, 1000, Configuration.UI.Mode);
 	smooth(8);
 	pixelDensity(2);
 }
@@ -182,9 +182,9 @@ void setup() {
 void draw() {
 	noCursor();
 	drawBackground();
-	drawHUD();
+	//drawHUD();
 	//drawGraph();
-	//drawGlobe();
+	drawGlobe();
 	//saveFrames();
 }
 
@@ -629,7 +629,9 @@ void drawBackground() {
 }
 
 void drawLights() {
-	directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
+  directionalLight( red(Configuration.Palette.Lights.Outside), green(Configuration.Palette.Lights.Outside), blue(Configuration.Palette.Lights.Outside), -1, 0, -1);
+  directionalLight( red(Configuration.Palette.Lights.Left), green(Configuration.Palette.Lights.Left), blue(Configuration.Palette.Lights.Left), 0, 0, 0);
+  ambientLight(red(Configuration.Palette.Lights.Ambient), green(Configuration.Palette.Lights.Ambient), blue(Configuration.Palette.Lights.Ambient));
 }
 
 void drawRotation() {
@@ -763,7 +765,7 @@ void drawMesh( color colour, WB_Point5D[] points ) {
 
 void renderWaves( WB_Point5D[] points ) {
 	pushMatrix();
-	translate( 0, (height / 2) - ((levels*Configuration.Mesh.Waves.Distance)/2), 300);
+	translate( 0, (height / 2), 300);
 	rotateX(radians(6));
 	rotateY(radians(-23));
 

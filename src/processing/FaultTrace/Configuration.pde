@@ -2,44 +2,44 @@ public static final class Configuration {
 
 	public static final class Palette {
 		public static final class Background {
-			public static final int Start = 0xff929597;
+			public static final int Start = 0xff000000;
 
-			public static final int End = 0xff929597;
+			public static final int End = 0xff000000;
 		}
 
 		public static final class UI {
 
-			public static final int Foreground = 0xff929597;
+			public static final int Foreground = 0xffffff00;
 
 			public static final class Start {
 				// Background colour of HUD
-				public static final int Background = 0xffF5DF4C;
+				public static final int Background = 0xffffff00;
 			}
 
 			public static final class End {
 				// Background colour of HUD
-				public static final int Background = 0xffF5DF4C;
+				public static final int Background = 0xffffff00;
 			}
 		}
 
 		public static final class Lights {
 			// Left Light
-			public static final int Left = 0xffED049C;
+			public static final int Left = 0xff000000;
 
 			// Inside Light
-			public static final int Inside = 0xff9D31AE;
+			public static final int Inside = 0xffffffff;
 
 			// Right Light
-			public static final int Right = 0xff16B3BA;
+			public static final int Right = 0xffffffff;
 
 			// Right Light
 			public static final int Outside = 0xffffffff;
 
 			// Bottom light
-			public static final int Bottom = 0xff0688D9;
+			public static final int Bottom = 0xffffffff;
 
 			// Centre Light
-			public static final int Centre = 0xffffffff;
+			public static final int Ambient = 0xffC724B1;
 		}
 
 		public static final class Mesh {
@@ -47,10 +47,10 @@ public static final class Configuration {
 			public static final int Wireframe = 0xffffffff;
 
 			// Face colour
-			public static final int Faces = 0xffF5DF4C;
+			public static final int Faces = 0xffff4500;
 
 			// Line colour
-			public static final int Line =  0xffF5DF4C;
+			public static final int Line =  0xff000000;
 
 			public static final int[] Plasma = {
 				0xffED049C,
@@ -200,7 +200,7 @@ public static final class Configuration {
 
 		public static final class Scale {
 			// Minimum tween scale factor
-			public static final float Min = 10;
+			public static final float Min = 2;
 
 			// Maximum tween scale factor
 			public static final float Max = 20;
@@ -230,149 +230,149 @@ public static final class Configuration {
 	}
 
 	public static final class Mesh {
-		// Size of the globe
-		public static final int GlobeSize = 400;
+    // Size of the globe
+    public static final int GlobeSize = 400;
 
-		// Maximum amount of points to render
-		public static final int MaxPoints = 10000;
+    // Maximum amount of points to render
+    public static final int MaxPoints = 10000;
 
-		// Show bounding wireframe
-		public static final boolean ShowWireframe = false;
+    // Show bounding wireframe
+    public static final boolean ShowWireframe = false;
 
-		// Opacity of globe ( 0 - 255 )
-		public static final int FillOpacity = 255;
+    // Opacity of globe ( 0 - 255 )
+    public static final int FillOpacity = 255;
 
-		// Rotate mesh points
-		public static final class Rotation {
-			public static final float X = -45.0;
-			public static final float Y = -210.0;
-			public static final float Z = -15.0;
-		}
+    // Rotate mesh points
+    public static final class Rotation {
+      public static final float X = -45.0;
+      public static final float Y = -210.0;
+      public static final float Z = -15.0;
+    }
 
-		// Available types:
-		// - Normal
-		// - Dual
-		// - Lattice
-		// - Twisted
-		// - Voronoi
-		// - Extrude
-		public static final MeshType Type = MeshType.Normal;
+    // Available types:
+    // - Normal
+    // - Dual
+    // - Lattice
+    // - Twisted
+    // - Voronoi
+    // - Extrude
+    public static final MeshType Type = MeshType.Dual;
 
-		// Available types:
-		// - Edges
-		// - Faces
-		// - EdgesFaces
-		// - Points
-		// - EdgesPoints
-		// - EdgesFacesPoints
-		// - Lines
-		// - Particles
-		// - Rings
-		// - Explosions
-		// - Meteors
-		// - Plasma
-		// - PulsarSignal
-		// - Waves
-		// - Spikes
-		// - Petals
+    // Available types:
+    // - Edges
+    // - Faces
+    // - EdgesFaces
+    // - Points
+    // - EdgesPoints
+    // - EdgesFacesPoints
+    // - Lines
+    // - Particles
+    // - Rings
+    // - Explosions
+    // - Meteors
+    // - Plasma
+    // - PulsarSignal
+    // - Waves
+    // - Spikes
+    // - Petals
 
-		public static final RenderType Renderer = RenderType.Faces;
+    public static final RenderType Renderer = RenderType.EdgesFaces;
 
-		public static final boolean UseIcosahedronBase = false;
+    public static final boolean UseIcosahedronBase = false;
 
-		public static final class Rings {
-			// Distance between rings
-			public static final int Distance = 8;
+    public static final class Rings {
+      // Distance between rings
+      public static final int Distance = 8;
 
-			// Rotation step
-			public static final int RotationStep = 6;
-		}
+      // Rotation step
+      public static final int RotationStep = 6;
+    }
 
-		public static final class Meteors {
-			// Minimum point size for the end of the trail
-			public static final float Min = 0.25;
+    public static final class Meteors {
+      // Minimum point size for the end of the trail
+      public static final float Min = 0.25;
 
-			// Maximum point size for the meteor
-			public static final float Max = 4.25;
+      // Maximum point size for the meteor
+      public static final float Max = 4.25;
 
-			// Trail length in pixels
-			public static final int TrailLength = 200;
+      // Trail length in pixels
+      public static final int TrailLength = 200;
 
-			// Opacity when in flight
-			public static final int TrailOpacity = 120;
+      // Opacity when in flight
+      public static final int TrailOpacity = 120;
 
-			// Resting Opacity
-			public static final int RestingOpacity = 200;
-		}
+      // Resting Opacity
+      public static final int RestingOpacity = 200;
+    }
 
-		public static final class Plasma {
-			// Minimum ribbon width
-			public static final float Min = 1.0;
+    public static final class Plasma {
+      // Minimum ribbon width
+      public static final float Min = 1.0;
 
-			// Maximum ribbon width
-			public static final float Max = 6.0;
-		}
+      // Maximum ribbon width
+      public static final float Max = 6.0;
+    }
 
-		public static final class PulsarSignal {
-			// Width of the viewport
-			public static final int Width = 800;
+    public static final class PulsarSignal {
+      // Width of the viewport
+      public static final int Width = 800;
 
-			// Height of the viewport
-			public static final int Height = 800;
+      // Height of the viewport
+      public static final int Height = 800;
 
-			// Distance between lines
-			public static final int Distance = 20;
+      // Distance between lines
+      public static final int Distance = 20;
 
-			// Distance between points
-			public static final int Step = 5;
-		}
+      // Distance between points
+      public static final int Step = 5;
+    }
 
-		public static final class Waves {
-			public static final int Distance = 6;
+    public static final class Waves {
+      public static final int Distance = 6;
 
-			public static final int Step = 6;
+      public static final int Step = 6;
 
-			public static final float Velocity = 0.1368;
+      public static final float Velocity = 0.1368;
 
-			public static final int Density = 5;
+      public static final int Density = 5;
 
-			public static final int WaveLength = 6;
-		}
+      public static final int WaveLength = 6;
+    }
 
-		public static final class Spikes {
-			public static final int Steps = 20;
+    public static final class Spikes {
+      public static final int Steps = 20;
 
-			public static final int Sides = 3;
+      public static final int Sides = 3;
 
-			public static final int LerpSteps = 100;
+      public static final int LerpSteps = 100;
 
-			public static final class Radius {
-				public static final float Min = 1.0;
+      public static final class Radius {
+        public static final float Min = 1.0;
 
-				public static final float Max = 100.0;
-			}
-		}
+        public static final float Max = 100.0;
+      }
+    }
 
-		public static final class Petals {
-			public static final int Sphere = 0xffF7F6F2;
-		}
+    public static final class Petals {
+      public static final int Sphere = 0xffF7F6F2;
+    }
 
-		public static final class Explosions {
-			public static final float Velocity = 0.00275;
+    public static final class Explosions {
+      public static final float Velocity = 0.00275;
 
-			public static final boolean AllowGravity = true;
+      public static final boolean AllowGravity = true;
 
-			public static final float Age = .0895;
+      public static final float Age = .0895;
 
-			public static final float Gravity = .005;
-		}
+      public static final float Gravity = .005;
+    }
 
-		public static final class Easings {
-			public static final Easing In = Ani.QUAD_IN;
+    public static final class Easings {
+      public static final Easing In = Ani.QUAD_IN;
 
-			public static final Easing Out = Ani.QUAD_IN;
-		}
-	}
+      public static final Easing Out = Ani.QUAD_IN;
+    }
+  }
 
 	public static final class Data {
 		public static final class Depth {
