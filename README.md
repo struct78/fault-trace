@@ -6,22 +6,15 @@ Each month a new song will be released based on earthquake data for that month. 
 
 Fault Trace is an open source project built with Processing, Python, and Ableton Live.
 
-This song was inspired by artists such as Sorrow and Burial.
+This song was written with my 6-year-old son.
 
 ## SONG INFORMATION
 
 Time Signature: 4/4
-
 Time Compression: 7300x
-
-Time Period: 1–30 December, 2017
-
+Time Period: 1-7 July, 2015
 Tempo: 120 BPM
+Genre: Electronic/House
+Earthquakes: 10,413
 
-Genre: Electronic/Future Garage
-
-Earthquakes: 8,607
-
-## Video
-
-[![Fault Trace](https://img.youtube.com/vi/6F9P-nwUweM/maxresdefault.jpg)](https://www.youtube.com/watch?v=6F9P-nwUweM)
+![Fault Trace](https://i.imgur.com/KLDrnaU.png)
