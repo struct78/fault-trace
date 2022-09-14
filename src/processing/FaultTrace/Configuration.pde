@@ -8,7 +8,7 @@ public static final class Configuration {
 		public static final long Acceleration = 4000;
 
 		// BPM for time quantization
-		public static final int BeatsPerMinute = 100;
+		public static final int BeatsPerMinute = 40;
 
 		// Beats per bar X/4
 		public static final float BeatsPerBar = 4;
@@ -18,9 +18,16 @@ public static final class Configuration {
 
 		// Decimal representaiton of BeatDivision
 		public static final float[] NoteType = new float[] {
-			QuantizationType.OneHalfNote.get(),
-			QuantizationType.OneQuarterNote.get(),
-		 	QuantizationType.OneEigthNote.get()
+      QuantizationType.OneSixteenthNote.get(),
+      QuantizationType.OneSixteenthNote.get(),
+      QuantizationType.OneHalfNote.get(),
+      QuantizationType.OneSixteenthNote.get(),
+      QuantizationType.OneSixteenthNote.get(),
+      QuantizationType.OneSixteenthNote.get(),
+      QuantizationType.OneEigthNote.get(),
+      QuantizationType.OneSixteenthNote.get(),
+      QuantizationType.OneSixteenthNote.get(),
+      QuantizationType.OneSixteenthNote.get()
 		};
 
 		// Number of MIDI channels to use
@@ -37,10 +44,10 @@ public static final class Configuration {
 
 		public static final class Velocity {
 			// Minimum velocity (0 - 127)
-			public static final int Min = 40;
+			public static final int Min = 20;
 
 			// Maximum velocity (0 - 127)
-			public static final int Max = 90;
+			public static final int Max = 50;
 		}
 
 
@@ -153,10 +160,10 @@ public static final class Configuration {
 
 	public static final class Timing {
 		// Start date offset
-		public static final String StartDate = "2017-03-01T00:00:00.000Z";
+		public static final String StartDate = "2022-04-01T00:00:00.000Z";
 
 		// End date
-		public static final String EndDate = "2017-03-31T23:59:59.999Z";
+		public static final String EndDate = "2022-04-30T23:59:59.999Z";
 	}
 
 	public static final class IO {
@@ -164,6 +171,6 @@ public static final class Configuration {
 		public static final boolean SaveFrames = false;
 
 		// CSV File
-		public static final String CSV = "quakes.csv";
+		public static final String CSV = "quakes-2022.csv";
 	}
 }

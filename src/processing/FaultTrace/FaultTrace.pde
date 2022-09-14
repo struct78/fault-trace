@@ -44,6 +44,7 @@ ArrayList<Integer> lightColours = new ArrayList();
 ArrayList<StateManager> states = new ArrayList();
 ArrayList<GlobePoint> points = new ArrayList<GlobePoint>();
 ArrayList<GraphPoint> graphPoints = new ArrayList<GraphPoint>();
+ArrayList<NoteStub> stubs = new ArrayList<NoteStub>();
 
 PFont font;
 HE_Mesh globeMesh;
@@ -80,6 +81,7 @@ HUD hud;
 Point2D.Double rectanglePoint;
 int uiGridWidth;
 int uiMargin;
+NoteStub stub;
 
 public void settings() {
 	size(1920, 1080, P3D);
@@ -310,29 +312,44 @@ void setupSong() {
 			graphPoints.add( new GraphPoint( delay + millis(), magnitude ) );
 			states.add( new StateManager( d2, colour, (long)(diff/Configuration.MIDI.Acceleration) ) );
 
-			setNote( channel, velocity, pitch, duration, quantized_delay );
-
-			// Violin
-			if ( depth >= 500 ) {
-				setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
-			}
-
-			// Cello
-			if ( depth >= 750 ) {
-				setNote( 9, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
-			}
-
-			// Double Bass
-			if ( depth >= 1000 ) {
-				setNote( 10, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
-			}
-
+      if ( !isDuplicateNote( quantized_delay, channel ) ) {
+        setNote( channel, velocity, pitch, duration, quantized_delay );
+  
+        // Violin
+        if ( depth >= 500 ) {
+          setNote( 8, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+        }
+  
+        // Cello
+        if ( depth >= 750 ) {
+          setNote( 9, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+        }
+  
+        // Double Bass
+        if ( depth >= 1000 ) {
+          setNote( 10, velocity, 60, mapMagnitude( magnitude, 20, 10000 ), quantized_delay );
+        }
+        
+        stub = new NoteStub( quantized_delay, channel );
+        stubs.add( stub );
+      }
 			x++;
 		}
 
 		// Update the previous date to the current date for the next iteration
 		previousDate = date;
 	}
+}
+
+boolean isDuplicateNote( long delay, int channel ) {
+  for ( int x = 0 ; x < stubs.size(); x++ ) {
+    stub = stubs.get(x);
+    if ( stub.delay == delay && stub.channel == channel ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void setNote( int channel, int velocity, int pitch, int duration, long delay ) {
